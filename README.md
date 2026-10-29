@@ -39,25 +39,51 @@ Sees who unlocked + their phone ◀─
 The rules live in the database (row-level security), not in the app, so a
 modified app can't get around them.
 
-## What's built so far (step 1: backend)
+## What's built
+
+### Backend (`supabase/`)
 
 | Path | What it does |
 |---|---|
-| `supabase/migrations/…_initial_schema.sql` | Tables, fee calculation, contact-detail detector, privacy rules, storage buckets |
-| `supabase/functions/create-unlock-order` | Creates the Razorpay order for an unlock |
-| `supabase/functions/verify-unlock-payment` | Confirms payment right after checkout so the contact unlocks instantly |
-| `supabase/functions/razorpay-webhook` | Backup confirmation from Razorpay; also records refunds |
-| `supabase/functions/moderate-image` | Checks each photo with Google Cloud Vision |
-| `supabase/tests/local/` | Tests for fees, the contact detector and every privacy rule |
-| `docs/RUNNING_COSTS.md` | What you pay, and when |
+| `migrations/` | Tables, fee calculation, contact-detail detector, privacy rules, storage buckets |
+| `functions/create-unlock-order` | Creates the Razorpay order for an unlock |
+| `functions/verify-unlock-payment` | Confirms payment right after checkout so the contact unlocks instantly |
+| `functions/razorpay-webhook` | Backup confirmation from Razorpay; also records refunds |
+| `functions/moderate-image` | Checks each photo with Google Cloud Vision |
+| `tests/local/` | Tests for fees, the contact detector and every privacy rule |
+
+### Android app (`app/`, Flutter)
+
+| Screen | What it does |
+|---|---|
+| Login | Mobile number + OTP |
+| Browse | Search, category chips, city filter, endless list |
+| Listing | Photos, price, details, approximate area; **Unlock** button (Razorpay); after paying: seller's phone, exact address, Call and Open in Maps |
+| Sell material | Photos checked on the phone (faces, QR codes, phone numbers) before upload and again on the server; live unlock-fee preview; private pickup address and GPS pin |
+| My listings | Status, how many buyers unlocked, edit, mark sold, hide; tap to see buyers' names and phone numbers |
+| Unlocked | Everything you paid for, with refund requests |
+| Account | Profile, fee table, listing rules, sign out |
+
+See `docs/RUNNING_COSTS.md` for what you pay and when.
+
+## Getting the APK
+
+Every push builds an Android APK on GitHub:
+
+1. Open the repo on GitHub → **Actions** → latest **CI** run.
+2. Download **aayamik-apk** at the bottom, unzip it, and install `app-release.apk` on an Android phone.
+
+For the APK to connect to your backend, first add two repository secrets under
+**Settings → Secrets and variables → Actions**:
+- `SUPABASE_URL`: e.g. `https://abcd1234.supabase.co`
+- `SUPABASE_PUBLISHABLE_KEY`: Supabase dashboard → Project Settings → API Keys
 
 ## Next steps
 
-1. **Flutter app (Android first)**: phone OTP login, browse/search, post a listing
-   with photos (on-phone face/QR/text pre-check with ML Kit), unlock with Razorpay,
-   "My listings" and "My unlocks".
-2. **Admin panel**: review reports, rejected photos and refund requests.
-3. **Launch**: Play Store listing, privacy policy, terms.
+1. Create the Supabase, Razorpay and Google Cloud accounts and set up the backend (below).
+2. Test the full flow on a phone with Razorpay **test mode** keys.
+3. Admin panel: review reports, rejected photos and refund requests.
+4. Launch: app icon, Play Store listing, privacy policy, terms.
 
 ## Running the tests
 
@@ -65,6 +91,12 @@ Database tests need Postgres 15+ server binaries installed locally:
 
 ```bash
 ./scripts/test-db.sh
+```
+
+App tests need [Flutter](https://flutter.dev):
+
+```bash
+cd app && flutter test
 ```
 
 Server function tests need [Deno](https://deno.com):
@@ -98,3 +130,7 @@ cd supabase/functions && deno test --allow-env _shared/
    - Add a webhook pointing to `https://<project-ref>.supabase.co/functions/v1/razorpay-webhook`
      for the events `payment.captured` and `refund.processed`.
 7. Process refunds from the Razorpay dashboard. The webhook marks them refunded in the app.
+8. Run the app against it:
+   ```bash
+   cd app && flutter run --dart-define=SUPABASE_URL=https://<project-ref>.supabase.co --dart-define=SUPABASE_PUBLISHABLE_KEY=<key>
+   ```

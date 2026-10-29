@@ -295,7 +295,24 @@ end $$;
 reset role;
 
 -- ---------------------------------------------------------------------------
-\echo '10. refund processed'
+\echo '10. sold listing stays visible to the buyer who unlocked it'
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', false) as _jwt \gset
+update public.listings set status = 'sold' where id = '10000000-0000-0000-0000-000000000001';
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', false) as _jwt \gset
+do $$
+begin
+  assert (select status from public.listings where id = '10000000-0000-0000-0000-000000000001') = 'sold';
+end $$;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000c', false) as _jwt \gset
+do $$
+begin
+  assert (select count(*) from public.listings) = 0, 'sold listing visible to a stranger';
+end $$;
+reset role;
+
+-- ---------------------------------------------------------------------------
+\echo '11. refund processed'
 set role service_role;
 select public.mark_unlock_refunded('pay_1') as _r \gset
 reset role;

@@ -1,3 +1,9 @@
 {
-  "fmt": { "lineWidth": 110 }
+  "fmt": { "lineWidth": 110 },
+  "lint": {
+    "rules": {
+      // Supabase Edge Functions import packages with npm:/jsr: specifiers.
+      "exclude": ["no-import-prefix"]
+    }
+  }
 }

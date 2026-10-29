@@ -38,18 +38,18 @@
         <nav aria-label="Main">
           <ul class="inline cap">
             <li><a href="#about">About</a></li>
-            <li><a href="#">Team</a></li>
-            <li><a href="#">Philosophy</a></li>
-            <li><a href="#">Projects</a></li>
+            <li><a href="#team">Team</a></li>
+            <li><a href="#philosophy">Philosophy</a></li>
+            <li><a href="#projects">Projects</a></li>
             <li><a href="#contact">Contact</a></li>
           </ul>
           <details>
             <summary class="cap">Menu</summary>
             <ul class="cap">
               <li><a href="#about">About</a></li>
-              <li><a href="#">Team</a></li>
-              <li><a href="#">Philosophy</a></li>
-              <li><a href="#">Projects</a></li>
+              <li><a href="#team">Team</a></li>
+              <li><a href="#philosophy">Philosophy</a></li>
+              <li><a href="#projects">Projects</a></li>
               <li><a href="#contact">Contact</a></li>
             </ul>
           </details>
@@ -62,7 +62,7 @@
         <div class="stages cap" aria-label="Stages of the drawing">
           <span class="on">Plan</span><i></i><span>Model</span><i></i><span>Home</span>
         </div>
-        <a href="#" class="btn cap tx">View projects</a>
+        <a href="#projects" class="btn cap tx">View projects</a>
       </div>
 
       <div class="side cap" aria-hidden="true"><span>I</span><i></i><span style="opacity:.7">VIII</span></div>
@@ -86,11 +86,9 @@
           <span class="back"></span>
           <span class="spine"></span>
           <span class="pages"></span>
-          <span class="inside">
-            <span class="cap">A sample</span>
-            <span style="font-size:14px;line-height:1.6">[The opening page of the book.]</span>
-          </span>
-          <span class="cover-back"></span>
+          <span class="inside"><img class="page-r" src="assets/img/book/intro-2.jpg" alt=""></span>
+          <span class="leaf" aria-hidden="true"><span class="leaf-f"><img alt=""></span><span class="leaf-b"><img alt=""></span></span>
+          <span class="cover-back"><img class="page-l" src="assets/img/book/intro-1.jpg" alt=""></span>
           <span class="cover">
             <span class="cap">Ar. Saptarshi Kapri</span>
             <span class="title">The 100 Decisions Before the First Brick</span>
@@ -99,13 +97,131 @@
         </button>
       </div>
       <p class="book-note cap">Click the book to open it</p>
+      <div class="reader" hidden>
+        <p class="cap reader-cap" aria-live="polite">Introduction · Why your home should be built on paper first</p>
+        <div class="reader-nav cap">
+          <button type="button" class="turn" data-dir="-1" aria-label="Previous pages">←</button>
+          <span><b class="reader-n">1</b> / 3</span>
+          <button type="button" class="turn" data-dir="1" aria-label="Next pages">→</button>
+        </div>
+      </div>
     </div>
   </section>
 
-  <footer class="foot cap" id="contact">
-    <span>Studio · 3652/2, 1st Floor, Green Field Model Gram, Ludhiana 141002</span>
-    <span><a href="tel:+918824396618">+91 88243 96618</a> · <a href="mailto:ceo@karukritdesigns.com">ceo@karukritdesigns.com</a></span>
-  </footer>
+  <!-- CHAPTER III · TEAM -->
+  <section class="team tx" id="team" aria-label="Chapter III, the studio">
+    <div class="sec-head">
+      <div class="reveal"><span class="cap">Chapter III</span><h2>The studio</h2><i class="rule"></i></div>
+      <p class="reveal">[One line on how the team works together, from first sketch to site.]</p>
+    </div>
+    <ul class="cards">
+      <li class="card reveal"><div class="tilt"><div class="portrait tx" style="--c:var(--sage)"><span class="cap">Portrait</span></div></div><span class="name">Kuljeet</span><span class="cap">[Role]</span></li>
+      <li class="card reveal"><div class="tilt"><div class="portrait tx" style="--c:var(--orange)"><span class="cap">Portrait</span></div></div><span class="name">Krishma</span><span class="cap">[Role]</span></li>
+      <li class="card reveal"><div class="tilt"><div class="portrait tx" style="--c:var(--moss)"><span class="cap">Portrait</span></div></div><span class="name">Sanchit</span><span class="cap">[Role]</span></li>
+      <li class="card reveal"><div class="tilt"><div class="portrait tx" style="--c:#9C7B52"><span class="cap">Portrait</span></div></div><span class="name">[Name]</span><span class="cap">[Role]</span></li>
+    </ul>
+  </section>
+
+  <!-- CHAPTER IV · PHILOSOPHY · three screens, one sentence each, in layers -->
+  <section class="philo" id="philosophy" aria-label="Chapter IV, philosophy">
+    <div class="philo-stage tx">
+      <svg class="layer back" viewBox="0 0 1000 700" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+        <g fill="none" stroke="currentColor" stroke-width="1.2">
+          <rect x="140" y="120" width="720" height="460"/>
+          <rect x="220" y="190" width="300" height="300"/><rect x="520" y="230" width="140" height="260"/>
+          <rect x="660" y="150" width="120" height="140"/><path d="M220 400h300M370 190v300M520 360h140"/>
+          <path d="M300 490a50 50 0 0 1 50-50M560 230a40 40 0 0 0 40 40"/>
+          <path d="M140 640h720M140 630v20M860 630v20M100 120v460M90 120h20M90 580h20"/>
+          <circle cx="820" cy="520" r="40"/><circle cx="210" cy="560" r="28"/>
+        </g>
+      </svg>
+      <div class="layer mid">
+        <span class="cap philo-count">Chapter IV · <b>1</b> of 3</span>
+        <div class="statements">
+          <div class="stmt on">
+            <p class="big">A home is <b>a hundred decisions</b>, made in the right order.</p>
+            <p>[Two sentences that open up the idea, drawn from the book.]</p>
+          </div>
+          <div class="stmt">
+            <p class="big">[Second idea, <b>one sentence</b>.]</p>
+            <p>[Two sentences that open up the idea, drawn from the book.]</p>
+          </div>
+          <div class="stmt">
+            <p class="big">[Third idea, <b>one sentence</b>.]</p>
+            <p>[Two sentences that open up the idea, drawn from the book.]</p>
+          </div>
+        </div>
+        <div class="dashes" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+      </div>
+      <div class="layer edge tx" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- CHAPTER V · PROJECTS · a curved gallery wall -->
+  <section class="work tx" id="projects" aria-label="Chapter V, work">
+    <div class="sec-head">
+      <div class="reveal"><span class="cap">Chapter V</span><h2>Work</h2></div>
+      <nav class="cap filters" aria-label="Project types">
+        <a href="#" class="tx on" aria-current="true">Residences</a><a href="#">Hotels</a><a href="#">Offices</a><a href="#">Convention centres</a>
+      </nav>
+    </div>
+    <div class="wall" aria-label="Projects. Drag to move along the wall">
+      <div class="row" data-row="1"></div>
+      <div class="row" data-row="2"></div>
+    </div>
+    <div class="sec-foot cap"><span>Hover to pause · drag to move · click a project to open it</span><a href="#" class="underline">View all residences →</a></div>
+  </section>
+
+  <!-- CHAPTER VI · COMPLETED PROJECT · walk in through the front door -->
+  <section class="done-proj" id="completed" aria-label="Chapter VI, a completed project">
+    <div class="walk-stage">
+      <div class="walk-pin">
+        <div class="walk-in tx"><span class="cap">[Interior · through the front door]</span></div>
+        <div class="walk-out tx"><span class="cap">[Front elevation · full width]</span><i class="door" aria-hidden="true"></i><span class="cap walk-hint">Scroll to walk in</span></div>
+      </div>
+    </div>
+    <div class="done-text tx">
+      <div class="reveal"><span class="cap gold">Residence · [City] · Completed [Year]</span><h2>[Residence name]</h2></div>
+      <p class="reveal">[The brief and the idea behind it.]</p>
+      <nav class="cap reveal" aria-label="This project"><a href="#">I · Site photographs</a><a href="#">II · Interiors</a><a href="#">III · Walkthrough</a><a href="#" class="gold">IV · Drawings</a></nav>
+    </div>
+  </section>
+
+  <!-- CHAPTER VII · ONGOING PROJECT · the building grows with the stage -->
+  <section class="ongoing tx" id="ongoing" aria-label="Chapter VII, an ongoing project">
+    <div class="sec-head">
+      <div class="reveal"><span class="cap">Ongoing · [City]</span><h2>[Residence name]</h2></div>
+      <span class="cap">Updated [Date]</span>
+    </div>
+    <ol class="stage-bar" data-now="4">
+      <li>Design</li><li>Approvals</li><li>Structure</li><li>Masonry, services <b class="cap">· now</b></li><li>Finishing</li><li>Handover</li>
+    </ol>
+    <div class="ongoing-grid">
+      <svg class="grow" viewBox="0 0 600 360" role="img" aria-label="Elevation drawing showing the house built up to the current stage">
+        <g data-step="1"><path d="M40 320h520M70 320v-18h460v18"/></g>
+        <g data-step="2"><path d="M90 302v-0M90 302V190M250 302V190M410 302V190M510 302V190M90 190V80M250 190V80M410 190V80M510 190V80"/></g>
+        <g data-step="3"><path d="M70 190h460v-12H70zM70 80h460V68H70zM60 68h480"/></g>
+        <g data-step="4"><path d="M90 302h160M250 302h160M90 190h420M120 302v-80h100v80M290 290v-70h90v70M440 290v-70h50v70M120 178v-70h100v70M290 178v-60h180v60"/></g>
+        <g data-step="5"><path d="M300 178v-60M330 178v-60M360 178v-60M390 178v-60M420 178v-60M450 178v-60M140 302v-60h60"/></g>
+        <g data-step="6"><path d="M20 320c20-60 50-60 60 0M540 320c10-80 50-80 50 0M560 320v-40"/><circle cx="50" cy="270" r="26"/><circle cx="565" cy="250" r="30"/></g>
+      </svg>
+      <div class="ph tx" style="background-color:var(--sage)"><span class="cap">[Render]</span></div>
+      <div class="ph"><span class="cap">[Site photo]</span></div>
+      <div class="ph"><span class="cap">[Site photo]</span></div>
+    </div>
+  </section>
+
+  <!-- CHAPTER VIII · CONTACT -->
+  <section class="contact tx" id="contact" aria-label="Chapter VIII, contact">
+    <span class="cap gold reveal">Chapter VIII</span>
+    <h2 class="reveal">Your house begins <b>here.</b></h2>
+    <div class="contact-cols reveal">
+      <div><span class="cap gold">Studio</span><span>3652/2, 1st Floor, Green Field</span><span>Model Gram, Ludhiana 141002</span></div>
+      <div><span class="cap gold">Talk</span><a href="tel:+918824396618">+91 88243 96618</a><a href="mailto:ceo@karukritdesigns.com">ceo@karukritdesigns.com</a></div>
+    </div>
+    <a href="mailto:ceo@karukritdesigns.com?subject=A%20first%20meeting" class="btn gold-btn cap tx reveal">Book a first meeting</a>
+    <div class="stripe" aria-hidden="true"><i style="background:#5B2525;width:120px"></i><i style="background:#295b28;width:120px"></i><i style="background:#24305A;width:120px"></i><i style="background:#5a5a5a;flex:1"></i></div>
+  </section>
 </main>
 
 <script src="assets/js/main.js"></script>

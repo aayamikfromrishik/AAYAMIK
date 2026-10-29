@@ -147,10 +147,11 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px soli
 .about h2 b { font-weight: 400; color: var(--moss); }
 .about .copy { display: flex; flex-direction: column; gap: 28px; color: var(--ink-soft); }
 .about p { font-size: 17px; line-height: 1.75; margin: 0; }
+.about p.cap { font-size: 11px; line-height: 1.6; }
 
 .book-wrap { perspective: 1600px; display: grid; place-items: center; min-height: 520px; }
 .book {
-  --w: 300px; --h: 430px; --t: 44px;
+  --w: 300px; --h: 464px; --t: 40px;
   --rx: -8deg; --ry: -28deg; --open: 0deg;
   position: relative; width: var(--w); height: var(--h);
   transform-style: preserve-3d;
@@ -185,11 +186,10 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px soli
 .book .cover .cap { color: var(--gold-light); }
 .book .inside {
   background-color: var(--paper); transform: translateZ(calc(var(--t) / 2 - 1px));
-  display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 36px; color: var(--ink);
+  overflow: hidden;
   box-shadow: inset 14px 0 24px rgba(0,0,0,.12);
   backface-visibility: hidden;
 }
-.book .inside p { font-size: 14px; line-height: 1.6; }
 .book .back { background-color: var(--moss-deep); transform: rotateY(180deg) translateZ(calc(var(--t) / 2)); box-shadow: 0 0 60px rgba(20,22,12,.35); }
 .book .spine { background-color: #3a3e25; background-image: var(--leather); background-blend-mode: multiply; transform: rotateY(-90deg) translateZ(calc(var(--w) / 2)); }
 .book .pages { background: repeating-linear-gradient(90deg, #EFE8DC 0 2px, #DCD2BF 2px 3px); transform: rotateY(90deg) translateZ(calc(var(--w) / 2 - 3px)); top: 4px; height: calc(100% - 8px); }
@@ -197,7 +197,6 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px soli
 .book.open { --open: 155deg; left: calc(var(--w) / 2); }
 .book-note { margin-top: 18px; color: var(--ink-soft); text-align: center; }
 
-.foot { background: var(--moss); color: var(--paper); padding: 48px clamp(16px, 6vw, 96px); display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
 
 /* ---------- Small screens ---------- */
 @media (max-width: 820px) {
@@ -207,10 +206,9 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px soli
   .side, .scroll-hint { display: none; }
   .about { grid-template-columns: 1fr; padding: 80px 16px; }
   .book-wrap { min-height: 460px; }
-  .book { --w: 170px; --h: 244px; --t: 28px; }
+  .book { --w: 170px; --h: 263px; --t: 26px; }
   .book .cover { padding: 22px 18px; }
   .book .cover .title { font-size: 19px; }
-  .book .inside { padding: 20px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -218,4 +216,169 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px soli
   .intro { display: none; }
   .scroll-hint::before { animation: none; }
   .book, .book .cover, .book .cover-back { transition: none; }
+}
+
+/* ---------- Book pages and the reader ---------- */
+.book img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.book .cover-back { overflow: hidden; }
+.book .leaf {
+  left: 0; width: var(--w); transform-style: preserve-3d; transform-origin: left center;
+  transform: translateZ(calc(var(--t) / 2 + 1px)) rotateY(var(--leaf, 0deg));
+  visibility: hidden;
+}
+.book .leaf.turning { visibility: visible; transition: transform .9s cubic-bezier(.55,.05,.3,1); }
+.book .leaf > span { position: absolute; inset: 0; backface-visibility: hidden; overflow: hidden; display: block; }
+.book .leaf-b { transform: rotateY(180deg); }
+.reader { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-top: 18px; color: var(--ink-soft); text-align: center; }
+.reader[hidden] { display: none; }
+.reader-nav { display: flex; align-items: center; gap: 18px; }
+.turn { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--ink-soft); background: none; color: inherit; font: inherit; font-size: 16px; cursor: pointer; }
+.turn:hover { background: rgba(35,38,26,.08); }
+
+/* ---------- Shared section bits ---------- */
+.sec-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px 48px; flex-wrap: wrap; }
+.sec-head h2, .done-text h2, .contact h2 { font-weight: 200; font-size: clamp(32px, 3.4vw, 44px); line-height: 1.15; margin: 10px 0 0; }
+.sec-head p { max-width: 420px; font-size: 17px; line-height: 1.75; margin: 0; }
+.rule { display: block; width: 56px; height: 3px; background: var(--orange); margin-top: 16px; }
+.gold { color: var(--gold-light); }
+.underline { border-bottom: 1px solid var(--orange); padding-bottom: 4px; }
+.ph { background: var(--taupe-dark); display: flex; align-items: flex-end; padding: 16px; color: var(--ink); min-height: 160px; }
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .9s ease, transform .9s cubic-bezier(.2,.7,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* ---------- Chapter III · team cards that tilt toward the cursor ---------- */
+.team { background-color: var(--gold); color: var(--ink); padding: 100px clamp(16px, 4.5vw, 64px) 110px; display: flex; flex-direction: column; gap: 56px; }
+.cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px; }
+.card { display: flex; flex-direction: column; gap: 10px; perspective: 900px; }
+.card .name { font-size: 18px; font-weight: 300; margin-top: 8px; }
+.tilt {
+  --rx: 0deg; --ry: 0deg; --mx: 50%; --my: 50%; --lift: 0px;
+  transform: rotateX(var(--rx)) rotateY(var(--ry)) translateZ(var(--lift));
+  transform-style: preserve-3d; transition: transform .5s cubic-bezier(.2,.7,.2,1);
+  aspect-ratio: 3 / 4; position: relative;
+}
+.card:hover .tilt { --lift: 24px; transition-duration: .15s; }
+.portrait {
+  position: absolute; inset: 0; display: flex; align-items: flex-end; padding: 16px;
+  background-color: var(--c); color: var(--paper-warm);
+  filter: grayscale(1) contrast(.9) brightness(1.1); transition: filter .6s ease, box-shadow .6s ease;
+  box-shadow: 0 10px 30px rgba(35,38,26,.15);
+}
+.portrait::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(circle at var(--mx) var(--my), rgba(255,246,230,.38), rgba(255,246,230,0) 55%);
+  opacity: 0; transition: opacity .4s ease;
+}
+.card:hover .portrait { filter: none; box-shadow: 0 30px 60px rgba(35,38,26,.35); }
+.card:hover .portrait::after { opacity: 1; }
+
+/* ---------- Chapter IV · philosophy in depth layers ---------- */
+.philo { position: relative; height: 300vh; }
+.philo-stage {
+  position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden;
+  background-color: var(--taupe); perspective: 1000px; color: var(--ink);
+}
+.layer { position: absolute; will-change: transform; }
+.layer.back { inset: -10%; width: 120%; height: 120%; color: var(--ink); opacity: .14; }
+.layer.back path, .layer.back rect, .layer.back circle { stroke-dasharray: 1; stroke-dashoffset: var(--draw, 1); }
+.layer.mid { inset: 0; display: flex; flex-direction: column; justify-content: center; gap: 30px; padding: 0 clamp(16px, 11vw, 160px); }
+.philo-count b { font-weight: 500; }
+.statements { position: relative; min-height: 330px; max-width: 1000px; }
+.stmt { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 28px; opacity: 0; transform: translateY(40px); filter: blur(6px); transition: opacity .8s ease, transform .9s cubic-bezier(.2,.7,.2,1), filter .8s ease; pointer-events: none; }
+.stmt.on { opacity: 1; transform: none; filter: none; pointer-events: auto; }
+.stmt .big { font-weight: 200; font-size: clamp(36px, 5.4vw, 76px); line-height: 1.1; margin: 0; }
+.stmt .big b { font-weight: 400; color: var(--moss); }
+.stmt p:not(.big) { max-width: 560px; font-size: 17px; line-height: 1.75; color: var(--ink-soft); margin: 0; }
+.dashes { display: flex; gap: 10px; }
+.dashes i { width: 40px; height: 3px; background: var(--taupe-dark); transition: background .5s ease; }
+.dashes i.on { background: var(--orange); }
+.layer.edge { right: 0; top: 0; bottom: 0; width: 14px; background-color: var(--gold); }
+
+/* ---------- Chapter V · the curved gallery wall ---------- */
+.work { background-color: var(--taupe); padding: 80px 0 64px; display: flex; flex-direction: column; gap: 36px; overflow: hidden; }
+.work .sec-head, .work .sec-foot { padding: 0 clamp(16px, 4.5vw, 64px); }
+.filters { display: flex; gap: 8px 26px; flex-wrap: wrap; align-items: center; }
+.filters a { padding: 10px 14px; }
+.filters a.on { background-color: var(--moss); color: var(--paper); }
+.wall { perspective: 1100px; perspective-origin: 50% 50%; display: flex; flex-direction: column; gap: 22px; cursor: grab; touch-action: pan-y; user-select: none; }
+.wall.dragging { cursor: grabbing; }
+.row { position: relative; height: 270px; transform-style: preserve-3d; }
+.tile {
+  position: absolute; left: 50%; top: 0; width: 300px; margin-left: -150px;
+  display: flex; flex-direction: column; gap: 9px; color: var(--ink);
+  transform-style: preserve-3d; will-change: transform;
+}
+.tile .img {
+  height: 200px; display: flex; align-items: flex-end; padding: 12px; color: var(--ink);
+  filter: grayscale(1) contrast(.9); transition: filter .6s ease, transform .5s cubic-bezier(.2,.7,.2,1), box-shadow .5s ease;
+  box-shadow: 0 8px 20px rgba(35,38,26,.12);
+}
+.tile:hover { opacity: 1; }
+.tile:hover .img { filter: none; transform: translateZ(70px); box-shadow: 0 30px 50px rgba(35,38,26,.35); }
+.tile .n { font-size: 15px; font-weight: 300; }
+.tile .s { display: flex; gap: 8px; align-items: center; }
+.tile .s i { width: 7px; height: 7px; border-radius: 50%; }
+.sec-foot { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; color: var(--ink-soft); }
+
+/* ---------- Chapter VI · walk in through the door ---------- */
+.done-proj { position: relative; background-color: var(--orange); color: var(--paper); }
+.walk-stage { position: relative; height: 200vh; }
+.walk-pin { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+.walk-in, .walk-out { position: absolute; inset: 0; display: flex; align-items: flex-end; padding: 24px clamp(16px, 4.5vw, 64px); }
+.walk-in { background-color: var(--moss); }
+.walk-out { background-color: var(--sage); color: var(--ink); transform-origin: 50% 72%; will-change: transform, opacity; }
+.door { position: absolute; left: 50%; top: 56%; width: 7%; height: 32%; margin-left: -3.5%; background: rgba(35,38,26,.55); border: 1px solid rgba(35,38,26,.6); }
+.walk-hint { position: absolute; bottom: 28px; right: clamp(16px, 4.5vw, 64px); color: var(--ink); }
+.done-text { background-color: var(--orange); display: grid; grid-template-columns: 5fr 4fr 3fr; gap: 24px 48px; padding: 56px clamp(16px, 4.5vw, 64px) 80px; position: relative; }
+.done-text p { font-size: 17px; line-height: 1.75; margin: 0; color: var(--paper-warm); }
+.done-text nav { display: flex; flex-direction: column; gap: 14px; }
+
+/* ---------- Chapter VII · ongoing, the drawing grows with the stage ---------- */
+.ongoing { background-color: var(--taupe); padding: 80px clamp(16px, 4.5vw, 64px); display: flex; flex-direction: column; gap: 32px; color: var(--ink); }
+.stage-bar { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+.stage-bar li { position: relative; padding: 16px; font-size: 13px; background: var(--taupe-dark); color: var(--ink); overflow: hidden; }
+.stage-bar li::before { content: ""; position: absolute; inset: 0; background-color: var(--moss); background-image: var(--leather); background-blend-mode: multiply; transform: scaleX(0); transform-origin: left; transition: transform .6s cubic-bezier(.6,.05,.3,1); transition-delay: calc(var(--i) * .35s); z-index: 0; }
+.stage-bar li.now::before { background-color: var(--orange); }
+.stage-bar.in li.done::before, .stage-bar.in li.now::before { transform: none; }
+.stage-bar li span { position: relative; z-index: 1; transition: color .3s ease; transition-delay: calc(var(--i) * .35s + .3s); }
+.stage-bar.in li.done span, .stage-bar.in li.now span { color: var(--paper); }
+.stage-bar li.now span { font-weight: 500; }
+.stage-bar li.now::after { content: ""; position: absolute; right: 12px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: var(--gold-light); animation: pulse 1.6s ease-in-out infinite; z-index: 1; }
+@keyframes pulse { 50% { opacity: .2; transform: scale(1.8); } }
+.ongoing-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: auto auto; gap: 20px; }
+.grow { grid-row: span 2; width: 100%; height: auto; background: var(--paper); padding: 16px; }
+.grow g { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; }
+.grow g path, .grow g circle { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.2s ease; }
+.grow g.later path, .grow g.later circle { stroke-dasharray: .012 .012; stroke-dashoffset: 0; opacity: .35; transition: none; }
+.grow.in g.built path, .grow.in g.built circle { stroke-dashoffset: 0; }
+.ongoing-grid .ph:first-of-type { grid-column: span 2; }
+
+/* ---------- Chapter VIII · contact ---------- */
+.contact { position: relative; background-color: var(--moss); color: var(--paper); padding: 140px clamp(16px, 11vw, 160px) 150px; display: flex; flex-direction: column; gap: 34px; }
+.contact h2 { font-size: clamp(44px, 5vw, 72px); }
+.contact h2 b { font-weight: 400; color: var(--gold-light); }
+.contact-cols { display: flex; gap: 32px 80px; flex-wrap: wrap; font-size: 18px; line-height: 1.8; }
+.contact-cols > div { display: flex; flex-direction: column; }
+.contact-cols .cap { margin-bottom: 8px; }
+.gold-btn { background-color: var(--gold); color: var(--ink); border-radius: 0; }
+.stripe { position: absolute; left: 0; right: 0; bottom: 0; display: flex; height: 10px; }
+
+@media (max-width: 820px) {
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .statements { min-height: 380px; }
+  .row { height: 210px; }
+  .tile { width: 220px; margin-left: -110px; }
+  .tile .img { height: 150px; }
+  .done-text { grid-template-columns: 1fr; }
+  .stage-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ongoing-grid { grid-template-columns: 1fr 1fr; }
+  .grow { grid-column: span 2; grid-row: auto; }
+  .contact { padding: 100px 16px 120px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .stmt { transition: none; filter: none; }
+  .tilt, .tile .img, .stage-bar li::before, .grow g path, .grow g circle, .book .leaf.turning { transition: none; }
+  .stage-bar li.now::after { animation: none; }
 }

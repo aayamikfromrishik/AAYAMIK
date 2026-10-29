@@ -15,6 +15,20 @@ The camera circles the house slowly, and moving the mouse tilts the view. The fr
 
 **Chapter II · About.** A 3D copy of *The 100 Decisions Before the First Brick* turns as you scroll and opens when clicked.
 
+**Chapter II · Book pages.** When the book is open, it shows the sample pages from the book (Introduction, Chapter 1 and Chapter 13), with arrows that turn the page.
+
+**Chapter III · Team.** Portrait cards tilt toward the cursor, with a soft light following it. Hovering lifts a card and brings it into colour.
+
+**Chapter IV · Philosophy.** Three statements change as you scroll, one per screen. Behind them a faint plan drawing draws itself and moves more slowly than the words, which gives the section depth.
+
+**Chapter V · Work.** Projects sit on a curved gallery wall that drifts slowly. Hovering pauses it and brings a project forward in colour, and the wall can be dragged.
+
+**Chapter VI · Completed project.** Scrolling walks you through the front door: the elevation grows until you pass through the door into the interior.
+
+**Chapter VII · Ongoing project.** The stage bar fills up to the current stage, and an elevation drawing builds itself to match. Stages still to come show as dashed lines.
+
+**Chapter VIII · Contact.** Studio address, phone, email and a button to book a first meeting.
+
 **Phones and accessibility.** The page is laid out for phones. If a visitor's device asks for less motion, the animations are switched off.
 
 ## Viewing it on your computer
@@ -44,8 +58,8 @@ The plan outline, the rising line drawing, and the colour and shadow stages work
 - `index.html`: the page
 - `assets/css/style.css`: colours, leather texture, glass card and the 3D book
 - `assets/js/hero3d.js`: the 3D house in Chapter I (three.js)
-- `assets/js/main.js`: the logo opening, the tilting glass card and the book
-- `assets/img/`: the logo and leather texture from the design canvas
+- `assets/js/main.js`: the logo opening, the glass card, the book and the effects in Chapters III to VII
+- `assets/img/`: the logo, the leather texture and the sample book pages from the design canvas
 - `assets/vendor/three/`: three.js r160 (MIT licence), kept in the repository so the site has no outside dependencies
 
 Text in square brackets, like `[Your story in two short paragraphs.]`, is a placeholder waiting for real content.

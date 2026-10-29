@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../data/repository.dart';
+import '../../ui/theme.dart';
 import '../../widgets/common.dart';
+import 'auth_layout.dart';
 import 'otp_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -41,64 +43,59 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Icon(Icons.foundation, size: 64, color: theme.colorScheme.primary),
-                  const SizedBox(height: 12),
-                  Text('BAAKI BUILD',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
-                  Text('by AAYAMIK', textAlign: TextAlign.center, style: theme.textTheme.labelLarge),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Buy and sell leftover construction material.\nFree to list.',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyLarge,
-                  ),
-                  const SizedBox(height: 40),
-                  TextFormField(
-                    controller: _phone,
-                    keyboardType: TextInputType.phone,
-                    autofillHints: const [AutofillHints.telephoneNumberNational],
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(10),
-                    ],
-                    decoration: const InputDecoration(
-                      labelText: 'Mobile number',
-                      prefixText: '+91 ',
-                    ),
-                    validator: (v) => RegExp(r'^[6-9]\d{9}$').hasMatch(v?.trim() ?? '')
-                        ? null
-                        : 'Enter a valid 10-digit mobile number',
-                    onFieldSubmitted: (_) => _send(),
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: _sending ? null : _send,
-                    style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
-                    child: _sending
-                        ? const SizedBox.square(dimension: 22, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Text('Send OTP'),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Your number is never shown on listings. Buyers see it only after they pay to unlock.',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodySmall,
-                  ),
-                ],
+    return AuthLayout(
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('Log in or sign up', style: theme.textTheme.headlineSmall),
+            const SizedBox(height: 6),
+            Text('We will send a one-time code to your mobile.',
+                style: theme.textTheme.bodyLarge?.copyWith(color: Brand.muted)),
+            const SizedBox(height: 28),
+            TextFormField(
+              controller: _phone,
+              keyboardType: TextInputType.phone,
+              autofillHints: const [AutofillHints.telephoneNumberNational],
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: 1),
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(10),
+              ],
+              decoration: const InputDecoration(
+                labelText: 'Mobile number',
+                prefixIcon: Padding(
+                  padding: EdgeInsets.only(left: 16, right: 8),
+                  child: Text('🇮🇳 +91', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                ),
+                prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
               ),
+              validator: (v) => RegExp(r'^[6-9]\d{9}$').hasMatch(v?.trim() ?? '')
+                  ? null
+                  : 'Enter a valid 10-digit mobile number',
+              onFieldSubmitted: (_) => _send(),
             ),
-          ),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: _sending ? null : _send,
+              child: _sending
+                  ? const SizedBox.square(
+                      dimension: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Text('Get OTP'),
+            ),
+            const SizedBox(height: 20),
+            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Icon(Icons.lock_rounded, size: 16, color: Brand.muted),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Your number is never shown on listings. Buyers see it only after they pay to unlock.',
+                  style: theme.textTheme.bodySmall?.copyWith(color: Brand.muted),
+                ),
+              ),
+            ]),
+          ],
         ),
       ),
     );

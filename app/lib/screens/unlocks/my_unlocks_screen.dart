@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/format.dart';
 import '../../data/models.dart';
 import '../../data/repository.dart';
+import '../../ui/layout.dart';
 import '../../widgets/common.dart';
 import '../listing/listing_detail_screen.dart';
 
@@ -54,7 +55,7 @@ class _MyUnlocksScreenState extends State<MyUnlocksScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Unlocked')),
+      appBar: pageAppBar(context, 'Unlocked'),
       body: FutureBuilder<List<Unlock>>(
         future: _future,
         builder: (context, snap) {
@@ -65,14 +66,17 @@ class _MyUnlocksScreenState extends State<MyUnlocksScreen> {
           final unlocks = snap.data!;
           if (unlocks.isEmpty) {
             return const EmptyView(
-              icon: Icons.lock_open_outlined,
-              message: 'Listings you unlock appear here, with the seller\'s contact.',
+              icon: Icons.lock_open_rounded,
+              title: 'No unlocks yet',
+              message: 'When you unlock a listing, the seller\'s phone and address are saved here.',
             );
           }
           return RefreshIndicator(
             onRefresh: _refresh,
             child: ListView.separated(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.fromLTRB(
+                  sidePadding(MediaQuery.sizeOf(context).width, maxWidth: 900), 4,
+                  sidePadding(MediaQuery.sizeOf(context).width, maxWidth: 900), 24),
               itemCount: unlocks.length,
               separatorBuilder: (_, _) => const SizedBox(height: 8),
               itemBuilder: (context, i) => _item(unlocks[i]),

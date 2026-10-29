@@ -6,6 +6,8 @@ import '../../core/format.dart';
 import '../../data/models.dart';
 import '../../data/repository.dart';
 import '../../services/unlock_payment.dart';
+import '../../ui/layout.dart';
+import '../../ui/theme.dart';
 import '../../widgets/common.dart';
 import 'report_sheet.dart';
 
@@ -29,6 +31,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
   Object? _error;
 
   bool get _isOwn => _listing?.sellerId == _repo.currentUserId;
+  bool get _canUnlock => _listing != null && !_isOwn && _contact == null && _listing!.status == 'active';
 
   @override
   void initState() {
@@ -52,8 +55,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
       ListingContact? contact;
       var buyers = <InterestedBuyer>[];
       if (listing != null) {
-        final own = listing.sellerId == _repo.currentUserId;
-        if (own) {
+        if (listing.sellerId == _repo.currentUserId) {
           buyers = await _repo.interestedBuyers(listing.id);
         } else if (await _repo.hasUnlocked(listing.id)) {
           contact = await _repo.contact(listing.id);
@@ -90,15 +92,17 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final listing = _listing;
+    final compact = isCompact(context);
     return Scaffold(
       appBar: AppBar(
         actions: [
           if (listing != null && !_isOwn)
             IconButton(
-              tooltip: 'Report',
+              tooltip: 'Report listing',
               icon: const Icon(Icons.flag_outlined),
               onPressed: () => showReportSheet(context, listing.id),
             ),
+          const SizedBox(width: 8),
         ],
       ),
       body: _loading
@@ -106,141 +110,306 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
           : _error != null
               ? ErrorView(error: _error!, onRetry: _load)
               : listing == null
-                  ? const EmptyView(icon: Icons.inventory_2_outlined, message: 'This listing is no longer available.')
-                  : RefreshIndicator(onRefresh: _load, child: _details(listing)),
-      bottomNavigationBar: listing == null || _isOwn || _contact != null || listing.status != 'active'
-          ? null
-          : SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    FilledButton.icon(
-                      onPressed: _unlocking ? null : _unlock,
-                      style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
-                      icon: _unlocking
-                          ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                          : const Icon(Icons.lock_open),
-                      label: Text('Unlock contact & location · ${rupees(listing.unlockFeeRupees)}'),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Pay once to see the seller\'s phone number and exact address. '
-                      'Refund if already sold, or no reply within 48 hours.',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
+                  ? const EmptyView(
+                      icon: Icons.inventory_2_outlined,
+                      title: 'Not available',
+                      message: 'This listing has been removed or sold.',
+                    )
+                  : RefreshIndicator(onRefresh: _load, child: compact ? _compact(listing) : _wide(listing)),
+      bottomNavigationBar: compact && _canUnlock
+          ? SafeArea(
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  border: Border(top: BorderSide(color: Brand.line)),
                 ),
+                child: _UnlockButton(fee: listing!.unlockFeeRupees, busy: _unlocking, onPressed: _unlock),
               ),
-            ),
+            )
+          : null,
     );
   }
+
+  Widget _compact(Listing listing) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: _PhotoGallery(images: listing.approvedImages, categoryId: listing.categoryId),
+        ),
+        const SizedBox(height: 16),
+        _summary(listing),
+        const SizedBox(height: 12),
+        ..._sidePanels(listing),
+        const SizedBox(height: 12),
+        _details(listing),
+      ],
+    );
+  }
+
+  Widget _wide(Listing listing) {
+    final pad = sidePadding(MediaQuery.sizeOf(context).width, maxWidth: 1180, min: 24);
+    return ListView(
+      padding: EdgeInsets.fromLTRB(pad, 0, pad, 40),
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 3,
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: _PhotoGallery(images: listing.approvedImages, categoryId: listing.categoryId),
+                ),
+                const SizedBox(height: 16),
+                _details(listing),
+              ]),
+            ),
+            const SizedBox(width: 24),
+            SizedBox(
+              width: 380,
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                _summary(listing),
+                const SizedBox(height: 12),
+                if (_canUnlock)
+                  SectionCard(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                      _UnlockButton(fee: listing.unlockFeeRupees, busy: _unlocking, onPressed: _unlock),
+                    ]),
+                  ),
+                ..._sidePanels(listing),
+              ]),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _summary(Listing listing) {
+    final theme = Theme.of(context);
+    return SectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (listing.status != 'active') ...[StatusChip(listing.status), const SizedBox(height: 10)],
+          Text(rupees(listing.priceRupees), style: theme.textTheme.headlineMedium),
+          Text('for ${quantityWithUnit(listing.quantity, listing.unit)}',
+              style: theme.textTheme.bodyMedium?.copyWith(color: Brand.muted)),
+          const SizedBox(height: 12),
+          Text(listing.title, style: theme.textTheme.titleLarge?.copyWith(height: 1.25)),
+          const SizedBox(height: 16),
+          _InfoRow(
+            icon: Icons.place_rounded,
+            title: '${listing.area}, ${listing.city}',
+            subtitle: _isOwn
+                ? 'Exact address shown only to buyers who unlock'
+                : _contact != null
+                    ? 'Exact address shown below'
+                    : 'Exact address after unlock',
+          ),
+          _InfoRow(
+            icon: Icons.storefront_rounded,
+            title: listing.sellerName ?? 'Seller',
+            subtitle: 'Posted ${shortDate(listing.createdAt)}',
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _sidePanels(Listing listing) => [
+        if (_contact != null) _ContactCard(contact: _contact!),
+        if (_isOwn) _BuyersCard(buyers: _buyers),
+        if (_canUnlock) const _HowUnlockWorks(),
+      ];
 
   Widget _details(Listing listing) {
     final theme = Theme.of(context);
     final category = categoryById(listing.categoryId);
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 24),
-      children: [
-        _PhotoGallery(images: listing.approvedImages),
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (listing.status != 'active') ...[StatusChip(listing.status), const SizedBox(height: 8)],
-              Text(listing.title, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
-              const SizedBox(height: 6),
-              Text(rupees(listing.priceRupees),
-                  style: theme.textTheme.headlineSmall
-                      ?.copyWith(fontWeight: FontWeight.w800, color: theme.colorScheme.primary)),
-              Text('for ${quantityWithUnit(listing.quantity, listing.unit)}', style: theme.textTheme.bodyMedium),
-              const SizedBox(height: 12),
-              Wrap(spacing: 8, runSpacing: 8, children: [
-                Chip(avatar: Icon(category.icon, size: 18), label: Text(category.name)),
-                Chip(label: Text(conditionLabels[listing.condition] ?? listing.condition)),
-              ]),
-              if (listing.description.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Text('Details', style: theme.textTheme.titleMedium),
-                const SizedBox(height: 4),
-                Text(listing.description, style: theme.textTheme.bodyLarge),
-              ],
-              const SizedBox(height: 16),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.place_outlined),
-                title: Text('${listing.area}, ${listing.city}'),
-                subtitle: Text(_contact != null || _isOwn
-                    ? 'Exact address below'
-                    : 'Approximate area. Exact address after unlock.'),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.storefront_outlined),
-                title: Text(listing.sellerName ?? 'Seller'),
-                subtitle: Text('Posted ${shortDate(listing.createdAt)}'),
-              ),
-              if (_contact != null) _ContactCard(contact: _contact!),
-              if (_isOwn) _BuyersSection(buyers: _buyers),
-            ],
-          ),
+    return SectionCard(
+      title: 'Details',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(spacing: 8, runSpacing: 8, children: [
+            Chip(avatar: Icon(category.icon, color: Brand.orange), label: Text(category.name)),
+            Chip(label: Text(conditionLabels[listing.condition] ?? listing.condition)),
+            Chip(label: Text(quantityWithUnit(listing.quantity, listing.unit))),
+          ]),
+          if (listing.description.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Text(listing.description, style: theme.textTheme.bodyLarge?.copyWith(height: 1.5)),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({required this.icon, required this.title, required this.subtitle});
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Row(children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(color: Brand.sand, borderRadius: BorderRadius.circular(12)),
+          child: Icon(icon, size: 20, color: Brand.charcoal),
         ),
-      ],
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(title, style: theme.textTheme.titleSmall),
+            Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(color: Brand.muted)),
+          ]),
+        ),
+      ]),
+    );
+  }
+}
+
+class _UnlockButton extends StatelessWidget {
+  const _UnlockButton({required this.fee, required this.busy, required this.onPressed});
+
+  final int fee;
+  final bool busy;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilledButton.icon(
+      onPressed: busy ? null : onPressed,
+      style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(56)),
+      icon: busy
+          ? const SizedBox.square(
+              dimension: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+          : const Icon(Icons.lock_open_rounded),
+      label: Text('Unlock contact · ${rupees(fee)}'),
+    );
+  }
+}
+
+class _HowUnlockWorks extends StatelessWidget {
+  const _HowUnlockWorks();
+
+  @override
+  Widget build(BuildContext context) {
+    Widget point(IconData icon, String text) => Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Icon(icon, size: 18, color: Brand.orange),
+            const SizedBox(width: 10),
+            Expanded(child: Text(text)),
+          ]),
+        );
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: SectionCard(
+        title: 'What you get',
+        child: Column(children: [
+          point(Icons.call_rounded, "Seller's phone number"),
+          point(Icons.map_rounded, 'Exact pickup address and map'),
+          point(Icons.replay_rounded, 'Refund if already sold, or no reply in 48 hours'),
+        ]),
+      ),
     );
   }
 }
 
 class _PhotoGallery extends StatefulWidget {
-  const _PhotoGallery({required this.images});
+  const _PhotoGallery({required this.images, required this.categoryId});
 
   final List<ListingImage> images;
+  final String categoryId;
 
   @override
   State<_PhotoGallery> createState() => _PhotoGalleryState();
 }
 
 class _PhotoGalleryState extends State<_PhotoGallery> {
+  final _controller = PageController();
   int _index = 0;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     if (widget.images.isEmpty) {
-      return const AspectRatio(aspectRatio: 4 / 3, child: ListingPhoto());
+      return AspectRatio(aspectRatio: 4 / 3, child: ListingPhoto(categoryId: widget.categoryId));
     }
+    final many = widget.images.length > 1;
     return AspectRatio(
       aspectRatio: 4 / 3,
       child: Stack(
         children: [
           PageView.builder(
+            controller: _controller,
             itemCount: widget.images.length,
             onPageChanged: (i) => setState(() => _index = i),
-            itemBuilder: (_, i) => ListingPhoto(publicPath: widget.images[i].publicPath),
+            itemBuilder: (_, i) =>
+                ListingPhoto(publicPath: widget.images[i].publicPath, categoryId: widget.categoryId),
           ),
-          if (widget.images.length > 1)
+          if (many) ...[
+            _arrow(Alignment.centerLeft, Icons.chevron_left_rounded, -1),
+            _arrow(Alignment.centerRight, Icons.chevron_right_rounded, 1),
             Positioned(
-              bottom: 8,
+              bottom: 12,
               left: 0,
               right: 0,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   for (var i = 0; i < widget.images.length; i++)
-                    Container(
-                      width: 8,
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: i == _index ? 18 : 8,
                       height: 8,
                       margin: const EdgeInsets.symmetric(horizontal: 3),
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: i == _index ? Colors.white : Colors.white54,
+                        borderRadius: BorderRadius.circular(4),
+                        color: i == _index ? Colors.white : Colors.white60,
                       ),
                     ),
                 ],
               ),
             ),
+          ],
         ],
+      ),
+    );
+  }
+
+  Widget _arrow(Alignment alignment, IconData icon, int delta) {
+    return Align(
+      alignment: alignment,
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: IconButton.filledTonal(
+          style: IconButton.styleFrom(backgroundColor: Colors.white70),
+          onPressed: () => _controller.animateToPage(
+            (_index + delta).clamp(0, widget.images.length - 1),
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOut,
+          ),
+          icon: Icon(icon),
+        ),
       ),
     );
   }
@@ -262,40 +431,55 @@ class _ContactCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Card(
-      color: Colors.green.shade50,
+      color: Brand.greenSoft,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Brand.green.withAlpha(70)),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(children: [
-              Icon(Icons.lock_open, color: Colors.green.shade800),
+              const Icon(Icons.verified_rounded, color: Brand.green),
               const SizedBox(width: 8),
-              Text('Seller contact', style: theme.textTheme.titleMedium),
+              Text('Contact unlocked', style: theme.textTheme.titleMedium?.copyWith(color: Brand.green)),
             ]),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             Text(contact.sellerName, style: theme.textTheme.titleMedium),
-            if (contact.sellerPhone != null) ...[
-              const SizedBox(height: 4),
-              SelectableText(contact.sellerPhone!, style: theme.textTheme.headlineSmall),
-            ],
+            if (contact.sellerPhone != null)
+              SelectableText(formatPhone(contact.sellerPhone!),
+                  style: theme.textTheme.headlineSmall?.copyWith(letterSpacing: 0.5)),
             if (contact.address != null) ...[
-              const SizedBox(height: 8),
-              SelectableText(contact.address!, style: theme.textTheme.bodyLarge),
+              const SizedBox(height: 10),
+              Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const Icon(Icons.place_rounded, size: 18, color: Brand.charcoal),
+                const SizedBox(width: 6),
+                Expanded(child: SelectableText(contact.address!, style: theme.textTheme.bodyLarge)),
+              ]),
             ],
-            const SizedBox(height: 12),
-            Wrap(spacing: 8, runSpacing: 8, children: [
+            const SizedBox(height: 16),
+            Row(children: [
               if (contact.sellerPhone != null)
-                FilledButton.icon(
-                  onPressed: () => launchUrl(Uri(scheme: 'tel', path: contact.sellerPhone)),
-                  icon: const Icon(Icons.call),
-                  label: const Text('Call'),
+                Expanded(
+                  child: FilledButton.icon(
+                    style: FilledButton.styleFrom(backgroundColor: Brand.green),
+                    onPressed: () => launchUrl(Uri(scheme: 'tel', path: contact.sellerPhone)),
+                    icon: const Icon(Icons.call_rounded),
+                    label: const Text('Call'),
+                  ),
                 ),
+              if (contact.sellerPhone != null && (contact.address != null || contact.lat != null))
+                const SizedBox(width: 10),
               if (contact.address != null || contact.lat != null)
-                OutlinedButton.icon(
-                  onPressed: () => launchUrl(_mapsUri, mode: LaunchMode.externalApplication),
-                  icon: const Icon(Icons.map_outlined),
-                  label: const Text('Open in Maps'),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(minimumSize: const Size(0, 52), backgroundColor: Colors.white),
+                    onPressed: () => launchUrl(_mapsUri, mode: LaunchMode.externalApplication),
+                    icon: const Icon(Icons.map_rounded),
+                    label: const Text('Directions'),
+                  ),
                 ),
             ]),
           ],
@@ -305,38 +489,39 @@ class _ContactCard extends StatelessWidget {
   }
 }
 
-class _BuyersSection extends StatelessWidget {
-  const _BuyersSection({required this.buyers});
+class _BuyersCard extends StatelessWidget {
+  const _BuyersCard({required this.buyers});
 
   final List<InterestedBuyer> buyers;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Divider(height: 32),
-        Text('Buyers who unlocked (${buyers.length})', style: theme.textTheme.titleMedium),
-        const SizedBox(height: 4),
-        if (buyers.isEmpty)
-          Text('No one yet. Buyers who pay to unlock will appear here with their phone number.',
-              style: theme.textTheme.bodyMedium)
-        else
-          for (final b in buyers)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const CircleAvatar(child: Icon(Icons.person)),
-              title: Text(b.name),
-              subtitle: Text('${b.phone ?? ''}  ·  ${shortDate(b.paidAt)}'),
-              trailing: b.phone == null
-                  ? null
-                  : IconButton(
-                      icon: const Icon(Icons.call),
-                      onPressed: () => launchUrl(Uri(scheme: 'tel', path: b.phone)),
-                    ),
-            ),
-      ],
+    return SectionCard(
+      title: 'Buyers who unlocked (${buyers.length})',
+      subtitle: buyers.isEmpty ? null : 'They have your number and may call. You can call them too.',
+      child: buyers.isEmpty
+          ? Text('No one yet. Buyers who pay to unlock will appear here with their phone number.',
+              style: theme.textTheme.bodyMedium?.copyWith(color: Brand.muted))
+          : Column(children: [
+              for (final b in buyers)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: CircleAvatar(
+                    backgroundColor: Brand.orangeSoft,
+                    child: Text(b.name.characters.first.toUpperCase(),
+                        style: const TextStyle(color: Brand.orange, fontWeight: FontWeight.w800)),
+                  ),
+                  title: Text(b.name, style: theme.textTheme.titleSmall),
+                  subtitle: Text('${b.phone == null ? '' : formatPhone(b.phone!)} · ${shortDate(b.paidAt)}'),
+                  trailing: b.phone == null
+                      ? null
+                      : IconButton.filledTonal(
+                          icon: const Icon(Icons.call_rounded),
+                          onPressed: () => launchUrl(Uri(scheme: 'tel', path: b.phone)),
+                        ),
+                ),
+            ]),
     );
   }
 }

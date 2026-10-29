@@ -78,6 +78,23 @@ For the APK to connect to your backend, first add two repository secrets under
 - `SUPABASE_URL`: e.g. `https://abcd1234.supabase.co`
 - `SUPABASE_PUBLISHABLE_KEY`: Supabase dashboard → Project Settings → API Keys
 
+## Web version (trial)
+
+The same app runs in the browser. Every push publishes it to Cloudflare Pages:
+
+- `https://baaki-build.pages.dev/`: the real app, using your Supabase backend
+- `https://baaki-build.pages.dev/demo/`: a demo with sample listings and no backend, for reviewing the design
+
+One-time setup, as two more repository secrets:
+- `CLOUDFLARE_ACCOUNT_ID`: Cloudflare dashboard → **Workers & Pages**, shown on the right
+- `CLOUDFLARE_API_TOKEN`: Cloudflare → **My Profile → API Tokens → Create Token → Custom token**, with permission **Account · Cloudflare Pages · Edit**
+
+Run the demo locally:
+
+```bash
+cd app && flutter run -d chrome --dart-define=DEMO=true
+```
+
 ## Next steps
 
 1. Create the Supabase, Razorpay and Google Cloud accounts and set up the backend (below).

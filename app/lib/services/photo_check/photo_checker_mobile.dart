@@ -2,7 +2,7 @@ import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
-import '../core/contact_filter.dart';
+import '../../core/contact_filter.dart';
 
 /// On-phone photo check, run before upload so the seller gets instant
 /// feedback. The server checks every photo again; this one only saves time.

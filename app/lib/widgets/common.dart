@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../core/categories.dart';
 import '../core/errors.dart';
 import '../core/format.dart';
 import '../data/repository.dart';
+import '../ui/theme.dart';
 
 void showError(BuildContext context, Object error) {
   ScaffoldMessenger.of(context)
@@ -31,11 +33,11 @@ class ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.cloud_off, size: 48),
+            const Icon(Icons.cloud_off_rounded, size: 48, color: Brand.muted),
             const SizedBox(height: 12),
             Text(friendlyError(error), textAlign: TextAlign.center),
-            const SizedBox(height: 12),
-            FilledButton.tonal(onPressed: onRetry, child: const Text('Try again')),
+            const SizedBox(height: 16),
+            OutlinedButton(onPressed: onRetry, child: const Text('Try again')),
           ],
         ),
       ),
@@ -44,24 +46,39 @@ class ErrorView extends StatelessWidget {
 }
 
 class EmptyView extends StatelessWidget {
-  const EmptyView({super.key, required this.icon, required this.message, this.action});
+  const EmptyView({super.key, required this.icon, required this.message, this.title, this.action});
 
   final IconData icon;
+  final String? title;
   final String message;
   final Widget? action;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 56, color: Theme.of(context).colorScheme.outline),
-            const SizedBox(height: 12),
-            Text(message, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
-            if (action != null) ...[const SizedBox(height: 16), action!],
+            Container(
+              width: 88,
+              height: 88,
+              decoration: const BoxDecoration(color: Brand.orangeSoft, shape: BoxShape.circle),
+              child: Icon(icon, size: 40, color: Brand.orange),
+            ),
+            const SizedBox(height: 16),
+            if (title != null) ...[
+              Text(title!, textAlign: TextAlign.center, style: theme.textTheme.titleLarge),
+              const SizedBox(height: 6),
+            ],
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 360),
+              child: Text(message,
+                  textAlign: TextAlign.center, style: theme.textTheme.bodyLarge?.copyWith(color: Brand.muted)),
+            ),
+            if (action != null) ...[const SizedBox(height: 20), action!],
           ],
         ),
       ),
@@ -69,18 +86,33 @@ class EmptyView extends StatelessWidget {
   }
 }
 
-/// A listing photo from public storage, or a placeholder when there is none.
+/// A listing photo from public storage, or a branded placeholder when there is none.
 class ListingPhoto extends StatelessWidget {
-  const ListingPhoto({super.key, this.publicPath, this.fit = BoxFit.cover});
+  const ListingPhoto({super.key, this.publicPath, this.categoryId, this.fit = BoxFit.cover});
 
   final String? publicPath;
+  final String? categoryId;
   final BoxFit fit;
 
   @override
   Widget build(BuildContext context) {
-    final placeholder = Container(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      child: Icon(Icons.construction, color: Theme.of(context).colorScheme.outline),
+    final placeholder = LayoutBuilder(
+      builder: (context, c) => Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFFFFE3D1), Color(0xFFF4EEE6)],
+          ),
+        ),
+        child: Center(
+          child: Icon(
+            categoryId == null ? Icons.construction_rounded : categoryById(categoryId!).icon,
+            size: (c.biggest.shortestSide * 0.32).clamp(24, 72),
+            color: Brand.orange.withAlpha(150),
+          ),
+        ),
+      ),
     );
     if (publicPath == null) return placeholder;
     return CachedNetworkImage(
@@ -99,18 +131,93 @@ class StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final (bg, fg) = switch (status) {
-      'active' => (Colors.green.shade100, Colors.green.shade900),
-      'sold' => (scheme.surfaceContainerHighest, scheme.onSurfaceVariant),
-      'removed' => (scheme.errorContainer, scheme.onErrorContainer),
-      _ => (Colors.amber.shade100, Colors.brown.shade800),
+      'active' => (Brand.greenSoft, Brand.green),
+      'sold' => (const Color(0xFFECEAE6), Brand.muted),
+      'removed' => (const Color(0xFFFDE8E8), const Color(0xFFB42318)),
+      _ => (const Color(0xFFFFF4D6), const Color(0xFF8A5A00)),
     };
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
       child: Text(statusLabels[status] ?? status,
-          style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600)),
+          style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w700)),
+    );
+  }
+}
+
+/// "🔒 ₹300 to unlock" badge.
+class UnlockFeePill extends StatelessWidget {
+  const UnlockFeePill({super.key, required this.feeRupees, this.compact = false});
+
+  final int feeRupees;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: compact ? 8 : 10, vertical: compact ? 4 : 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(235),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [BoxShadow(color: Color(0x1A000000), blurRadius: 6, offset: Offset(0, 2))],
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(Icons.lock_rounded, size: compact ? 12 : 14, color: Brand.orange),
+        const SizedBox(width: 4),
+        Text(
+          '${rupees(feeRupees)} to unlock',
+          style: TextStyle(fontSize: compact ? 11 : 12, fontWeight: FontWeight.w700, color: Brand.charcoal),
+        ),
+      ]),
+    );
+  }
+}
+
+/// White rounded card with an optional heading, used to group form sections and details.
+class SectionCard extends StatelessWidget {
+  const SectionCard({super.key, this.title, this.step, this.subtitle, required this.child, this.padding});
+
+  final String? title;
+  final int? step;
+  final String? subtitle;
+  final Widget child;
+  final EdgeInsets? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      child: Padding(
+        padding: padding ?? const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (title != null) ...[
+              Row(children: [
+                if (step != null) ...[
+                  Container(
+                    width: 26,
+                    height: 26,
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(color: Brand.charcoal, shape: BoxShape.circle),
+                    child: Text('$step',
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13)),
+                  ),
+                  const SizedBox(width: 10),
+                ],
+                Expanded(child: Text(title!, style: theme.textTheme.titleMedium)),
+              ]),
+              if (subtitle != null) ...[
+                const SizedBox(height: 4),
+                Text(subtitle!, style: theme.textTheme.bodyMedium?.copyWith(color: Brand.muted)),
+              ],
+              const SizedBox(height: 16),
+            ],
+            child,
+          ],
+        ),
+      ),
     );
   }
 }

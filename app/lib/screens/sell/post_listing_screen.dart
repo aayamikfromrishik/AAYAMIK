@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,7 +12,9 @@ import '../../core/fees.dart';
 import '../../core/format.dart';
 import '../../data/models.dart';
 import '../../data/repository.dart';
-import '../../services/photo_checker.dart';
+import '../../services/photo_check/photo_checker.dart';
+import '../../ui/layout.dart';
+import '../../ui/theme.dart';
 import '../../widgets/common.dart';
 
 const maxPhotos = 6;
@@ -275,161 +278,230 @@ class _PostListingScreenState extends State<PostListingScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final price = int.tryParse(_price.text.trim());
+    final compact = isCompact(context);
+    const gap = SizedBox(height: 16);
+    const sectionGap = SizedBox(height: 14);
+
+    Widget pair(Widget a, Widget b) => compact
+        ? Column(children: [a, gap, b])
+        : Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Expanded(child: a),
+            const SizedBox(width: 12),
+            Expanded(child: b),
+          ]);
+
     return Scaffold(
       appBar: AppBar(title: Text(_existing == null ? 'Sell material' : 'Edit listing')),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 40),
           children: [
-            Text('Photos', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 4),
-            Text('Only the material. No people, phone numbers or QR codes.', style: theme.textTheme.bodySmall),
-            const SizedBox(height: 8),
-            _photoRow(),
-            const SizedBox(height: 20),
-            DropdownButtonFormField<String>(
-              initialValue: _categoryId,
-              isExpanded: true,
-              decoration: const InputDecoration(labelText: 'Category'),
-              items: [
-                for (final c in categories)
-                  DropdownMenuItem(
-                    value: c.id,
-                    child: Row(children: [Icon(c.icon, size: 20), const SizedBox(width: 8), Text(c.name)]),
-                  ),
-              ],
-              onChanged: (v) => setState(() => _categoryId = v),
-              validator: (v) => v == null ? 'Choose a category' : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _title,
-              textCapitalization: TextCapitalization.sentences,
-              maxLength: 100,
-              decoration: const InputDecoration(labelText: 'Title', hintText: 'e.g. UltraTech cement 50 kg bags'),
-              validator: (v) => _publicText(v, min: 5),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _description,
-              textCapitalization: TextCapitalization.sentences,
-              maxLines: 4,
-              maxLength: 2000,
-              decoration: const InputDecoration(
-                labelText: 'Details (optional)',
-                hintText: 'Brand, size, how it was stored, reason for selling…',
-                alignLabelWithHint: true,
-              ),
-              validator: (v) => (v?.trim().isEmpty ?? true) ? null : _publicText(v, min: 0, max: 2000),
-            ),
-            const SizedBox(height: 8),
-            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Expanded(
-                child: TextFormField(
-                  controller: _quantity,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
-                  decoration: const InputDecoration(labelText: 'Quantity'),
-                  validator: (v) {
-                    final q = double.tryParse(v?.trim() ?? '');
-                    return q == null || q <= 0 ? 'Enter quantity' : null;
-                  },
+            MaxWidth(
+              maxWidth: 760,
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                SectionCard(
+                  step: 1,
+                  title: 'Photos',
+                  subtitle: 'Up to $maxPhotos clear photos of the material only. '
+                      'No people, phone numbers or QR codes.',
+                  child: _photoRow(),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  initialValue: _unit,
-                  isExpanded: true,
-                  decoration: const InputDecoration(labelText: 'Unit'),
-                  items: [
-                    for (final e in unitLabels.entries) DropdownMenuItem(value: e.key, child: Text(e.value)),
-                  ],
-                  onChanged: (v) => setState(() => _unit = v!),
+                sectionGap,
+                SectionCard(
+                  step: 2,
+                  title: 'What are you selling?',
+                  child: Column(children: [
+                    DropdownButtonFormField<String>(
+                      initialValue: _categoryId,
+                      isExpanded: true,
+                      decoration: const InputDecoration(labelText: 'Category'),
+                      items: [
+                        for (final c in categories)
+                          DropdownMenuItem(
+                            value: c.id,
+                            child: Row(children: [
+                              Icon(c.icon, size: 20, color: Brand.orange),
+                              const SizedBox(width: 10),
+                              Text(c.name),
+                            ]),
+                          ),
+                      ],
+                      onChanged: (v) => setState(() => _categoryId = v),
+                      validator: (v) => v == null ? 'Choose a category' : null,
+                    ),
+                    gap,
+                    TextFormField(
+                      controller: _title,
+                      textCapitalization: TextCapitalization.sentences,
+                      maxLength: 100,
+                      decoration: const InputDecoration(
+                        labelText: 'Title',
+                        hintText: 'e.g. UltraTech cement, 50 kg bags',
+                      ),
+                      validator: (v) => _publicText(v, min: 5),
+                    ),
+                    const SizedBox(height: 4),
+                    pair(
+                      TextFormField(
+                        controller: _quantity,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                        decoration: const InputDecoration(labelText: 'Quantity'),
+                        validator: (v) {
+                          final q = double.tryParse(v?.trim() ?? '');
+                          return q == null || q <= 0 ? 'Enter quantity' : null;
+                        },
+                      ),
+                      DropdownButtonFormField<String>(
+                        initialValue: _unit,
+                        isExpanded: true,
+                        decoration: const InputDecoration(labelText: 'Unit'),
+                        items: [
+                          for (final e in unitLabels.entries)
+                            DropdownMenuItem(value: e.key, child: Text(e.value)),
+                        ],
+                        onChanged: (v) => setState(() => _unit = v!),
+                      ),
+                    ),
+                    gap,
+                    DropdownButtonFormField<String>(
+                      initialValue: _condition,
+                      decoration: const InputDecoration(labelText: 'Condition'),
+                      items: [
+                        for (final e in conditionLabels.entries)
+                          DropdownMenuItem(value: e.key, child: Text(e.value)),
+                      ],
+                      onChanged: (v) => setState(() => _condition = v!),
+                    ),
+                    gap,
+                    TextFormField(
+                      controller: _description,
+                      textCapitalization: TextCapitalization.sentences,
+                      maxLines: 4,
+                      maxLength: 2000,
+                      decoration: const InputDecoration(
+                        labelText: 'Details (optional)',
+                        hintText: 'Brand, size, how it was stored, reason for selling…',
+                        alignLabelWithHint: true,
+                      ),
+                      validator: (v) => (v?.trim().isEmpty ?? true) ? null : _publicText(v, min: 0, max: 2000),
+                    ),
+                  ]),
                 ),
-              ),
-            ]),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _price,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(9)],
-              decoration: InputDecoration(
-                labelText: 'Total price for everything (₹)',
-                prefixText: '₹ ',
-                helperText: price == null || price < 1
-                    ? 'Listing is free for you.'
-                    : 'Free for you. Buyers pay ${rupees(unlockFeeRupees(price))} to unlock your contact.',
-                helperMaxLines: 2,
-              ),
-              validator: (v) {
-                final p = int.tryParse(v?.trim() ?? '');
-                return p == null || p < 1 ? 'Enter the price' : null;
-              },
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              initialValue: _condition,
-              decoration: const InputDecoration(labelText: 'Condition'),
-              items: [
-                for (final e in conditionLabels.entries) DropdownMenuItem(value: e.key, child: Text(e.value)),
-              ],
-              onChanged: (v) => setState(() => _condition = v!),
-            ),
-            const SizedBox(height: 24),
-            Text('Location', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _city,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'City'),
-              validator: (v) => _publicText(v, max: 60),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _area,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'Area / locality',
-                hintText: 'e.g. Andheri East',
-                helperText: 'Shown to everyone.',
-              ),
-              validator: (v) => _publicText(v, max: 80),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _address,
-              textCapitalization: TextCapitalization.sentences,
-              maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'Exact pickup address',
-                prefixIcon: Icon(Icons.lock_outline),
-                helperText: 'Private. Only shown to buyers who pay to unlock.',
-              ),
-              validator: (v) {
-                final t = v?.trim() ?? '';
-                if (t.length < 5) return 'Enter the pickup address';
-                if (t.length > 300) return 'Keep it under 300 characters';
-                return null;
-              },
-            ),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: OutlinedButton.icon(
-                onPressed: _locating ? null : _useCurrentLocation,
-                icon: _locating
-                    ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                    : Icon(_lat == null ? Icons.my_location : Icons.check_circle, size: 18),
-                label: Text(_lat == null ? 'Pin site using my current location' : 'Site location pinned'),
-              ),
-            ),
-            const SizedBox(height: 28),
-            FilledButton(
-              onPressed: _checkingPhoto ? null : _submit,
-              style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
-              child: Text(_existing == null ? 'Post listing (free)' : 'Save changes'),
+                sectionGap,
+                SectionCard(
+                  step: 3,
+                  title: 'Price',
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                    TextFormField(
+                      controller: _price,
+                      keyboardType: TextInputType.number,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(9),
+                      ],
+                      decoration: const InputDecoration(
+                        labelText: 'Total price for everything',
+                        prefixText: '₹ ',
+                      ),
+                      validator: (v) {
+                        final p = int.tryParse(v?.trim() ?? '');
+                        return p == null || p < 1 ? 'Enter the price' : null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Brand.orangeSoft,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(children: [
+                        const Icon(Icons.info_rounded, color: Brand.orange),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            price == null || price < 1
+                                ? 'Listing is free for you. Buyers pay a small fee to see your number.'
+                                : 'You pay ₹0. Buyers pay ${rupees(unlockFeeRupees(price))} to unlock '
+                                    'your number and address.',
+                            style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ]),
+                    ),
+                  ]),
+                ),
+                sectionGap,
+                SectionCard(
+                  step: 4,
+                  title: 'Pickup location',
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                    pair(
+                      TextFormField(
+                        controller: _city,
+                        textCapitalization: TextCapitalization.words,
+                        decoration: const InputDecoration(labelText: 'City'),
+                        validator: (v) => _publicText(v, max: 60),
+                      ),
+                      TextFormField(
+                        controller: _area,
+                        textCapitalization: TextCapitalization.words,
+                        decoration: const InputDecoration(
+                          labelText: 'Area / locality',
+                          hintText: 'e.g. Andheri East',
+                          helperText: 'Shown to everyone.',
+                        ),
+                        validator: (v) => _publicText(v, max: 80),
+                      ),
+                    ),
+                    gap,
+                    TextFormField(
+                      controller: _address,
+                      textCapitalization: TextCapitalization.sentences,
+                      maxLines: 2,
+                      decoration: const InputDecoration(
+                        labelText: 'Exact pickup address',
+                        prefixIcon: Icon(Icons.lock_rounded),
+                        helperText: 'Private. Only shown to buyers who pay to unlock.',
+                      ),
+                      validator: (v) {
+                        final t = v?.trim() ?? '';
+                        if (t.length < 5) return 'Enter the pickup address';
+                        if (t.length > 300) return 'Keep it under 300 characters';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: OutlinedButton.icon(
+                        onPressed: _locating ? null : _useCurrentLocation,
+                        style: _lat == null
+                            ? null
+                            : OutlinedButton.styleFrom(
+                                foregroundColor: Brand.green,
+                                side: const BorderSide(color: Brand.green, width: 1.5),
+                              ),
+                        icon: _locating
+                            ? const SizedBox.square(
+                                dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                            : Icon(_lat == null ? Icons.my_location_rounded : Icons.check_circle_rounded,
+                                size: 18),
+                        label: Text(_lat == null ? 'Pin site using my current location' : 'Site location pinned'),
+                      ),
+                    ),
+                  ]),
+                ),
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: _checkingPhoto ? null : _submit,
+                  style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(56)),
+                  child: Text(_existing == null ? 'Post listing (free)' : 'Save changes'),
+                ),
+              ]),
             ),
           ],
         ),
@@ -438,27 +510,34 @@ class _PostListingScreenState extends State<PostListingScreen> {
   }
 
   Widget _photoRow() {
+    const size = 104.0;
     return SizedBox(
-      height: 96,
+      height: size,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
-          for (final p in _photos) _photoTile(p),
+          for (final p in _photos) _photoTile(p, size),
           if (_photos.length < maxPhotos)
             InkWell(
               onTap: _checkingPhoto ? null : _addPhoto,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(14),
               child: Container(
-                width: 96,
+                width: size,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Theme.of(context).colorScheme.outline),
-                  borderRadius: BorderRadius.circular(8),
+                  color: Brand.orangeSoft,
+                  border: Border.all(color: Brand.orange.withAlpha(90), width: 1.5),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: _checkingPhoto
                     ? const Center(child: CircularProgressIndicator())
                     : const Column(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [Icon(Icons.add_a_photo_outlined), SizedBox(height: 4), Text('Add')],
+                        children: [
+                          Icon(Icons.add_a_photo_rounded, color: Brand.orange),
+                          SizedBox(height: 6),
+                          Text('Add photo',
+                              style: TextStyle(color: Brand.orange, fontWeight: FontWeight.w700, fontSize: 13)),
+                        ],
                       ),
               ),
             ),
@@ -467,17 +546,19 @@ class _PostListingScreenState extends State<PostListingScreen> {
     );
   }
 
-  Widget _photoTile(_Photo p) {
+  Widget _photoTile(_Photo p, double size) {
     final Widget image = p.file != null
-        ? Image.file(File(p.file!.path), fit: BoxFit.cover)
-        : ListingPhoto(publicPath: p.saved!.publicPath);
+        ? (kIsWeb
+            ? Image.network(p.file!.path, fit: BoxFit.cover)
+            : Image.file(File(p.file!.path), fit: BoxFit.cover))
+        : ListingPhoto(publicPath: p.saved!.publicPath, categoryId: _categoryId);
     final pending = p.saved?.status == 'pending';
     return Padding(
-      padding: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.only(right: 10),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(14),
         child: SizedBox.square(
-          dimension: 96,
+          dimension: size,
           child: Stack(fit: StackFit.expand, children: [
             image,
             if (pending)
@@ -487,13 +568,19 @@ class _PostListingScreenState extends State<PostListingScreen> {
                 child: const Text('Checking', style: TextStyle(color: Colors.white, fontSize: 12)),
               ),
             Positioned(
-              top: 2,
-              right: 2,
-              child: IconButton.filledTonal(
-                visualDensity: VisualDensity.compact,
-                iconSize: 16,
-                onPressed: () => _removePhoto(p),
-                icon: const Icon(Icons.close),
+              top: 4,
+              right: 4,
+              child: Material(
+                color: Colors.white,
+                shape: const CircleBorder(),
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () => _removePhoto(p),
+                  child: const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: Icon(Icons.close_rounded, size: 16, color: Brand.charcoal),
+                  ),
+                ),
               ),
             ),
           ]),
@@ -502,4 +589,3 @@ class _PostListingScreenState extends State<PostListingScreen> {
     );
   }
 }
-

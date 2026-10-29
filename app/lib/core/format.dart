@@ -43,3 +43,9 @@ const statusLabels = {
   'sold': 'Sold',
   'removed': 'Removed by admin',
 };
+
+/// "+919822012345" -> "+91 98220 12345". Other formats are returned unchanged.
+String formatPhone(String phone) {
+  final m = RegExp(r'^\+91(\d{5})(\d{5})$').firstMatch(phone);
+  return m == null ? phone : '+91 ${m[1]} ${m[2]}';
+}

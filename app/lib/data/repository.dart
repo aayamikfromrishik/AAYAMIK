@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
+import 'demo_repository.dart';
 import 'models.dart';
 
 SupabaseClient get _db => Supabase.instance.client;
@@ -21,8 +22,10 @@ class PhotoCheckResult {
 /// Every call the app makes to the backend. Access rules are enforced by the
 /// database; this class just shapes the requests.
 class Repository {
-  Repository._();
-  static final instance = Repository._();
+  Repository.live();
+
+  /// Demo builds (--dart-define=DEMO=true) run on sample data with no backend.
+  static final Repository instance = demoMode ? DemoRepository() : Repository.live();
 
   String? get currentUserId => _db.auth.currentUser?.id;
 

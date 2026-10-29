@@ -3,8 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../app.dart';
+import '../../data/demo_repository.dart';
 import '../../data/repository.dart';
+import '../../ui/theme.dart';
 import '../../widgets/common.dart';
+import 'auth_layout.dart';
 
 class OtpScreen extends StatefulWidget {
   const OtpScreen({super.key, required this.phone});
@@ -48,8 +52,17 @@ class _OtpScreenState extends State<OtpScreen> {
     setState(() => _verifying = true);
     try {
       await Repository.instance.verifyOtp(widget.phone, _code.text);
+      if (!mounted) return;
+      if (demoMode) {
+        // No auth stream in demo mode: go straight into the app.
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute<void>(builder: (_) => const ProfileGate()),
+          (_) => false,
+        );
+        return;
+      }
       // AuthGate rebuilds underneath; drop the login screens on top of it.
-      if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
+      Navigator.of(context).popUntil((r) => r.isFirst);
     } catch (e) {
       if (mounted) showError(context, e);
     } finally {
@@ -69,20 +82,23 @@ class _OtpScreenState extends State<OtpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Enter OTP')),
-      body: ListView(
-        padding: const EdgeInsets.all(24),
+    final theme = Theme.of(context);
+    return AuthLayout(
+      showBack: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('We sent a 6-digit code to ${widget.phone}'),
-          const SizedBox(height: 24),
+          Text('Enter the code', style: theme.textTheme.headlineSmall),
+          const SizedBox(height: 6),
+          Text('Sent to ${widget.phone}', style: theme.textTheme.bodyLarge?.copyWith(color: Brand.muted)),
+          const SizedBox(height: 28),
           TextField(
             controller: _code,
             autofocus: true,
             keyboardType: TextInputType.number,
             autofillHints: const [AutofillHints.oneTimeCode],
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 28, letterSpacing: 12),
+            style: const TextStyle(fontSize: 30, letterSpacing: 14, fontWeight: FontWeight.w700),
             inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(6)],
             decoration: const InputDecoration(hintText: '······'),
             onChanged: (v) {
@@ -92,15 +108,15 @@ class _OtpScreenState extends State<OtpScreen> {
           const SizedBox(height: 16),
           FilledButton(
             onPressed: _verifying ? null : _verify,
-            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
             child: _verifying
-                ? const SizedBox.square(dimension: 22, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Text('Verify'),
+                ? const SizedBox.square(
+                    dimension: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                : const Text('Verify and continue'),
           ),
           const SizedBox(height: 8),
           TextButton(
             onPressed: _resendIn > 0 ? null : _resend,
-            child: Text(_resendIn > 0 ? 'Resend OTP in $_resendIn s' : 'Resend OTP'),
+            child: Text(_resendIn > 0 ? 'Resend code in $_resendIn s' : 'Resend code'),
           ),
         ],
       ),

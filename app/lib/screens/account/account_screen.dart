@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../core/format.dart';
 import '../../data/models.dart';
 import '../../data/repository.dart';
+import '../../ui/layout.dart';
+import '../../ui/theme.dart';
 import '../../widgets/common.dart';
 import '../auth/profile_setup_screen.dart';
 
@@ -42,8 +45,9 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final pad = sidePadding(MediaQuery.sizeOf(context).width, maxWidth: 900);
     return Scaffold(
-      appBar: AppBar(title: const Text('Account')),
+      appBar: pageAppBar(context, 'Account'),
       body: FutureBuilder<(Profile?, String?)>(
         future: _future,
         builder: (context, snap) {
@@ -54,62 +58,86 @@ class _AccountScreenState extends State<AccountScreen> {
             return ErrorView(error: snap.error!, onRetry: () => setState(() => _future = _load()));
           }
           final (profile, phone) = snap.data!;
+          final name = profile?.displayName ?? '';
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.fromLTRB(pad, 4, pad, 32),
             children: [
               Card(
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(12),
-                  leading: const CircleAvatar(radius: 24, child: Icon(Icons.person)),
-                  title: Text(profile?.displayName ?? '', style: theme.textTheme.titleMedium),
-                  subtitle: Text([?phone, ?profile?.city].join('  ·  ')),
-                  trailing: profile == null
-                      ? null
-                      : IconButton(icon: const Icon(Icons.edit_outlined), onPressed: () => _editProfile(profile)),
+                color: Brand.charcoal,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(children: [
+                    CircleAvatar(
+                      radius: 28,
+                      backgroundColor: Brand.orange,
+                      child: Text(name.isEmpty ? '?' : name.characters.first.toUpperCase(),
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 22)),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(name, style: theme.textTheme.titleLarge?.copyWith(color: Colors.white)),
+                        const SizedBox(height: 2),
+                        Text([if (phone != null) formatPhone(phone), ?profile?.city].join('  ·  '),
+                            style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70)),
+                      ]),
+                    ),
+                    if (profile != null)
+                      IconButton(
+                        tooltip: 'Edit profile',
+                        color: Colors.white,
+                        icon: const Icon(Icons.edit_rounded),
+                        onPressed: () => _editProfile(profile),
+                      ),
+                  ]),
                 ),
               ),
-              const SizedBox(height: 16),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('How it works', style: theme.textTheme.titleMedium),
-                    const SizedBox(height: 8),
-                    const Text('• Listing is free. No subscription.'),
-                    const Text('• Buyers pay a small fee to see the seller\'s phone and exact address.'),
-                    const Text('• Refund within 7 days if already sold, or no reply in 48 hours.'),
-                    const SizedBox(height: 12),
-                    Table(
-                      border: TableBorder.all(color: theme.colorScheme.outlineVariant),
+              const SizedBox(height: 14),
+              SectionCard(
+                title: 'How it works',
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  const _Point(Icons.sell_rounded, 'Listing is free. No subscription, no commission for sellers.'),
+                  const _Point(Icons.lock_rounded, "Buyers pay a small fee to see the seller's phone and exact address."),
+                  const _Point(Icons.replay_rounded, 'Refund within 7 days if already sold, or no reply in 48 hours.'),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Table(
+                      border: const TableBorder(horizontalInside: BorderSide(color: Brand.line)),
                       children: const [
-                        TableRow(children: [_Cell('Listed price', bold: true), _Cell('Unlock fee', bold: true)]),
+                        TableRow(
+                          decoration: BoxDecoration(color: Brand.sand),
+                          children: [_Cell('Listed price', bold: true), _Cell('Unlock fee', bold: true)],
+                        ),
                         TableRow(children: [_Cell('Up to ₹1,000'), _Cell('₹10')]),
-                        TableRow(children: [_Cell('₹1,001 – ₹50,000'), _Cell('1%')]),
+                        TableRow(children: [_Cell('₹1,001 – ₹50,000'), _Cell('1% of price')]),
                         TableRow(children: [_Cell('₹50,001 – ₹1,00,000'), _Cell('₹500')]),
                         TableRow(children: [_Cell('Above ₹1,00,000'), _Cell('₹1,000')]),
                       ],
                     ),
-                  ]),
-                ),
+                  ),
+                ]),
               ),
-              const SizedBox(height: 16),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('Listing rules', style: theme.textTheme.titleMedium),
-                    const SizedBox(height: 8),
-                    const Text('• No phone numbers, emails, links or "WhatsApp me" in text.'),
-                    const Text('• Photos must show only the material: no faces, no QR codes, no numbers.'),
-                    const Text('• List the real price. Listings reported for a different price are removed.'),
-                  ]),
-                ),
+              const SizedBox(height: 14),
+              const SectionCard(
+                title: 'Listing rules',
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  _Point(Icons.phone_disabled_rounded, 'No phone numbers, emails, links or "WhatsApp me" in text.'),
+                  _Point(Icons.no_photography_rounded,
+                      'Photos show only the material: no faces, no QR codes, no numbers.'),
+                  _Point(Icons.price_check_rounded,
+                      'List the real price. Listings reported for a different price are removed.'),
+                ]),
               ),
               const SizedBox(height: 24),
-              OutlinedButton.icon(
-                onPressed: _signOut,
-                icon: const Icon(Icons.logout),
-                label: const Text('Sign out'),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: OutlinedButton.icon(
+                  onPressed: _signOut,
+                  icon: const Icon(Icons.logout_rounded),
+                  label: const Text('Sign out'),
+                ),
               ),
             ],
           );
@@ -117,6 +145,23 @@ class _AccountScreenState extends State<AccountScreen> {
       ),
     );
   }
+}
+
+class _Point extends StatelessWidget {
+  const _Point(this.icon, this.text);
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Icon(icon, size: 20, color: Brand.orange),
+          const SizedBox(width: 12),
+          Expanded(child: Text(text, style: const TextStyle(height: 1.35))),
+        ]),
+      );
 }
 
 class _Cell extends StatelessWidget {
@@ -127,7 +172,7 @@ class _Cell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(8),
-        child: Text(text, style: bold ? const TextStyle(fontWeight: FontWeight.w600) : null),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Text(text, style: bold ? const TextStyle(fontWeight: FontWeight.w700) : null),
       );
 }

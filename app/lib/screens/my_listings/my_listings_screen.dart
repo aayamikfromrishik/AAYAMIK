@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../data/models.dart';
 import '../../data/repository.dart';
+import '../../ui/layout.dart';
+import '../../ui/theme.dart';
 import '../../widgets/common.dart';
 import '../browse/listing_card.dart';
 import '../listing/listing_detail_screen.dart';
@@ -53,7 +55,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('My listings')),
+      appBar: pageAppBar(context, 'My listings'),
       body: FutureBuilder<List<Listing>>(
         future: _future,
         builder: (context, snap) {
@@ -64,15 +66,18 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
           final listings = snap.data!;
           if (listings.isEmpty) {
             return EmptyView(
-              icon: Icons.inventory_outlined,
-              message: 'You have not listed anything yet.\nListing is free.',
+              icon: Icons.inventory_2_rounded,
+              title: 'Nothing listed yet',
+              message: 'Turn leftover material into cash. Listing is free and takes 2 minutes.',
               action: FilledButton(onPressed: widget.onSell, child: const Text('Sell material')),
             );
           }
           return RefreshIndicator(
             onRefresh: _refresh,
             child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 96),
+              padding: EdgeInsets.fromLTRB(
+                  sidePadding(MediaQuery.sizeOf(context).width, maxWidth: 900), 4,
+                  sidePadding(MediaQuery.sizeOf(context).width, maxWidth: 900), 96),
               itemCount: listings.length,
               separatorBuilder: (_, _) => const SizedBox(height: 10),
               itemBuilder: (context, i) => _item(listings[i]),
@@ -97,7 +102,12 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
       },
       footer: Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
         StatusChip(l.status),
-        Text('${l.unlockCount} unlocked', style: theme.textTheme.bodySmall),
+        Row(mainAxisSize: MainAxisSize.min, children: [
+          const Icon(Icons.lock_open_rounded, size: 14, color: Brand.muted),
+          const SizedBox(width: 3),
+          Text('${l.unlockCount} unlocked',
+              style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
+        ]),
         if (pending > 0) Text('$pending photo(s) checking', style: theme.textTheme.bodySmall),
         if (rejected > 0)
           Text('$rejected photo(s) rejected',

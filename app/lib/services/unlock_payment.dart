@@ -1,38 +1,32 @@
 import 'dart:async';
 
-import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../core/errors.dart';
+import '../data/demo_repository.dart';
 import '../data/models.dart';
 import '../data/repository.dart';
+import 'checkout/checkout.dart';
 
 /// Pays the unlock fee for a listing through Razorpay.
 ///
 /// 1. Server creates a Razorpay order for the exact fee.
-/// 2. Razorpay checkout opens on the phone (UPI, cards, netbanking).
+/// 2. Razorpay checkout opens (UPI, cards, netbanking).
 /// 3. Server verifies the payment and unlocks the contact.
 class UnlockPayment {
-  UnlockPayment() {
-    _razorpay
-      ..on(Razorpay.EVENT_PAYMENT_SUCCESS, _onSuccess)
-      ..on(Razorpay.EVENT_PAYMENT_ERROR, _onError)
-      ..on(Razorpay.EVENT_EXTERNAL_WALLET, (_) {});
-  }
-
-  final _razorpay = Razorpay();
-  Completer<PaymentSuccessResponse>? _pending;
+  final _checkout = RazorpayCheckout();
 
   SupabaseClient get _db => Supabase.instance.client;
 
-  /// Completes when the contact is unlocked. Throws [PaymentCancelled] if the
+  /// Completes when the contact is unlocked. Throws PaymentCancelled if the
   /// buyer backs out, or another error if something fails.
   Future<void> unlock(Listing listing, {String? buyerPhone}) async {
+    final repo = Repository.instance;
+    if (repo is DemoRepository) return repo.fakeUnlock(listing.id);
+
     final orderRes = await _db.functions.invoke('create-unlock-order', body: {'listing_id': listing.id});
     final order = orderRes.data as Map<String, dynamic>;
 
-    _pending = Completer<PaymentSuccessResponse>();
-    _razorpay.open({
+    final payment = await _checkout.open({
       'key': order['key_id'],
       'order_id': order['order_id'],
       'amount': order['amount_paise'],
@@ -40,9 +34,8 @@ class UnlockPayment {
       'name': 'BAAKI BUILD',
       'description': 'Unlock contact: ${listing.title}',
       'prefill': {'contact': ?buyerPhone},
-      'theme': {'color': '#E65100'},
+      'theme': {'color': '#E8590C'},
     });
-    final payment = await _pending!.future;
 
     final verifyRes = await _db.functions.invoke('verify-unlock-payment', body: {
       'razorpay_order_id': payment.orderId,
@@ -60,10 +53,5 @@ class UnlockPayment {
     }
   }
 
-  void _onSuccess(PaymentSuccessResponse response) => _pending?.complete(response);
-
-  void _onError(PaymentFailureResponse response) =>
-      _pending?.completeError(PaymentCancelled(response.message));
-
-  void dispose() => _razorpay.clear();
+  void dispose() => _checkout.dispose();
 }

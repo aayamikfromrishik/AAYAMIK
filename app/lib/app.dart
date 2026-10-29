@@ -1,29 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'data/demo_repository.dart';
 import 'data/models.dart';
 import 'data/repository.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/profile_setup_screen.dart';
 import 'screens/home_shell.dart';
+import 'ui/theme.dart';
 import 'widgets/common.dart';
-
-const brandOrange = Color(0xFFE65100);
-
-ThemeData buildTheme() {
-  final scheme = ColorScheme.fromSeed(seedColor: brandOrange, primary: brandOrange);
-  return ThemeData(
-    colorScheme: scheme,
-    useMaterial3: true,
-    appBarTheme: AppBarTheme(
-      backgroundColor: scheme.surface,
-      surfaceTintColor: Colors.transparent,
-      titleTextStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: scheme.onSurface),
-    ),
-    inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder()),
-    cardTheme: const CardThemeData(margin: EdgeInsets.zero, clipBehavior: Clip.antiAlias),
-  );
-}
 
 class BaakiBuildApp extends StatelessWidget {
   const BaakiBuildApp({super.key});
@@ -34,7 +19,12 @@ class BaakiBuildApp extends StatelessWidget {
       title: 'BAAKI BUILD',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
-      home: const AuthGate(),
+      builder: demoMode ? (context, child) => _DemoStrip(child: child!) : null,
+      home: !demoMode
+          ? const AuthGate()
+          : Uri.base.queryParameters['start'] == 'home'
+              ? const ProfileGate()
+              : const LoginScreen(),
     );
   }
 }
@@ -95,6 +85,7 @@ class MissingConfigApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: buildTheme(),
+      debugShowCheckedModeBanner: false,
       home: const Scaffold(
         body: Padding(
           padding: EdgeInsets.all(24),
@@ -108,5 +99,39 @@ class MissingConfigApp extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Thin strip on top of every screen in demo builds.
+class _DemoStrip extends StatelessWidget {
+  const _DemoStrip({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: [
+      Material(
+        color: Brand.orange,
+        child: SafeArea(
+          bottom: false,
+          child: SizedBox(
+            height: 24,
+            width: double.infinity,
+            child: Center(
+              child: Text(
+                'DEMO · sample listings · no real payments',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.4,
+                    ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      Expanded(child: MediaQuery.removePadding(context: context, removeTop: true, child: child)),
+    ]);
   }
 }

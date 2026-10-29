@@ -1,0 +1,7 @@
+# Supabase CLI project settings. Anything not listed uses the CLI defaults.
+project_id = "aayamik"
+
+# Razorpay calls this without a Supabase login; it is protected by the
+# X-Razorpay-Signature check inside the function.
+[functions.razorpay-webhook]
+verify_jwt = false

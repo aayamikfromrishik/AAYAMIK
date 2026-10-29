@@ -53,9 +53,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   Icon(Icons.foundation, size: 64, color: theme.colorScheme.primary),
                   const SizedBox(height: 12),
-                  Text('AAYAMIK',
+                  Text('BAAKI BUILD',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
+                  Text('by AAYAMIK', textAlign: TextAlign.center, style: theme.textTheme.labelLarge),
                   const SizedBox(height: 8),
                   Text(
                     'Buy and sell leftover construction material.\nFree to list.',

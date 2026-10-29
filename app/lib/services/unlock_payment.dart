@@ -37,7 +37,7 @@ class UnlockPayment {
       'order_id': order['order_id'],
       'amount': order['amount_paise'],
       'currency': order['currency'],
-      'name': 'AAYAMIK',
+      'name': 'BAAKI BUILD',
       'description': 'Unlock contact: ${listing.title}',
       'prefill': {'contact': ?buyerPhone},
       'theme': {'color': '#E65100'},

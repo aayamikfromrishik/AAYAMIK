@@ -25,13 +25,13 @@ ThemeData buildTheme() {
   );
 }
 
-class AayamikApp extends StatelessWidget {
-  const AayamikApp({super.key});
+class BaakiBuildApp extends StatelessWidget {
+  const BaakiBuildApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AAYAMIK',
+      title: 'BAAKI BUILD',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
       home: const AuthGate(),

@@ -1,4 +1,4 @@
-# AAYAMIK: Running Costs
+# BAAKI BUILD: Running Costs
 
 Prices as of October 2026. Dollar prices are converted at about ₹88 = $1.
 Check each provider's pricing page before you pay, because prices change.

@@ -97,7 +97,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AAYAMIK'),
+        title: const Text('BAAKI BUILD'),
         actions: [
           IconButton(
             tooltip: 'City',

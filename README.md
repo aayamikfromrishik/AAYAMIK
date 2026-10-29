@@ -1,4 +1,4 @@
-# AAYAMIK
+# BAAKI BUILD by AAYAMIK
 
 A free marketplace where builders resell leftover construction material
 (cement, steel, tiles, bricks, pipes…) to other builders.
@@ -71,7 +71,7 @@ See `docs/RUNNING_COSTS.md` for what you pay and when.
 Every push builds an Android APK on GitHub:
 
 1. Open the repo on GitHub → **Actions** → latest **CI** run.
-2. Download **aayamik-apk** at the bottom, unzip it, and install `app-release.apk` on an Android phone.
+2. Download **baaki-build-apk** at the bottom, unzip it, and install `app-release.apk` on an Android phone.
 
 For the APK to connect to your backend, first add two repository secrets under
 **Settings → Secrets and variables → Actions**:

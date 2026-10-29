@@ -1,4 +1,4 @@
-package com.aayamik.app
+package com.aayamik.baakibuild
 
 import io.flutter.embedding.android.FlutterActivity
 

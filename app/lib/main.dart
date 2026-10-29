@@ -15,5 +15,5 @@ Future<void> main() async {
     return;
   }
   await Supabase.initialize(url: supabaseUrl, publishableKey: supabasePublishableKey);
-  runApp(const AayamikApp());
+  runApp(const BaakiBuildApp());
 }

@@ -1,4 +1,4 @@
-# AAYAMIK app
+# BAAKI BUILD app
 
 Flutter app (Android first). See the main [README](../README.md) for setup.
 

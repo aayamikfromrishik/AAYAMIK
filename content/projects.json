@@ -1,0 +1,32 @@
+{
+  "_readme": "Every project on the site comes from this file. Run `node tools/build.mjs` after editing it. Everything in [square brackets] is placeholder text for the studio to replace. status is completed, ongoing or concept. stage is 1 to 6 for ongoing projects: 1 Design, 2 Approvals, 3 Structure, 4 Masonry and services, 5 Finishing, 6 Handover. tint is the placeholder colour shown until real images are added; image fields take a path under assets/ plus alt text.",
+  "categories": [
+    { "slug": "residences", "name": "Residences", "one": "Residence" },
+    { "slug": "hotels", "name": "Hotels", "one": "Hotel" },
+    { "slug": "offices", "name": "Offices", "one": "Office" },
+    { "slug": "convention-centres", "name": "Convention centres", "one": "Convention centre" }
+  ],
+  "projects": [
+    { "slug": "residence-01", "name": "[Residence 01]", "category": "residences", "status": "ongoing", "stage": 4, "city": "[City]", "updated": "[Date]", "tint": "#818865" },
+    { "slug": "residence-02", "name": "[Residence 02]", "category": "residences", "status": "completed", "city": "Ludhiana", "year": "[Year]", "tint": "#BB8D3F" },
+    { "slug": "residence-03", "name": "[Residence 03]", "category": "residences", "status": "completed", "city": "[City]", "year": "[Year]", "tint": "#8B4729" },
+    { "slug": "residence-04", "name": "[Residence 04]", "category": "residences", "status": "ongoing", "stage": 2, "city": "[City]", "updated": "[Date]", "tint": "#7E7A5C" },
+    { "slug": "residence-05", "name": "[Residence 05]", "category": "residences", "status": "completed", "city": "[City]", "year": "[Year]", "tint": "#45492D" },
+    { "slug": "residence-06", "name": "[Residence 06]", "category": "residences", "status": "concept", "city": "[City]", "year": "[Year]", "tint": "#9C7B52" },
+    { "slug": "residence-07", "name": "[Residence 07]", "category": "residences", "status": "completed", "city": "[City]", "year": "[Year]", "tint": "#818865" },
+    { "slug": "residence-08", "name": "[Residence 08]", "category": "residences", "status": "ongoing", "stage": 5, "city": "[City]", "updated": "[Date]", "tint": "#BB8D3F" },
+    { "slug": "residence-09", "name": "[Residence 09]", "category": "residences", "status": "completed", "city": "[City]", "year": "[Year]", "tint": "#8B4729" },
+    { "slug": "residence-10", "name": "[Residence 10]", "category": "residences", "status": "completed", "city": "[City]", "year": "[Year]", "tint": "#7E7A5C" },
+    { "slug": "residence-11", "name": "[Residence 11]", "category": "residences", "status": "ongoing", "stage": 1, "city": "[City]", "updated": "[Date]", "tint": "#45492D" },
+    { "slug": "residence-12", "name": "[Residence 12]", "category": "residences", "status": "completed", "city": "[City]", "year": "[Year]", "tint": "#9C7B52" },
+
+    { "slug": "hotel-bachelor-project", "name": "[Hotel · bachelor project]", "category": "hotels", "status": "concept", "city": "[City]", "year": "[Year]", "tint": "#9C7B52" },
+    { "slug": "hotel-02", "name": "[Hotel 02]", "category": "hotels", "status": "ongoing", "stage": 1, "city": "[City]", "updated": "[Date]", "tint": "#818865" },
+    { "slug": "hotel-03", "name": "[Hotel 03]", "category": "hotels", "status": "ongoing", "stage": 1, "city": "[City]", "updated": "[Date]", "tint": "#BB8D3F" },
+
+    { "slug": "office-01", "name": "[Office 01]", "category": "offices", "status": "completed", "city": "[City]", "year": "[Year]", "tint": "#7E7A5C" },
+    { "slug": "office-02", "name": "[Office 02]", "category": "offices", "status": "ongoing", "stage": 3, "city": "[City]", "updated": "[Date]", "tint": "#8B4729" },
+
+    { "slug": "convention-centre-bachelor-project", "name": "[Convention centre · bachelor project]", "category": "convention-centres", "status": "concept", "city": "[City]", "year": "[Year]", "tint": "#45492D" }
+  ]
+}

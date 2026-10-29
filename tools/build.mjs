@@ -48,7 +48,8 @@ ${HAS_SATOSHI
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500&display=swap">`}
 <link rel="stylesheet" href="${base}assets/css/site.css">
-${home ? `<script>
+${home ? `<script type="importmap">{ "imports": { "three": "./assets/vendor/three/three.module.min.js", "three/addons/": "./assets/vendor/three/addons/" } }</script>
+<script>
   // 5.1 the logo animation plays on the first visit only
   try { if (!localStorage.getItem('kd_intro_seen')) { document.documentElement.classList.add('kd-intro');
     var l = document.createElement('link'); l.rel = 'preload'; l.as = 'video'; l.href = 'assets/loader/KD_logo_animation_on_moss_1080p_8s.mp4'; document.head.appendChild(l); } } catch (e) {}
@@ -148,17 +149,20 @@ ${mobileMenu(base, true)}
 </div>
 
 <main>
-<!-- I · Home: frosted glass -->
-<section id="home" class="ch hero s-moss tx" data-chapter="I" data-cursor="light" data-snap aria-label="Chapter I, home">
+<!-- I · Home: frosted glass. Scrolling shrinks the glass into a card and the 3D house is drawn, modelled and finished behind it. -->
+<div id="home" class="hero-scroll" data-chapter="I" data-cursor="light" data-snap>
+<section class="ch hero s-moss tx" aria-label="Chapter I, home">
   <div class="glowsets" aria-hidden="true">${SKETCHES.map(glowset).join('')}</div>
-  <div class="glass tx hero-fade" data-cursor="dark">
-    <div class="glass-top">
+  <canvas id="house" role="img" aria-label="A house drawn as a plan on paper, rising into walls, then shown as a white model and as the finished home"></canvas>
+  <div class="glass hero-fade" data-cursor="dark">
+    <div class="pane tx" aria-hidden="true"></div>
+    <div class="glass-top fades">
       <a class="wordmark" href="#home" aria-label="Karukrit Designs, home"><img src="assets/brand/wordmark-dark-TRACED.svg" alt="Karukrit Designs" width="230" height="18"></a>
       <nav aria-label="Chapters"><ul class="menu" data-ring-group>${navLinks(base, true)}</ul></nav>
       <button class="menu-btn" type="button" aria-label="Open menu"><i></i><i></i></button>
     </div>
     <div class="g12 glass-body">
-      <div class="sketch-col">
+      <div class="sketch-col fades">
         <div class="sketches">${SKETCHES.map((s, i) => `<img src="${s.src}" alt="${esc(s.alt)}" data-name="${esc(s.name)}"${i === 0 ? ' class="on"' : ' loading="lazy"'}>`).join('')}</div>
         <div class="sketch-meta">
           <span class="cap sketch-cap" aria-live="polite">Sketch 01 · ${esc(SKETCHES[0].name)}</span>
@@ -168,12 +172,15 @@ ${mobileMenu(base, true)}
       <div class="hero-text">
         <span class="cap">Chapter I</span>
         <h1 class="h1"><b class="hl">Every house</b> begins as a line on paper.</h1>
+        <div class="build-stages cap" aria-hidden="true"><span class="on">Plan</span><i></i><span>Model</span><i></i><span>Home</span></div>
         <a class="btn btn-orange tx" href="#work" data-ring>View projects</a>
-        <a class="cap link-cap" href="#about">Scroll to begin ↓</a>
+        <a class="cap link-cap" href="#build">Scroll to begin ↓</a>
       </div>
     </div>
   </div>
 </section>
+<span id="build" class="build-anchor" aria-hidden="true"></span>
+</div>
 
 <!-- II · The architect -->
 <section id="about" class="ch arch s-taupe tx" data-chapter="II" data-cursor="dark" data-snap aria-labelledby="arch-h">
@@ -194,7 +201,13 @@ ${mobileMenu(base, true)}
 <section id="author" class="ch author s-moss tx" data-chapter="II" data-cursor="light" data-snap aria-labelledby="author-h">
   <div class="wrap g12" style="flex:1;align-items:center">
     <div class="author-left" data-stagger>
-      ${bookPic('book-cover-front', 'Cover of The 100 Decisions Before the First Brick by Ar. Saptarshi Kapri', ' class="cover rv"').replace('<picture>', '<picture class="rv">')}
+      <div class="book-wrap rv">
+        <button class="book3d" type="button" data-pages="book" aria-label="The 100 Decisions Before the First Brick by Ar. Saptarshi Kapri. Read a sample">
+          <span class="b-back"></span><span class="b-spine"></span><span class="b-pages"></span>
+          <span class="b-inside">${bookPic('book-p15', '')}</span>
+          <span class="b-cover">${bookPic('book-cover-front', '')}</span>
+        </button>
+      </div>
       <span class="cap cap-gold rv">Chapter II · The author</span>
       <h2 id="author-h" class="title rv">The 100 Decisions <b class="hl">Before the First Brick</b></h2>
       <p class="line rv">What to finalise, question, compare and document before you start building. A practical guide for homeowners.</p>
@@ -236,19 +249,27 @@ ${mobileMenu(base, true)}
   </div>
   <ul class="wrap team-grid" data-stagger>
     ${[['Kuljeet', '[Role]'], ['Krishma', '[Role]'], ['Sanchit', '[Role]'], ['[Fourth member]', '[Role]']].map(([n, r]) => `<li class="member mono-host rv">
-      <div class="frame"><div class="mono ph tx" style="background-color:var(--sage)" role="img" aria-label="Portrait of ${esc(n)}, placeholder"><span class="cap">[Portrait]</span></div></div>
+      <div class="frame tilt"><div class="mono ph tx" style="background-color:var(--sage)" role="img" aria-label="Portrait of ${esc(n)}, placeholder"><span class="cap">[Portrait]</span></div></div>
       <span class="name">${esc(n)}</span><span class="cap">${esc(r)}</span>
     </li>`).join('')}
   </ul>
 </section>
 
 <!-- IV · Philosophy: three screens, one sentence each -->
-<div id="philosophy" class="philosophy">
+<div id="philosophy" class="philosophy s-taupe tx">
+<div class="philo-back" aria-hidden="true"><div class="philo-draw">
+  <svg viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke="currentColor" stroke-width="1.2">
+    <rect x="140" y="120" width="720" height="460"/><rect x="220" y="190" width="300" height="300"/><rect x="520" y="230" width="140" height="260"/>
+    <rect x="660" y="150" width="120" height="140"/><path d="M220 400h300M370 190v300M520 360h140"/>
+    <path d="M300 490a50 50 0 0 1 50-50M560 230a40 40 0 0 0 40 40"/>
+    <path d="M140 640h720M140 630v20M860 630v20M100 120v460M90 120h20M90 580h20"/>
+    <circle cx="820" cy="520" r="40"/><circle cx="210" cy="560" r="28"/></g></svg>
+</div></div>
 ${[
     ['A home is <b class="hl">a hundred decisions</b>, made in the right order.', '[Two sentences that open up the idea, drawn from the book.]'],
     ['[Second sentence, with <b class="hl">key words</b> highlighted.]', '[Two sentences that open up the idea, drawn from the book.]'],
     ['[Third sentence, with <b class="hl">key words</b> highlighted.]', '[Two sentences that open up the idea, drawn from the book.]'],
-  ].map(([s, sub], i) => `<section class="ch thought s-taupe tx" data-chapter="IV" data-cursor="dark" data-snap aria-label="Chapter IV, philosophy, ${i + 1} of 3">
+  ].map(([s, sub], i) => `<section class="ch thought" data-chapter="IV" data-cursor="dark" data-snap aria-label="Chapter IV, philosophy, ${i + 1} of 3">
   <span class="cap">Chapter IV · ${i + 1} of 3</span>
   <p class="h1">${s}</p>
   <p class="body">${sub}</p>
@@ -312,6 +333,7 @@ ${[
 <script src="assets/vendor/lenis-1.1.13.min.js"></script>
 <script src="assets/js/site.js"></script>
 <script src="assets/js/home.js"></script>
+<script type="module" src="assets/js/hero3d.js"></script>
 </body>
 </html>
 `;
@@ -403,7 +425,12 @@ ${topbar(base, false)}
 ${mobileMenu(base, false)}
 <main id="main" class="page-top">
   <div class="s-orange tx" data-cursor="light">
-    <div class="p-hero">${visual(p.heroImage, p.tint, 'Front elevation · render or photo', base, true)}</div>
+    <div class="walk">
+      <div class="walk-pin">
+        <div class="walk-in">${visual(g.interiors && g.interiors[0] && g.interiors[0].image, '#45492D', 'Interior · through the front door', base)}</div>
+        <div class="walk-out" style="--door-x:${(p.door && p.door.x) || 50}%;--door-y:${(p.door && p.door.y) || 72}%">${visual(p.heroImage, p.tint, 'Front elevation · render or photo', base, true)}${p.heroImage ? '' : '<i class="door" aria-hidden="true"></i>'}<span class="cap walk-hint" aria-hidden="true">Scroll to walk in</span></div>
+      </div>
+    </div>
     <div class="wrap g12 p-info">
       <div class="name-col"><span class="cap cap-gold">${esc(label)}</span><h1 class="h2">${esc(p.name)}</h1></div>
       <p class="brief body">${esc(p.brief || '[The brief and the one idea behind the design, in three or four sentences.]')}</p>
@@ -450,9 +477,20 @@ ${mobileMenu(base, false)}
       <div class="stack" style="gap:12px"><span class="cap">Ongoing · ${esc(p.city)}</span><h1 class="h2">${esc(p.name)}</h1></div>
       <span class="cap muted">Updated ${esc(p.updated)}</span>
     </div>
-    <ol class="stages" aria-label="Stages, now at stage ${p.stage} of 6">
+    <ol class="stages fill" aria-label="Stages, now at stage ${p.stage} of 6">
       ${STAGES.map((s, k) => `<li class="${stageClass(k)} tx"${k + 1 === p.stage ? ' aria-current="step"' : ''}>${s}${k + 1 === p.stage ? ' · now' : ''}</li>`).join('')}
     </ol>
+    <figure class="progress-draw">
+      <svg class="grow" viewBox="0 0 600 360" role="img" aria-label="Elevation drawing built up to stage ${p.stage} of 6" data-now="${p.stage}">
+        <g data-step="1"><path d="M40 320h520M70 320v-18h460v18"/></g>
+        <g data-step="2"><path d="M90 302V190M250 302V190M410 302V190M510 302V190"/></g>
+        <g data-step="3"><path d="M70 190h460v-12H70zM90 178V80M250 178V80M410 178V80M510 178V80M70 80h460V68H70zM60 68h480"/></g>
+        <g data-step="4"><path d="M90 302h160M250 302h160M120 302v-80h100v80M290 290v-70h90v70M440 290v-70h50v70M120 178v-70h100v70M290 178v-60h180v60"/></g>
+        <g data-step="5"><path d="M300 178v-60M330 178v-60M360 178v-60M390 178v-60M420 178v-60M450 178v-60M140 302v-60h60"/></g>
+        <g data-step="6"><path d="M20 320c20-60 50-60 60 0M540 320c10-80 50-80 50 0M560 320v-40"/><circle cx="50" cy="270" r="26"/><circle cx="565" cy="250" r="30"/></g>
+      </svg>
+      <figcaption class="cap muted">Progress drawing · stage ${p.stage} of 6</figcaption>
+    </figure>
     <div class="photo-grid">
       <figure class="wide"><button type="button" data-lightbox="latest" data-caption="How it will look" aria-label="Open the render">${visual(p.render, p.tint, 'Render · how it will look', base, true)}</button></figure>
       ${latest.map((it) => `<figure><button type="button" data-lightbox="latest" data-caption="${esc(it.caption)}" aria-label="Open ${esc(it.caption)}">${visual(it.image, '#948E89', it.label, base)}</button><figcaption class="cap muted">${esc(it.caption)}</figcaption></figure>`).join('')}

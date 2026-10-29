@@ -18,6 +18,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500&display=swap">
 <link rel="stylesheet" href="assets/css/site.css">
+<script type="importmap">{ "imports": { "three": "./assets/vendor/three/three.module.min.js", "three/addons/": "./assets/vendor/three/addons/" } }</script>
 <script>
   // 5.1 the logo animation plays on the first visit only
   try { if (!localStorage.getItem('kd_intro_seen')) { document.documentElement.classList.add('kd-intro');
@@ -60,17 +61,20 @@
 </div>
 
 <main>
-<!-- I · Home: frosted glass -->
-<section id="home" class="ch hero s-moss tx" data-chapter="I" data-cursor="light" data-snap aria-label="Chapter I, home">
+<!-- I · Home: frosted glass. Scrolling shrinks the glass into a card and the 3D house is drawn, modelled and finished behind it. -->
+<div id="home" class="hero-scroll" data-chapter="I" data-cursor="light" data-snap>
+<section class="ch hero s-moss tx" aria-label="Chapter I, home">
   <div class="glowsets" aria-hidden="true"><div class="glowset on"><i style="left:-8.33%;top:-15.56%;width:43.06%;height:60.00%;background:#818865;opacity:1"></i><i style="left:33.33%;top:-13.33%;width:36.11%;height:42.22%;background:#BB8D3F;opacity:0.9"></i><i style="left:69.44%;top:-13.33%;width:38.89%;height:55.56%;background:#818865;opacity:0.85"></i><i style="left:56.94%;top:42.22%;width:33.33%;height:46.67%;background:#8B4729;opacity:1"></i><i style="left:9.72%;top:60.00%;width:41.67%;height:44.44%;background:#2A2D1B;opacity:1"></i><i style="left:79.17%;top:66.67%;width:27.78%;height:40.00%;background:#BB8D3F;opacity:0.7"></i></div><div class="glowset"><i style="left:-8.33%;top:-15.56%;width:43.06%;height:60.00%;background:#BB8D3F;opacity:1"></i><i style="left:33.33%;top:-13.33%;width:36.11%;height:42.22%;background:#8B4729;opacity:0.9"></i><i style="left:69.44%;top:-13.33%;width:38.89%;height:55.56%;background:#818865;opacity:0.85"></i><i style="left:56.94%;top:42.22%;width:33.33%;height:46.67%;background:#BB8D3F;opacity:1"></i><i style="left:9.72%;top:60.00%;width:41.67%;height:44.44%;background:#2A2D1B;opacity:1"></i><i style="left:79.17%;top:66.67%;width:27.78%;height:40.00%;background:#818865;opacity:0.7"></i></div><div class="glowset"><i style="left:-8.33%;top:-15.56%;width:43.06%;height:60.00%;background:#8B4729;opacity:1"></i><i style="left:33.33%;top:-13.33%;width:36.11%;height:42.22%;background:#818865;opacity:0.9"></i><i style="left:69.44%;top:-13.33%;width:38.89%;height:55.56%;background:#BB8D3F;opacity:0.85"></i><i style="left:56.94%;top:42.22%;width:33.33%;height:46.67%;background:#2A2D1B;opacity:1"></i><i style="left:9.72%;top:60.00%;width:41.67%;height:44.44%;background:#818865;opacity:1"></i><i style="left:79.17%;top:66.67%;width:27.78%;height:40.00%;background:#8B4729;opacity:0.7"></i></div><div class="glowset"><i style="left:-8.33%;top:-15.56%;width:43.06%;height:60.00%;background:#818865;opacity:1"></i><i style="left:33.33%;top:-13.33%;width:36.11%;height:42.22%;background:#2A2D1B;opacity:0.9"></i><i style="left:69.44%;top:-13.33%;width:38.89%;height:55.56%;background:#BB8D3F;opacity:0.85"></i><i style="left:56.94%;top:42.22%;width:33.33%;height:46.67%;background:#818865;opacity:1"></i><i style="left:9.72%;top:60.00%;width:41.67%;height:44.44%;background:#8B4729;opacity:1"></i><i style="left:79.17%;top:66.67%;width:27.78%;height:40.00%;background:#BB8D3F;opacity:0.7"></i></div></div>
-  <div class="glass tx hero-fade" data-cursor="dark">
-    <div class="glass-top">
+  <canvas id="house" role="img" aria-label="A house drawn as a plan on paper, rising into walls, then shown as a white model and as the finished home"></canvas>
+  <div class="glass hero-fade" data-cursor="dark">
+    <div class="pane tx" aria-hidden="true"></div>
+    <div class="glass-top fades">
       <a class="wordmark" href="#home" aria-label="Karukrit Designs, home"><img src="assets/brand/wordmark-dark-TRACED.svg" alt="Karukrit Designs" width="230" height="18"></a>
       <nav aria-label="Chapters"><ul class="menu" data-ring-group><li><a class="cap" href="#about" data-ring>About</a></li><li><a class="cap" href="#team" data-ring>Team</a></li><li><a class="cap" href="#philosophy" data-ring>Philosophy</a></li><li><a class="cap" href="#work" data-ring>Projects</a></li><li><a class="cap" href="#contact" data-ring>Contact</a></li></ul></nav>
       <button class="menu-btn" type="button" aria-label="Open menu"><i></i><i></i></button>
     </div>
     <div class="g12 glass-body">
-      <div class="sketch-col">
+      <div class="sketch-col fades">
         <div class="sketches"><img src="assets/sketches/sketch-01.svg" alt="Pencil sketch of a two-storey house elevation" data-name="[Residence name]" class="on"><img src="assets/sketches/sketch-02.svg" alt="Pencil sketch of a long single-storey house with a timber screen" data-name="[Residence name]" loading="lazy"><img src="assets/sketches/sketch-03.svg" alt="Pencil sketch of a three-storey house with a stair tower" data-name="[Residence name]" loading="lazy"><img src="assets/sketches/sketch-04.svg" alt="Pencil sketch of a ground floor plan around a courtyard" data-name="[Residence name]" loading="lazy"></div>
         <div class="sketch-meta">
           <span class="cap sketch-cap" aria-live="polite">Sketch 01 · [Residence name]</span>
@@ -80,12 +84,15 @@
       <div class="hero-text">
         <span class="cap">Chapter I</span>
         <h1 class="h1"><b class="hl">Every house</b> begins as a line on paper.</h1>
+        <div class="build-stages cap" aria-hidden="true"><span class="on">Plan</span><i></i><span>Model</span><i></i><span>Home</span></div>
         <a class="btn btn-orange tx" href="#work" data-ring>View projects</a>
-        <a class="cap link-cap" href="#about">Scroll to begin ↓</a>
+        <a class="cap link-cap" href="#build">Scroll to begin ↓</a>
       </div>
     </div>
   </div>
 </section>
+<span id="build" class="build-anchor" aria-hidden="true"></span>
+</div>
 
 <!-- II · The architect -->
 <section id="about" class="ch arch s-taupe tx" data-chapter="II" data-cursor="dark" data-snap aria-labelledby="arch-h">
@@ -106,7 +113,13 @@
 <section id="author" class="ch author s-moss tx" data-chapter="II" data-cursor="light" data-snap aria-labelledby="author-h">
   <div class="wrap g12" style="flex:1;align-items:center">
     <div class="author-left" data-stagger>
-      <picture class="rv"><source srcset="assets/book/book-cover-front.webp" type="image/webp"><img src="assets/book/book-cover-front.jpg" alt="Cover of The 100 Decisions Before the First Brick by Ar. Saptarshi Kapri" loading="lazy" class="cover rv"></picture>
+      <div class="book-wrap rv">
+        <button class="book3d" type="button" data-pages="book" aria-label="The 100 Decisions Before the First Brick by Ar. Saptarshi Kapri. Read a sample">
+          <span class="b-back"></span><span class="b-spine"></span><span class="b-pages"></span>
+          <span class="b-inside"><picture><source srcset="assets/book/book-p15.webp" type="image/webp"><img src="assets/book/book-p15.jpg" alt="" loading="lazy"></picture></span>
+          <span class="b-cover"><picture><source srcset="assets/book/book-cover-front.webp" type="image/webp"><img src="assets/book/book-cover-front.jpg" alt="" loading="lazy"></picture></span>
+        </button>
+      </div>
       <span class="cap cap-gold rv">Chapter II · The author</span>
       <h2 id="author-h" class="title rv">The 100 Decisions <b class="hl">Before the First Brick</b></h2>
       <p class="line rv">What to finalise, question, compare and document before you start building. A practical guide for homeowners.</p>
@@ -148,36 +161,44 @@
   </div>
   <ul class="wrap team-grid" data-stagger>
     <li class="member mono-host rv">
-      <div class="frame"><div class="mono ph tx" style="background-color:var(--sage)" role="img" aria-label="Portrait of Kuljeet, placeholder"><span class="cap">[Portrait]</span></div></div>
+      <div class="frame tilt"><div class="mono ph tx" style="background-color:var(--sage)" role="img" aria-label="Portrait of Kuljeet, placeholder"><span class="cap">[Portrait]</span></div></div>
       <span class="name">Kuljeet</span><span class="cap">[Role]</span>
     </li><li class="member mono-host rv">
-      <div class="frame"><div class="mono ph tx" style="background-color:var(--sage)" role="img" aria-label="Portrait of Krishma, placeholder"><span class="cap">[Portrait]</span></div></div>
+      <div class="frame tilt"><div class="mono ph tx" style="background-color:var(--sage)" role="img" aria-label="Portrait of Krishma, placeholder"><span class="cap">[Portrait]</span></div></div>
       <span class="name">Krishma</span><span class="cap">[Role]</span>
     </li><li class="member mono-host rv">
-      <div class="frame"><div class="mono ph tx" style="background-color:var(--sage)" role="img" aria-label="Portrait of Sanchit, placeholder"><span class="cap">[Portrait]</span></div></div>
+      <div class="frame tilt"><div class="mono ph tx" style="background-color:var(--sage)" role="img" aria-label="Portrait of Sanchit, placeholder"><span class="cap">[Portrait]</span></div></div>
       <span class="name">Sanchit</span><span class="cap">[Role]</span>
     </li><li class="member mono-host rv">
-      <div class="frame"><div class="mono ph tx" style="background-color:var(--sage)" role="img" aria-label="Portrait of [Fourth member], placeholder"><span class="cap">[Portrait]</span></div></div>
+      <div class="frame tilt"><div class="mono ph tx" style="background-color:var(--sage)" role="img" aria-label="Portrait of [Fourth member], placeholder"><span class="cap">[Portrait]</span></div></div>
       <span class="name">[Fourth member]</span><span class="cap">[Role]</span>
     </li>
   </ul>
 </section>
 
 <!-- IV · Philosophy: three screens, one sentence each -->
-<div id="philosophy" class="philosophy">
-<section class="ch thought s-taupe tx" data-chapter="IV" data-cursor="dark" data-snap aria-label="Chapter IV, philosophy, 1 of 3">
+<div id="philosophy" class="philosophy s-taupe tx">
+<div class="philo-back" aria-hidden="true"><div class="philo-draw">
+  <svg viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke="currentColor" stroke-width="1.2">
+    <rect x="140" y="120" width="720" height="460"/><rect x="220" y="190" width="300" height="300"/><rect x="520" y="230" width="140" height="260"/>
+    <rect x="660" y="150" width="120" height="140"/><path d="M220 400h300M370 190v300M520 360h140"/>
+    <path d="M300 490a50 50 0 0 1 50-50M560 230a40 40 0 0 0 40 40"/>
+    <path d="M140 640h720M140 630v20M860 630v20M100 120v460M90 120h20M90 580h20"/>
+    <circle cx="820" cy="520" r="40"/><circle cx="210" cy="560" r="28"/></g></svg>
+</div></div>
+<section class="ch thought" data-chapter="IV" data-cursor="dark" data-snap aria-label="Chapter IV, philosophy, 1 of 3">
   <span class="cap">Chapter IV · 1 of 3</span>
   <p class="h1">A home is <b class="hl">a hundred decisions</b>, made in the right order.</p>
   <p class="body">[Two sentences that open up the idea, drawn from the book.]</p>
   <div class="bars" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
 </section>
-<section class="ch thought s-taupe tx" data-chapter="IV" data-cursor="dark" data-snap aria-label="Chapter IV, philosophy, 2 of 3">
+<section class="ch thought" data-chapter="IV" data-cursor="dark" data-snap aria-label="Chapter IV, philosophy, 2 of 3">
   <span class="cap">Chapter IV · 2 of 3</span>
   <p class="h1">[Second sentence, with <b class="hl">key words</b> highlighted.]</p>
   <p class="body">[Two sentences that open up the idea, drawn from the book.]</p>
   <div class="bars" aria-hidden="true"><i></i><i class="on"></i><i></i></div>
 </section>
-<section class="ch thought s-taupe tx" data-chapter="IV" data-cursor="dark" data-snap aria-label="Chapter IV, philosophy, 3 of 3">
+<section class="ch thought" data-chapter="IV" data-cursor="dark" data-snap aria-label="Chapter IV, philosophy, 3 of 3">
   <span class="cap">Chapter IV · 3 of 3</span>
   <p class="h1">[Third sentence, with <b class="hl">key words</b> highlighted.]</p>
   <p class="body">[Two sentences that open up the idea, drawn from the book.]</p>
@@ -721,5 +742,6 @@
 <script src="assets/vendor/lenis-1.1.13.min.js"></script>
 <script src="assets/js/site.js"></script>
 <script src="assets/js/home.js"></script>
+<script type="module" src="assets/js/hero3d.js"></script>
 </body>
 </html>

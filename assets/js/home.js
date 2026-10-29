@@ -47,7 +47,7 @@
       dots.forEach((d, k) => d.setAttribute('aria-current', String(k === i)));
       cap.textContent = `Sketch ${String(i + 1).padStart(2, '0')} · ${slides[i].dataset.name}`;
     };
-    const start = () => { clearInterval(timer); timer = setInterval(() => { if (!hover && !document.hidden) go(i + 1); }, 6000); };
+    const start = () => { clearInterval(timer); timer = setInterval(() => { if (!hover && !document.hidden && !(KD.heroP > 0.05)) go(i + 1); }, 6000); };
     show.addEventListener('pointerenter', () => { hover = true; });
     show.addEventListener('pointerleave', () => { hover = false; });
     dots.forEach((d, k) => d.addEventListener('click', () => { go(k); start(); }));
@@ -203,24 +203,79 @@
         rows.innerHTML = $(`template[data-cat="${tab.dataset.cat}"]`).innerHTML;
         foot.textContent = `View all ${tab.dataset.name.toLowerCase()} →`;
         foot.href = `projects/${tab.dataset.cat}/index.html`;
+        initWall();
         rows.classList.remove('fading');
       }, reduce ? 0 : 250);
     }));
-    // 14 touching a row pauses it and colours the tile under the finger; it resumes 2 s after release
-    let resume = null;
-    rows.addEventListener('pointerdown', (e) => {
-      if (e.pointerType === 'mouse') return;
-      const marq = e.target.closest('.marq');
-      if (!marq) return;
-      clearTimeout(resume);
-      $$('.marq.held', rows).forEach((m) => m.classList.remove('held'));
-      $$('.is-colour', rows).forEach((m) => m.classList.remove('is-colour'));
-      marq.classList.add('held');
-      e.target.closest('.tile')?.querySelector('.mono')?.classList.add('is-colour');
+    initWall();
+  }
+
+  /* ---------- 10 the curved gallery wall: both rows flow left at the same speed, one cycle of 6 tiles in 48 s ---------- */
+  function initWall() {
+    if (reduce || !rows) return;
+    $$('.marq', rows).forEach((marq, r) => {
+      marq.classList.add('curved');
+      const tiles = $$('.tile', marq);
+      const st = { tiles, offset: 0, paused: false, held: false, drag: null, vel: 0, moved: 0, resume: null, row: r };
+      marq._wall = st;
+      marq.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') st.paused = true; });
+      marq.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') st.paused = false; });
+      marq.addEventListener('focusin', () => { st.paused = true; });
+      marq.addEventListener('focusout', () => { st.paused = false; });
+      marq.addEventListener('pointerdown', (e) => {
+        st.drag = e.clientX; st.moved = 0; st.vel = 0; marq.classList.add('dragging');
+        if (e.pointerType !== 'mouse') {
+          // 14 touching a row pauses it and colours the tile under the finger
+          clearTimeout(st.resume); st.held = true;
+          $$('.is-colour', rows).forEach((m) => m.classList.remove('is-colour'));
+          e.target.closest('.tile')?.querySelector('.mono')?.classList.add('is-colour');
+        }
+      });
+      marq.addEventListener('click', (e) => { if (st.moved > 6) e.preventDefault(); }, true);
     });
-    const release = () => { clearTimeout(resume); resume = setTimeout(() => { $$('.marq.held', rows).forEach((m) => m.classList.remove('held')); $$('.is-colour', rows).forEach((m) => m.classList.remove('is-colour')); }, 2000); };
-    rows.addEventListener('pointerup', release);
-    rows.addEventListener('pointercancel', release);
+  }
+  if (rows && !reduce) {
+    const all = () => $$('.marq.curved', rows).map((m) => m._wall).filter(Boolean);
+    addEventListener('pointermove', (e) => all().forEach((st) => {
+      if (st.drag === null) return;
+      const dx = e.clientX - st.drag; st.drag = e.clientX; st.offset += dx; st.vel = dx; st.moved += Math.abs(dx);
+    }));
+    const up = (e) => all().forEach((st) => {
+      if (st.drag === null) return;
+      st.drag = null;
+      $$('.marq.dragging', rows).forEach((m) => m.classList.remove('dragging'));
+      if (e.pointerType !== 'mouse') { clearTimeout(st.resume); st.resume = setTimeout(() => { st.held = false; $$('.is-colour', rows).forEach((m) => m.classList.remove('is-colour')); }, 2000); }
+    });
+    addEventListener('pointerup', up);
+    addEventListener('pointercancel', up);
+    let inView = false, last = performance.now();
+    new IntersectionObserver(([e]) => { inView = e.isIntersecting; }).observe($('.work'));
+    (function loop(now) {
+      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      if (inView) {
+        const narrow = innerWidth < 768;
+        const gap = narrow ? 244 : 324;                     // tile width plus the 24 px gap
+        const speed = (gap * 6) / 48;                      // px per second: 6 tiles in 48 s
+        const R = narrow ? 560 : Math.max(1000, innerWidth * 0.8); // radius of the wall
+        all().forEach((st) => {
+          if (st.drag === null) {
+            if (!st.paused && !st.held) st.offset -= speed * dt;
+            if (Math.abs(st.vel) > 0.1) { st.offset += st.vel; st.vel *= 0.92; }
+          }
+          const L = st.tiles.length * gap;
+          const shift = st.row ? gap * 3 : 0;               // the second row runs half a cycle behind
+          st.tiles.forEach((t, k) => {
+            let x = (((k * gap + st.offset - shift) % L) + L) % L;
+            if (x > L / 2) x -= L;
+            const th = x / R;
+            const hide = Math.abs(th) > 1.2;
+            t.style.visibility = hide ? 'hidden' : '';
+            if (!hide) t.style.transform = `translate3d(${(R * Math.sin(th)).toFixed(1)}px,0,${(R * (1 - Math.cos(th)) * 0.9).toFixed(1)}px) rotateY(${(-th * 57.2958).toFixed(2)}deg)`;
+          });
+        });
+      }
+      requestAnimationFrame(loop);
+    })(last);
   }
 
   /* ---------- 9 philosophy: each sentence fades and rises in as its screen arrives ---------- */
@@ -285,5 +340,107 @@
       done.hidden = false;
       done.focus();
     });
+  }
+  /* ---------- motion layered on the spec ---------- */
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const smooth = (a, b, v) => { const t = clamp((v - a) / (b - a)); return t * t * (3 - 2 * t); };
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const progressOf = (el) => { const r = el.getBoundingClientRect(); return clamp(-r.top / Math.max(1, r.height - innerHeight)); };
+  const mouse = { x: 0, y: 0 };
+  if (KD.mouse && !reduce) addEventListener('pointermove', (e) => { mouse.x = e.clientX / innerWidth - 0.5; mouse.y = e.clientY / innerHeight - 0.5; }, { passive: true });
+
+  // Chapter I: the frosted glass shrinks into a card around the headline, and the 3D house appears behind it
+  const hs = $('.hero-scroll');
+  KD.heroP = 0;
+  if (hs && !reduce) {
+    const hero = $('.hero', hs), glass = $('.glass', hs), pane = $('.pane', hs), text = $('.hero-text', hs);
+    const bar = $('.topbar');
+    let target = null, inView = true, tx = 0, ty = 0;
+    const measure = () => {
+      glass.style.transform = '';
+      const g = glass.getBoundingClientRect(), t = text.getBoundingClientRect();
+      const pad = innerWidth < 768 ? 20 : 40;
+      const x = Math.max(0, t.left - g.left - pad), y = Math.max(0, t.top - g.top - pad);
+      target = { gw: g.width, gh: g.height, x, y, w: Math.min(g.width - x, t.width + pad * 2), h: Math.min(g.height - y, t.height + pad * 2) };
+      glass.style.setProperty('--card-x', `${((x + target.w / 2) / g.width) * 100}%`);
+      glass.style.setProperty('--card-y', `${((y + target.h / 2) / g.height) * 100}%`);
+    };
+    addEventListener('resize', measure);
+    document.fonts && document.fonts.ready.then(measure);
+    new IntersectionObserver(([e]) => { inView = e.isIntersecting; }).observe(hs);
+    (function loop() {
+      requestAnimationFrame(loop);
+      if (!inView && KD.heroP > 0.99) return;
+      if (!target) measure();
+      const p = progressOf(hs);
+      KD.heroP = p;
+      const m = smooth(0, 0.12, p);
+      pane.style.left = `${lerp(0, target.x, m)}px`;
+      pane.style.top = `${lerp(0, target.y, m)}px`;
+      pane.style.width = `${lerp(target.gw, target.w, m)}px`;
+      pane.style.height = `${lerp(target.gh, target.h, m)}px`;
+      hero.style.setProperty('--fade', (1 - smooth(0, 0.07, p)).toFixed(3));
+      hero.style.setProperty('--glow', (1 - smooth(0.03, 0.13, p)).toFixed(3));
+      hero.style.setProperty('--scene', smooth(0.02, 0.12, p).toFixed(3));
+      hero.style.setProperty('--stg', smooth(0.1, 0.15, p).toFixed(3));
+      hero.classList.toggle('opened', p > 0.08);
+      if (bar) bar.classList.toggle('show', p > 0.12 || hs.getBoundingClientRect().bottom < 0);
+      // once it is a card, it leans gently toward the cursor
+      const k = smooth(0.12, 0.2, p);
+      tx += (mouse.x - tx) * 0.06; ty += (mouse.y - ty) * 0.06;
+      glass.style.transform = k > 0 ? `perspective(1200px) rotateY(${(tx * 8 * k).toFixed(2)}deg) rotateX(${(-ty * 6 * k).toFixed(2)}deg)` : '';
+    })();
+  }
+
+  if (hs && reduce) {
+    const bar = $('.topbar');
+    new IntersectionObserver(([e]) => bar && bar.classList.toggle('show', !e.isIntersecting && e.boundingClientRect.top < 0), { threshold: 0.02 }).observe(hs);
+  }
+
+  // Chapter II: the book turns as the chapter scrolls by and leans toward the cursor
+  const book = $('.book3d'), author = $('#author');
+  if (book && author && !reduce) {
+    let mx = 0, my = 0;
+    const turn = () => {
+      const r = author.getBoundingClientRect();
+      const p = clamp(1 - (r.top + r.height / 2) / innerHeight);
+      book.style.setProperty('--ry', `${-44 + p * 36 + mx * 16}deg`);
+      book.style.setProperty('--rx', `${-8 - my * 8}deg`);
+    };
+    addEventListener('scroll', turn, { passive: true });
+    if (KD.lenis) KD.lenis.on('scroll', turn);
+    if (KD.mouse) author.addEventListener('pointermove', (e) => { const r = author.getBoundingClientRect(); mx = (e.clientX - r.left) / r.width - 0.5; my = (e.clientY - r.top) / r.height - 0.5; turn(); });
+    turn();
+  }
+
+  // Chapter III: portraits lean toward the cursor, a soft light follows it
+  if (KD.mouse && !reduce) $$('.member .tilt').forEach((t) => {
+    t.addEventListener('pointermove', (e) => {
+      const r = t.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+      t.style.setProperty('--ry', `${((x - 0.5) * 14).toFixed(2)}deg`);
+      t.style.setProperty('--rx', `${((0.5 - y) * 10).toFixed(2)}deg`);
+      t.style.setProperty('--mx', `${x * 100}%`);
+      t.style.setProperty('--my', `${y * 100}%`);
+    });
+    t.addEventListener('pointerleave', () => { t.style.setProperty('--rx', '0deg'); t.style.setProperty('--ry', '0deg'); });
+  });
+
+  // Chapter IV: the plan drawing behind the sentences draws itself and moves slower than the words
+  const philo = $('.philosophy');
+  if (philo) {
+    const svg = $('.philo-draw svg', philo);
+    $$('rect, path, circle', svg).forEach((el) => el.setAttribute('pathLength', '1'));
+    if (reduce) svg.style.setProperty('--draw', 0);
+    else {
+      const tick = () => {
+        const p = progressOf(philo);
+        svg.style.setProperty('--draw', Math.max(0, 1 - p * 2.4).toFixed(3));
+        svg.style.transform = `translate3d(${(mouse.x * -24).toFixed(1)}px, ${(p * -80 + mouse.y * -16).toFixed(1)}px, 0) scale(1.08)`;
+      };
+      addEventListener('scroll', tick, { passive: true });
+      if (KD.lenis) KD.lenis.on('scroll', tick);
+      if (KD.mouse) philo.addEventListener('pointermove', tick);
+      tick();
+    }
   }
 })();

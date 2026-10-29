@@ -136,14 +136,28 @@ html.kd-intro.kd-intro-out .hero-fade { opacity: 1; transition: opacity .9s ease
 .indicator ol a span:first-child { width: 22px; }
 
 /* 6 chapter I: frosted glass */
-.hero { overflow: hidden; height: 100vh; height: 100svh; min-height: 760px; }
+.hero-scroll { position: relative; height: 420vh; }
+.hero { position: sticky; top: 0; overflow: hidden; height: 100vh; height: 100svh; min-height: 0; }
+.build-anchor { position: absolute; top: 130vh; left: 0; width: 1px; height: 1px; }
+#house { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: var(--scene, 0); }
+.glowsets { opacity: var(--glow, 1); }
 .glowsets { position: absolute; inset: 0; }
 .glowset { position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s ease; }
 .glowset.on { opacity: 1; }
 .glowset i { position: absolute; border-radius: 50%; filter: blur(60px); }
 .glowset img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(60px); transform: scale(1.1); }
-.glass { position: absolute; top: 64px; bottom: 56px; left: 72px; right: 72px; border-radius: 24px; border: 1px solid rgba(255,255,255,.3); background-color: rgba(168,162,157,.62); backdrop-filter: blur(36px) saturate(1.05); -webkit-backdrop-filter: blur(36px) saturate(1.05); padding: 36px 56px 44px; display: flex; flex-direction: column; color: var(--ink); --focus: var(--orange); }
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .glass { background-color: rgba(168,162,157,.92); } }
+/* the glass content stays put; only its pane (the frosted surface) shrinks into a card as Chapter I scrolls */
+.glass { position: absolute; top: 64px; bottom: 56px; left: 72px; right: 72px; padding: 36px 56px 44px; display: flex; flex-direction: column; color: var(--ink); --focus: var(--orange); transform-origin: var(--card-x, 80%) var(--card-y, 80%); }
+.glass > :not(.pane) { position: relative; z-index: 1; }
+.pane { position: absolute; left: 0; top: 0; width: 100%; height: 100%; border-radius: 24px; border: 1px solid rgba(255,255,255,.3); background-color: rgba(168,162,157,.62); backdrop-filter: blur(36px) saturate(1.05); -webkit-backdrop-filter: blur(36px) saturate(1.05); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .pane { background-color: rgba(168,162,157,.92); } }
+.fades { opacity: var(--fade, 1); }
+.hero.opened .fades { pointer-events: none; visibility: hidden; }
+.build-stages { display: flex; gap: 14px; align-items: center; opacity: var(--stg, 0); margin-block: -8px; }
+.build-stages span { opacity: .5; transition: opacity .5s ease, color .5s ease; }
+.build-stages span.on { opacity: 1; color: var(--ink); }
+.build-stages i { width: 18px; height: 1px; background: currentColor; opacity: .35; }
+.hero:not(.opened) .build-stages { visibility: hidden; }
 .glass-top { display: flex; justify-content: space-between; align-items: center; gap: 24px; }
 .glass-body { flex: 1; min-height: 0; align-items: center; }
 .sketch-col { grid-column: 1 / span 7; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
@@ -172,6 +186,19 @@ html.kd-intro.kd-intro-out .hero-fade { opacity: 1; transition: opacity .9s ease
 .author { padding-block: 64px; display: flex; flex-direction: column; justify-content: center; gap: 40px; }
 .author-left { grid-column: 1 / span 4; align-self: center; display: flex; flex-direction: column; gap: 20px; }
 .author-left .cover { width: 128px; box-shadow: 0 14px 30px rgba(0,0,0,.35); }
+/* the book as an object: it turns as the chapter scrolls and leans toward the cursor; hover lifts the cover */
+.book-wrap { perspective: 1200px; padding: 8px 0 12px 8px; align-self: flex-start; }
+.book3d { --w: 150px; --h: 234px; --t: 22px; --rx: -6deg; --ry: -26deg; --open: 0deg; position: relative; display: block; width: var(--w); height: var(--h); transform-style: preserve-3d; transform: rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .3s ease-out; }
+.book3d > span { position: absolute; top: 0; height: 100%; display: block; }
+.book3d img, .book3d picture { width: 100%; height: 100%; object-fit: cover; display: block; }
+.book3d .b-cover, .book3d .b-inside, .book3d .b-back { left: 0; width: var(--w); }
+.book3d .b-spine, .book3d .b-pages { left: calc((var(--w) - var(--t)) / 2); width: var(--t); }
+.book3d .b-cover { transform-origin: left center; transform: translateZ(calc(var(--t) / 2)) rotateY(calc(var(--open) * -1)); transition: transform .9s cubic-bezier(.6,.05,.25,1); overflow: hidden; box-shadow: inset 4px 0 0 rgba(0,0,0,.12); }
+.book3d .b-inside { transform: translateZ(calc(var(--t) / 2 - 1px)); overflow: hidden; background: var(--cream); }
+.book3d .b-back { background-color: #E6DFD2; transform: rotateY(180deg) translateZ(calc(var(--t) / 2)); box-shadow: 0 14px 30px rgba(0,0,0,.35); }
+.book3d .b-spine { background-color: #E6DFD2; transform: rotateY(-90deg) translateZ(calc(var(--w) / 2)); }
+.book3d .b-pages { background: repeating-linear-gradient(90deg, #EFE8DC 0 2px, #D9CFBF 2px 3px); transform: rotateY(90deg) translateZ(calc(var(--w) / 2 - 3px)); top: 3px; height: calc(100% - 6px); }
+.book3d:hover, .book3d:focus-visible { --open: 28deg; }
 .author-left .title { font-size: 34px; line-height: 1.2; }
 .author-left .line { font-size: 15px; line-height: 1.7; color: var(--cream-muted); }
 .btn-row { display: flex; flex-wrap: wrap; gap: 12px; }
@@ -223,12 +250,24 @@ dialog.full[open] { display: flex; flex-direction: column; gap: 18px; }
 .team-head p { max-width: 420px; }
 .team-grid { flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px; list-style: none; margin: 0 auto; padding-block: 0; }
 .member { display: flex; flex-direction: column; gap: 12px; }
-.member .frame { flex: 1; min-height: 360px; background: rgba(35,38,26,.12); border: 1px solid rgba(35,38,26,.25); display: flex; }
+.member { perspective: 900px; }
+.member .frame { flex: 1; min-height: 360px; background: rgba(35,38,26,.12); border: 1px solid rgba(35,38,26,.25); display: flex; position: relative; }
+/* portraits lean toward the cursor, with a soft light following it */
+.tilt { --rx: 0deg; --ry: 0deg; --mx: 50%; --my: 50%; transform: rotateX(var(--rx)) rotateY(var(--ry)); transform-style: preserve-3d; transition: transform .5s var(--ease); }
+.member:hover .tilt { transition-duration: .15s; }
+.tilt::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at var(--mx) var(--my), rgba(255,246,230,.32), rgba(255,246,230,0) 55%); opacity: 0; transition: opacity .4s ease; }
+.member:hover .tilt::after { opacity: 1; }
 .member .frame > * { flex: 1; }
 .member .name { font-size: 18px; line-height: 1.4; }
 
 /* 9 philosophy */
 .philosophy { position: relative; }
+/* one plan drawing sits behind all three screens, draws itself and moves slower than the words */
+.philo-back { position: absolute; inset: 0; pointer-events: none; }
+.philo-draw { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; color: var(--ink); opacity: .13; }
+.philo-draw svg { position: absolute; inset: -10%; width: 120%; height: 120%; will-change: transform; }
+.philo-draw svg * { stroke-dasharray: 1; stroke-dashoffset: var(--draw, 1); }
+.thought { position: relative; z-index: 1; }
 .philosophy::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 14px; background-color: var(--gold); background-image: url("../texture/leather-grain.png"); background-size: 512px 512px; }
 .thought { display: flex; flex-direction: column; justify-content: center; gap: 30px; padding: 0 160px; }
 .thought > * { opacity: 0; transform: translateY(24px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
@@ -254,6 +293,14 @@ dialog.full[open] { display: flex; flex-direction: column; gap: 18px; }
 .track { display: flex; gap: 24px; padding-right: 24px; width: max-content; animation: kdflow var(--dur, 48s) linear infinite; }
 .track.row2 { animation-delay: calc(var(--dur, 48s) / -2); }
 .marq:hover .track, .marq.held .track { animation-play-state: paused; }
+/* the curved gallery wall: when script runs, the rows bend into a gentle concave wall and keep flowing left */
+.marq.curved { overflow: visible; perspective: 1100px; cursor: grab; touch-action: pan-y; user-select: none; }
+.marq.curved.dragging { cursor: grabbing; }
+.marq.curved .track { animation: none; position: relative; width: 100%; height: 262px; padding: 0; transform-style: preserve-3d; }
+.marq.curved .tile { position: absolute; left: 50%; top: 0; margin-left: -150px; transform-style: preserve-3d; will-change: transform; }
+.marq.curved .tile .img { transition: filter .6s ease, transform .6s var(--ease); }
+.marq.curved .tile:hover .img, .marq.curved .tile:focus-visible .img { transform: translateZ(60px) translateY(-4px); }
+.work { overflow: hidden; }
 @keyframes kdflow { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .tile { width: 300px; flex: none; display: flex; flex-direction: column; gap: 9px; }
 .tile .img { height: 200px; }
@@ -344,6 +391,7 @@ dialog.full[open] { display: flex; flex-direction: column; gap: 18px; }
   .ch { min-height: 100vh; }
   .h1 { font-size: 56px; }
   .glass { left: 40px; right: 40px; padding: 30px 36px 36px; }
+  .hero-scroll { height: 380vh; }
   .sketch-col { grid-column: 1 / span 5; }
   .hero-text { grid-column: 6 / span 3; }
   .hero-text .h1 { font-size: 40px; }
@@ -376,10 +424,14 @@ dialog.full[open] { display: flex; flex-direction: column; gap: 18px; }
   .menu { display: none; }
   .menu-btn { display: inline-flex; }
   .indicator { display: none; }
-  .hero { height: auto; min-height: 100svh; }
-  .glass { position: relative; inset: auto; margin: 16px; min-height: calc(100svh - 32px); padding: 22px 20px 28px; }
-  .glass-body { display: flex; flex-direction: column; align-items: stretch; gap: 28px; padding-top: 24px; }
-  .sketches { max-height: none; }
+  .glass { inset: 16px; padding: 22px 20px 26px; }
+  .glass-body { display: flex; flex-direction: column; align-items: stretch; gap: 20px; padding-top: 16px; }
+  .sketch-col { flex: 1; min-height: 0; }
+  .sketches { flex: 1; min-height: 0; aspect-ratio: auto; max-height: none; }
+  .sketches img { object-position: center; }
+  .marq.curved .track { height: 214px; }
+  .marq.curved .tile { margin-left: -110px; }
+  .book3d { --w: 130px; --h: 203px; --t: 20px; }
   .hero-text { gap: 20px; }
   .dots button { height: 44px; }
   .arch { grid-template-columns: 1fr; }
@@ -418,6 +470,50 @@ dialog.full[open] { display: flex; flex-direction: column; gap: 18px; }
 @media (prefers-reduced-motion: reduce) {
   .rv, .thought > * { opacity: 1 !important; transform: none !important; transition: none !important; }
   .track { animation: none; }
+  .hero-scroll { height: auto; }
+  .hero { position: relative; }
+  .tilt, .book3d, .book3d .b-cover { transition: none; }
   .marq { overflow-x: auto; }
   .sketches img, .glowset, .leaf, .rows, .form-panel, .mobile-menu, .topbar, .mono { transition: none !important; }
+}
+
+/* 11 completed project: scrolling walks you through the front door */
+.walk { position: relative; height: 200vh; }
+.walk-pin { position: sticky; top: calc(64px + env(safe-area-inset-top, 0px)); height: calc(100vh - 64px); height: calc(100svh - 64px - env(safe-area-inset-top, 0px)); overflow: hidden; }
+.walk-in, .walk-out { position: absolute; inset: 0; }
+.walk-in > *, .walk-out > :first-child { width: 100%; height: 100%; object-fit: cover; }
+.walk-in > .ph, .walk-out > .ph { padding: 24px var(--side); }
+.walk-in .ph { color: var(--cream); }
+.walk-out { transform-origin: var(--door-x) var(--door-y); will-change: transform, opacity; }
+.door { position: absolute; left: var(--door-x); top: calc(var(--door-y) - 16%); width: 7%; height: 32%; margin-left: -3.5%; background: rgba(35,38,26,.5); border: 1px solid rgba(35,38,26,.6); }
+.walk-hint { position: absolute; right: var(--side); bottom: 28px; color: var(--ink); }
+
+/* 12 ongoing project: the stage line fills up to today, and a drawing builds to match */
+.stages.fill li { position: relative; overflow: hidden; }
+.stages.fill li.done, .stages.fill li.now { background-color: var(--taupe-dark); color: var(--ink); transition: color .3s ease; transition-delay: calc(var(--i, 0) * .3s + .3s); }
+.stages.fill li::before { content: ""; position: absolute; inset: 0; z-index: -1; transform: scaleX(0); transform-origin: left; transition: transform .6s cubic-bezier(.6,.05,.3,1); transition-delay: calc(var(--i, 0) * .3s); background-image: url("../texture/leather-grain.png"); background-size: 512px 512px; }
+.stages.fill li { z-index: 0; isolation: isolate; }
+.stages.fill li.done::before { background-color: var(--moss); }
+.stages.fill li.now::before { background-color: var(--orange); }
+.stages.fill.in li.done { color: var(--cream); }
+.stages.fill.in li.now { color: var(--cream-warm); }
+.stages.fill.in li::before { transform: none; }
+.progress-draw { margin: 0; display: flex; flex-direction: column; gap: 8px; max-width: 720px; }
+.grow { width: 100%; height: auto; background-color: var(--cream); padding: 16px; }
+.grow g { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; }
+.grow g path, .grow g circle { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.2s ease; }
+.grow g.later path, .grow g.later circle { stroke-dasharray: .012 .012; stroke-dashoffset: 0; opacity: .35; transition: none; }
+.grow.in g.built path, .grow.in g.built circle { stroke-dashoffset: 0; }
+
+@media (max-width: 767px) {
+  .stages.fill li.done, .stages.fill li.now { background-color: transparent; }
+  .stages.fill li::before { display: none; }
+  .stages.fill.in li.done, .stages.fill.in li.now { color: var(--ink); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .walk { height: 520px; }
+  .walk-pin { position: relative; height: 520px; }
+  .walk-in { display: none; }
+  .walk-hint { display: none; }
+  .stages.fill li::before, .grow g path, .grow g circle, .stages.fill li { transition: none !important; }
 }

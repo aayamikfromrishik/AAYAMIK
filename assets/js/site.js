@@ -159,7 +159,7 @@
   /* ---------- 4 slim header: appears after chapter I on the home page ---------- */
   const bar = document.querySelector('.topbar');
   const hero = document.querySelector('.hero');
-  if (bar && hero && !bar.classList.contains('always')) {
+  if (bar && hero && !bar.classList.contains('always') && !document.querySelector('.hero-scroll')) {
     const io = new IntersectionObserver(([e]) => bar.classList.toggle('show', !e.isIntersecting && e.boundingClientRect.top < 0), { threshold: 0.02 });
     io.observe(hero);
   }

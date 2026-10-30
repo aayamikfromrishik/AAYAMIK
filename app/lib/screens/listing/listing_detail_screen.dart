@@ -120,7 +120,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
           ? SafeArea(
               child: Container(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: Colors.white,
                   border: Border(top: BorderSide(color: Brand.line)),
                 ),
@@ -236,7 +236,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Wrap(spacing: 8, runSpacing: 8, children: [
-            Chip(avatar: Icon(category.icon, color: Brand.orange), label: Text(category.name)),
+            Chip(avatar: Icon(category.icon, color: Brand.accent), label: Text(category.name)),
             Chip(label: Text(conditionLabels[listing.condition] ?? listing.condition)),
             Chip(label: Text(quantityWithUnit(listing.quantity, listing.unit))),
           ]),
@@ -267,7 +267,7 @@ class _InfoRow extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(color: Brand.sand, borderRadius: BorderRadius.circular(12)),
-          child: Icon(icon, size: 20, color: Brand.charcoal),
+          child: Icon(icon, size: 20, color: Brand.ink),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -294,8 +294,8 @@ class _UnlockButton extends StatelessWidget {
       onPressed: busy ? null : onPressed,
       style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(56)),
       icon: busy
-          ? const SizedBox.square(
-              dimension: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+          ? SizedBox.square(
+              dimension: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Brand.onPrimary))
           : const Icon(Icons.lock_open_rounded),
       label: Text('Unlock contact · ${rupees(fee)}'),
     );
@@ -310,7 +310,7 @@ class _HowUnlockWorks extends StatelessWidget {
     Widget point(IconData icon, String text) => Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Icon(icon, size: 18, color: Brand.orange),
+            Icon(icon, size: 18, color: Brand.accent),
             const SizedBox(width: 10),
             Expanded(child: Text(text)),
           ]),
@@ -454,7 +454,7 @@ class _ContactCard extends StatelessWidget {
             if (contact.address != null) ...[
               const SizedBox(height: 10),
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Icon(Icons.place_rounded, size: 18, color: Brand.charcoal),
+                Icon(Icons.place_rounded, size: 18, color: Brand.ink),
                 const SizedBox(width: 6),
                 Expanded(child: SelectableText(contact.address!, style: theme.textTheme.bodyLarge)),
               ]),
@@ -508,9 +508,9 @@ class _BuyersCard extends StatelessWidget {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: CircleAvatar(
-                    backgroundColor: Brand.orangeSoft,
+                    backgroundColor: Brand.soft,
                     child: Text(b.name.characters.first.toUpperCase(),
-                        style: const TextStyle(color: Brand.orange, fontWeight: FontWeight.w800)),
+                        style: TextStyle(color: Brand.accent, fontWeight: FontWeight.w800)),
                   ),
                   title: Text(b.name, style: theme.textTheme.titleSmall),
                   subtitle: Text('${b.phone == null ? '' : formatPhone(b.phone!)} · ${shortDate(b.paidAt)}'),

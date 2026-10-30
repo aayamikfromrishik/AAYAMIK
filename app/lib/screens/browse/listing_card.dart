@@ -53,7 +53,7 @@ class ListingTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Row(children: [
-                    const Icon(Icons.place_rounded, size: 13, color: Brand.muted),
+                    Icon(Icons.place_rounded, size: 13, color: Brand.muted),
                     const SizedBox(width: 2),
                     Expanded(
                       child: Text(

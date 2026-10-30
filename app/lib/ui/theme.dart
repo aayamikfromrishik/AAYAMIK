@@ -1,14 +1,41 @@
 import 'package:flutter/material.dart';
 
-/// BAAKI BUILD palette: site-safety orange on warm sand, charcoal text.
+/// Palette chosen at build time: --dart-define=PALETTE=safety|green|toran|brick.
+const palette = String.fromEnvironment('PALETTE', defaultValue: 'safety');
+
+Color _pick(int safety, int green, int toran, int brick) => Color(switch (palette) {
+      'green' => green,
+      'toran' => toran,
+      'brick' => brick,
+      _ => safety,
+    });
+
+/// BAAKI BUILD colour roles. No pure black anywhere: text is a dark grey.
 abstract final class Brand {
-  static const orange = Color(0xFFE8590C);
-  static const orangeSoft = Color(0xFFFFEDE2);
-  static const charcoal = Color(0xFF1C1F24);
-  static const charcoalSoft = Color(0xFF2A2E35);
-  static const sand = Color(0xFFF7F4EF);
-  static const line = Color(0xFFE6E0D6);
-  static const muted = Color(0xFF6B6F76);
+  /// Buttons and filled brand surfaces.
+  static final primary = _pick(0xFFC2410C, 0xFF15803D, 0xFFF2A900, 0xFFB23A1E);
+
+  /// Text and icons on [primary].
+  static final onPrimary = _pick(0xFFFFFFFF, 0xFFFFFFFF, 0xFF1F2933, 0xFFFFFFFF);
+
+  /// Icon tint on light backgrounds.
+  static final accent = _pick(0xFFC2410C, 0xFF15803D, 0xFF1E6B3A, 0xFFB23A1E);
+
+  /// Light tint behind accent icons and info boxes.
+  static final soft = _pick(0xFFFFEDE3, 0xFFE3F4E8, 0xFFFFF4CF, 0xFFFBE9E3);
+
+  /// Coloured band behind the hero, login panel and profile card.
+  static final header = _pick(0xFF334155, 0xFF14532D, 0xFF1E6B3A, 0xFF3D5A47);
+  static final headerSoft = _pick(0xFF475569, 0xFF1D6B3D, 0xFF2A7D48, 0xFF4C6B56);
+
+  /// Icons that must stand out on [header].
+  static final highlight = _pick(0xFFFB923C, 0xFFF2B705, 0xFFF2A900, 0xFFE0B23C);
+
+  static final sand = _pick(0xFFF4F5F7, 0xFFF5F7F2, 0xFFFAF8F1, 0xFFFAF6F0);
+  static final line = _pick(0xFFE2E5EA, 0xFFDFE6DC, 0xFFE9E3D3, 0xFFE8DFD5);
+  static final ink = _pick(0xFF1F2933, 0xFF1F2A24, 0xFF1F2933, 0xFF2B2622);
+  static final muted = _pick(0xFF64707D, 0xFF5F6B64, 0xFF6B6A5F, 0xFF6E655D);
+
   static const green = Color(0xFF2B8A3E);
   static const greenSoft = Color(0xFFE6F4EA);
 
@@ -17,13 +44,13 @@ abstract final class Brand {
 
 ThemeData buildTheme() {
   final scheme = ColorScheme.fromSeed(
-    seedColor: Brand.orange,
-    primary: Brand.orange,
-    onPrimary: Colors.white,
-    secondary: Brand.charcoal,
+    seedColor: Brand.primary,
+    primary: Brand.primary,
+    onPrimary: Brand.onPrimary,
+    secondary: Brand.ink,
     onSecondary: Colors.white,
     surface: Colors.white,
-    onSurface: Brand.charcoal,
+    onSurface: Brand.ink,
   ).copyWith(
     outline: const Color(0xFFB9B3A9),
     outlineVariant: Brand.line,
@@ -45,7 +72,7 @@ ThemeData buildTheme() {
 
   return base.copyWith(
     textTheme: base.textTheme
-        .apply(bodyColor: Brand.charcoal, displayColor: Brand.charcoal)
+        .apply(bodyColor: Brand.ink, displayColor: Brand.ink)
         .copyWith(
           headlineLarge: base.textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.w800, height: 1.15),
           headlineMedium: base.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800, height: 1.2),
@@ -55,14 +82,14 @@ ThemeData buildTheme() {
           titleSmall: base.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
           labelLarge: base.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
         ),
-    appBarTheme: const AppBarTheme(
+    appBarTheme: AppBarTheme(
       backgroundColor: Brand.sand,
-      foregroundColor: Brand.charcoal,
+      foregroundColor: Brand.ink,
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: false,
       titleTextStyle:
-          TextStyle(fontFamily: Brand.font, fontSize: 22, fontWeight: FontWeight.w800, color: Brand.charcoal),
+          TextStyle(fontFamily: Brand.font, fontSize: 22, fontWeight: FontWeight.w800, color: Brand.ink),
     ),
     cardTheme: CardThemeData(
       color: Colors.white,
@@ -71,7 +98,7 @@ ThemeData buildTheme() {
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Brand.line),
+        side: BorderSide(color: Brand.line),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -80,10 +107,10 @@ ThemeData buildTheme() {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: border(Brand.line),
       enabledBorder: border(Brand.line),
-      focusedBorder: border(Brand.orange, 2),
+      focusedBorder: border(Brand.accent, 2),
       errorBorder: border(scheme.error),
       focusedErrorBorder: border(scheme.error, 2),
-      helperStyle: const TextStyle(color: Brand.muted),
+      helperStyle: TextStyle(color: Brand.muted),
       helperMaxLines: 3,
       errorMaxLines: 3,
     ),
@@ -98,8 +125,8 @@ ThemeData buildTheme() {
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(0, 48),
-        foregroundColor: Brand.charcoal,
-        side: const BorderSide(color: Brand.line, width: 1.5),
+        foregroundColor: Brand.ink,
+        side: BorderSide(color: Brand.line, width: 1.5),
         shape: RoundedRectangleBorder(borderRadius: radius12),
         textStyle: const TextStyle(fontFamily: Brand.font, fontSize: 15, fontWeight: FontWeight.w700),
       ),
@@ -111,52 +138,52 @@ ThemeData buildTheme() {
     ),
     chipTheme: ChipThemeData(
       backgroundColor: Colors.white,
-      selectedColor: Brand.charcoal,
+      selectedColor: Brand.header,
       showCheckmark: false,
-      side: const BorderSide(color: Brand.line),
+      side: BorderSide(color: Brand.line),
       shape: const StadiumBorder(),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       labelStyle: WidgetStateTextStyle.resolveWith((states) => TextStyle(
             fontFamily: Brand.font,
             fontWeight: FontWeight.w600,
-            color: states.contains(WidgetState.selected) ? Colors.white : Brand.charcoal,
+            color: states.contains(WidgetState.selected) ? Colors.white : Brand.ink,
           )),
       iconTheme: const IconThemeData(size: 18),
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: Colors.white,
-      indicatorColor: Brand.orangeSoft,
+      indicatorColor: Brand.soft,
       surfaceTintColor: Colors.transparent,
       height: 68,
       labelTextStyle: WidgetStateTextStyle.resolveWith((states) => TextStyle(
             fontFamily: Brand.font,
             fontSize: 12,
             fontWeight: states.contains(WidgetState.selected) ? FontWeight.w800 : FontWeight.w600,
-            color: states.contains(WidgetState.selected) ? Brand.orange : Brand.muted,
+            color: states.contains(WidgetState.selected) ? Brand.accent : Brand.muted,
           )),
       iconTheme: WidgetStateProperty.resolveWith((states) =>
-          IconThemeData(color: states.contains(WidgetState.selected) ? Brand.orange : Brand.muted)),
+          IconThemeData(color: states.contains(WidgetState.selected) ? Brand.accent : Brand.muted)),
     ),
-    navigationRailTheme: const NavigationRailThemeData(
+    navigationRailTheme: NavigationRailThemeData(
       backgroundColor: Colors.white,
-      indicatorColor: Brand.orangeSoft,
-      selectedIconTheme: IconThemeData(color: Brand.orange),
+      indicatorColor: Brand.soft,
+      selectedIconTheme: IconThemeData(color: Brand.accent),
       unselectedIconTheme: IconThemeData(color: Brand.muted),
       selectedLabelTextStyle:
-          TextStyle(fontFamily: Brand.font, fontWeight: FontWeight.w800, color: Brand.orange, fontSize: 14),
+          TextStyle(fontFamily: Brand.font, fontWeight: FontWeight.w800, color: Brand.accent, fontSize: 14),
       unselectedLabelTextStyle:
           TextStyle(fontFamily: Brand.font, fontWeight: FontWeight.w600, color: Brand.muted, fontSize: 14),
     ),
     floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: Brand.orange,
-      foregroundColor: Colors.white,
+      backgroundColor: Brand.primary,
+      foregroundColor: Brand.onPrimary,
       extendedTextStyle: const TextStyle(fontFamily: Brand.font, fontWeight: FontWeight.w700, fontSize: 15),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
-    dividerTheme: const DividerThemeData(color: Brand.line, space: 1),
+    dividerTheme: DividerThemeData(color: Brand.line, space: 1),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
-      backgroundColor: Brand.charcoal,
+      backgroundColor: Brand.ink,
       shape: RoundedRectangleBorder(borderRadius: radius12),
     ),
     dialogTheme: DialogThemeData(

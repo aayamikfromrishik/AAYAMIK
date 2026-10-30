@@ -12,15 +12,15 @@ class BrandMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = onDark ? Colors.white : Brand.charcoal;
+    final text = onDark ? Colors.white : Brand.ink;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: size,
           height: size,
-          decoration: BoxDecoration(color: Brand.orange, borderRadius: BorderRadius.circular(size * 0.28)),
-          child: Icon(Icons.foundation, color: Colors.white, size: size * 0.6),
+          decoration: BoxDecoration(color: Brand.primary, borderRadius: BorderRadius.circular(size * 0.28)),
+          child: Icon(Icons.foundation, color: Brand.onPrimary, size: size * 0.6),
         ),
         SizedBox(width: size * 0.28),
         Column(

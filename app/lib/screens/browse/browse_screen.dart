@@ -128,7 +128,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
     final compact = isCompact(context);
     final theme = Theme.of(context);
     return Container(
-      color: Brand.charcoal,
+      color: Brand.header,
       padding: EdgeInsets.fromLTRB(pad, MediaQuery.paddingOf(context).top + (compact ? 16 : 32), pad, 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,7 +164,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
             child: SearchBar(
               controller: _search,
               hintText: 'Search cement, tiles, TMT bars…',
-              leading: const Icon(Icons.search_rounded, color: Brand.muted),
+              leading: Icon(Icons.search_rounded, color: Brand.muted),
               elevation: const WidgetStatePropertyAll(0),
               backgroundColor: const WidgetStatePropertyAll(Colors.white),
               shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
@@ -194,11 +194,11 @@ class _BrowseScreenState extends State<BrowseScreen> {
       onPressed: _pickCity,
       style: TextButton.styleFrom(
         foregroundColor: Colors.white,
-        backgroundColor: Brand.charcoalSoft,
+        backgroundColor: Brand.headerSoft,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      icon: const Icon(Icons.place_rounded, size: 18, color: Brand.orange),
+      icon: Icon(Icons.place_rounded, size: 18, color: Brand.highlight),
       label: Text(_city ?? 'All cities'),
     );
   }
@@ -222,12 +222,12 @@ class _BrowseScreenState extends State<BrowseScreen> {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: ChoiceChip(
-        avatar: Icon(icon, color: selected ? Colors.white : Brand.orange),
+        avatar: Icon(icon, color: selected ? Colors.white : Brand.accent),
         label: Text(label),
         labelStyle: TextStyle(
           fontFamily: Brand.font,
           fontWeight: FontWeight.w600,
-          color: selected ? Colors.white : Brand.charcoal,
+          color: selected ? Colors.white : Brand.ink,
         ),
         selected: selected,
         onSelected: (_) {

@@ -109,8 +109,8 @@ class _OtpScreenState extends State<OtpScreen> {
           FilledButton(
             onPressed: _verifying ? null : _verify,
             child: _verifying
-                ? const SizedBox.square(
-                    dimension: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                ? SizedBox.square(
+                    dimension: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Brand.onPrimary))
                 : const Text('Verify and continue'),
           ),
           const SizedBox(height: 8),

@@ -112,7 +112,7 @@ class _DemoStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(children: [
       Material(
-        color: Brand.orange,
+        color: Brand.primary,
         child: SafeArea(
           bottom: false,
           child: SizedBox(
@@ -122,7 +122,7 @@ class _DemoStrip extends StatelessWidget {
               child: Text(
                 'DEMO · sample listings · no real payments',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Colors.white,
+                      color: Brand.onPrimary,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.4,
                     ),

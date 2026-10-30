@@ -103,7 +103,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
       footer: Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
         StatusChip(l.status),
         Row(mainAxisSize: MainAxisSize.min, children: [
-          const Icon(Icons.lock_open_rounded, size: 14, color: Brand.muted),
+          Icon(Icons.lock_open_rounded, size: 14, color: Brand.muted),
           const SizedBox(width: 3),
           Text('${l.unlockCount} unlocked',
               style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),

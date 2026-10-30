@@ -52,7 +52,7 @@ class _BrandPanel extends StatelessWidget {
     final theme = Theme.of(context);
     final top = MediaQuery.paddingOf(context).top;
     return Container(
-      color: Brand.charcoal,
+      color: Brand.header,
       padding: EdgeInsets.fromLTRB(compact ? 24 : 56, top + (compact ? 16 : 48), compact ? 24 : 56, compact ? 32 : 48),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,8 +101,8 @@ class _Point extends StatelessWidget {
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Container(
           padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(color: Brand.orange.withAlpha(40), borderRadius: BorderRadius.circular(8)),
-          child: Icon(icon, size: 18, color: Brand.orange),
+          decoration: BoxDecoration(color: Brand.highlight.withAlpha(45), borderRadius: BorderRadius.circular(8)),
+          child: Icon(icon, size: 18, color: Brand.highlight),
         ),
         const SizedBox(width: 12),
         Expanded(

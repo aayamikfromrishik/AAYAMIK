@@ -321,7 +321,7 @@ class _PostListingScreenState extends State<PostListingScreen> {
                           DropdownMenuItem(
                             value: c.id,
                             child: Row(children: [
-                              Icon(c.icon, size: 20, color: Brand.orange),
+                              Icon(c.icon, size: 20, color: Brand.accent),
                               const SizedBox(width: 10),
                               Text(c.name),
                             ]),
@@ -415,11 +415,11 @@ class _PostListingScreenState extends State<PostListingScreen> {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Brand.orangeSoft,
+                        color: Brand.soft,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(children: [
-                        const Icon(Icons.info_rounded, color: Brand.orange),
+                        Icon(Icons.info_rounded, color: Brand.accent),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
@@ -524,19 +524,19 @@ class _PostListingScreenState extends State<PostListingScreen> {
               child: Container(
                 width: size,
                 decoration: BoxDecoration(
-                  color: Brand.orangeSoft,
-                  border: Border.all(color: Brand.orange.withAlpha(90), width: 1.5),
+                  color: Brand.soft,
+                  border: Border.all(color: Brand.accent.withAlpha(90), width: 1.5),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: _checkingPhoto
                     ? const Center(child: CircularProgressIndicator())
-                    : const Column(
+                    : Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.add_a_photo_rounded, color: Brand.orange),
+                          Icon(Icons.add_a_photo_rounded, color: Brand.accent),
                           SizedBox(height: 6),
                           Text('Add photo',
-                              style: TextStyle(color: Brand.orange, fontWeight: FontWeight.w700, fontSize: 13)),
+                              style: TextStyle(color: Brand.accent, fontWeight: FontWeight.w700, fontSize: 13)),
                         ],
                       ),
               ),
@@ -576,9 +576,9 @@ class _PostListingScreenState extends State<PostListingScreen> {
                 child: InkWell(
                   customBorder: const CircleBorder(),
                   onTap: () => _removePhoto(p),
-                  child: const Padding(
+                  child: Padding(
                     padding: EdgeInsets.all(4),
-                    child: Icon(Icons.close_rounded, size: 16, color: Brand.charcoal),
+                    child: Icon(Icons.close_rounded, size: 16, color: Brand.ink),
                   ),
                 ),
               ),

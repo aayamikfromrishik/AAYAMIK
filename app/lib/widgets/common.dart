@@ -33,7 +33,7 @@ class ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.cloud_off_rounded, size: 48, color: Brand.muted),
+            Icon(Icons.cloud_off_rounded, size: 48, color: Brand.muted),
             const SizedBox(height: 12),
             Text(friendlyError(error), textAlign: TextAlign.center),
             const SizedBox(height: 16),
@@ -65,8 +65,8 @@ class EmptyView extends StatelessWidget {
             Container(
               width: 88,
               height: 88,
-              decoration: const BoxDecoration(color: Brand.orangeSoft, shape: BoxShape.circle),
-              child: Icon(icon, size: 40, color: Brand.orange),
+              decoration: BoxDecoration(color: Brand.soft, shape: BoxShape.circle),
+              child: Icon(icon, size: 40, color: Brand.accent),
             ),
             const SizedBox(height: 16),
             if (title != null) ...[
@@ -98,18 +98,18 @@ class ListingPhoto extends StatelessWidget {
   Widget build(BuildContext context) {
     final placeholder = LayoutBuilder(
       builder: (context, c) => Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFFFFE3D1), Color(0xFFF4EEE6)],
+            colors: [Brand.soft, Brand.sand],
           ),
         ),
         child: Center(
           child: Icon(
             categoryId == null ? Icons.construction_rounded : categoryById(categoryId!).icon,
             size: (c.biggest.shortestSide * 0.32).clamp(24, 72),
-            color: Brand.orange.withAlpha(150),
+            color: Brand.accent.withAlpha(150),
           ),
         ),
       ),
@@ -163,11 +163,11 @@ class UnlockFeePill extends StatelessWidget {
         boxShadow: const [BoxShadow(color: Color(0x1A000000), blurRadius: 6, offset: Offset(0, 2))],
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(Icons.lock_rounded, size: compact ? 12 : 14, color: Brand.orange),
+        Icon(Icons.lock_rounded, size: compact ? 12 : 14, color: Brand.accent),
         const SizedBox(width: 4),
         Text(
           '${rupees(feeRupees)} to unlock',
-          style: TextStyle(fontSize: compact ? 11 : 12, fontWeight: FontWeight.w700, color: Brand.charcoal),
+          style: TextStyle(fontSize: compact ? 11 : 12, fontWeight: FontWeight.w700, color: Brand.ink),
         ),
       ]),
     );
@@ -200,7 +200,7 @@ class SectionCard extends StatelessWidget {
                     width: 26,
                     height: 26,
                     alignment: Alignment.center,
-                    decoration: const BoxDecoration(color: Brand.charcoal, shape: BoxShape.circle),
+                    decoration: BoxDecoration(color: Brand.header, shape: BoxShape.circle),
                     child: Text('$step',
                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13)),
                   ),

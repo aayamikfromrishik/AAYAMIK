@@ -80,13 +80,13 @@ class _LoginScreenState extends State<LoginScreen> {
             FilledButton(
               onPressed: _sending ? null : _send,
               child: _sending
-                  ? const SizedBox.square(
-                      dimension: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  ? SizedBox.square(
+                      dimension: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Brand.onPrimary))
                   : const Text('Get OTP'),
             ),
             const SizedBox(height: 20),
             Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Icon(Icons.lock_rounded, size: 16, color: Brand.muted),
+              Icon(Icons.lock_rounded, size: 16, color: Brand.muted),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

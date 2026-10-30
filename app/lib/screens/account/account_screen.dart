@@ -63,16 +63,16 @@ class _AccountScreenState extends State<AccountScreen> {
             padding: EdgeInsets.fromLTRB(pad, 4, pad, 32),
             children: [
               Card(
-                color: Brand.charcoal,
+                color: Brand.header,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Row(children: [
                     CircleAvatar(
                       radius: 28,
-                      backgroundColor: Brand.orange,
+                      backgroundColor: Brand.primary,
                       child: Text(name.isEmpty ? '?' : name.characters.first.toUpperCase(),
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 22)),
+                          style: TextStyle(color: Brand.onPrimary, fontWeight: FontWeight.w800, fontSize: 22)),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -104,8 +104,8 @@ class _AccountScreenState extends State<AccountScreen> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Table(
-                      border: const TableBorder(horizontalInside: BorderSide(color: Brand.line)),
-                      children: const [
+                      border: TableBorder(horizontalInside: BorderSide(color: Brand.line)),
+                      children: [
                         TableRow(
                           decoration: BoxDecoration(color: Brand.sand),
                           children: [_Cell('Listed price', bold: true), _Cell('Unlock fee', bold: true)],
@@ -157,7 +157,7 @@ class _Point extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(bottom: 10),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Icon(icon, size: 20, color: Brand.orange),
+          Icon(icon, size: 20, color: Brand.accent),
           const SizedBox(width: 12),
           Expanded(child: Text(text, style: const TextStyle(height: 1.35))),
         ]),

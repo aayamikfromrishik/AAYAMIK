@@ -57,26 +57,39 @@ ${home ? `<script type="importmap">{ "imports": { "three": "./assets/vendor/thre
 </head>`;
 }
 
-const NAV = [['About', 'about'], ['Team', 'team'], ['Philosophy', 'philosophy'], ['Projects', 'work'], ['Contact', 'contact']];
-const navLinks = (base, home) => NAV.map(([t, id]) => `<li><a class="cap" href="${home ? '' : base + 'index.html'}#${id}" data-ring>${t}</a></li>`).join('');
+// the opening scroll is the home page; every chapter after it has its own page
+const NAV = [['About', 'about'], ['Team', 'team'], ['Philosophy', 'philosophy'], ['Projects', 'projects'], ['Contact', 'contact']];
+const pageHref = (base, slug) => `${base}${slug}/index.html`;
+const navLinks = (base, current) => NAV.map(([t, slug]) => `<li><a class="cap" href="${pageHref(base, slug)}"${slug === current ? ' aria-current="page"' : ''} data-ring>${t}</a></li>`).join('');
 
-function topbar(base, home) {
+function topbar(base, current, home = false) {
   return `<header class="topbar tx${home ? '' : ' always'}">
   <div class="wrap">
-    <a class="wordmark" href="${home ? '#home' : base + 'index.html'}" aria-label="Karukrit Designs, home"><img src="${base}assets/brand/wordmark-dark-TRACED.svg" alt="Karukrit Designs" width="230" height="18"></a>
-    <nav aria-label="Main"><ul class="menu" data-ring-group>${navLinks(base, home)}</ul></nav>
+    <a class="wordmark" href="${base}index.html" aria-label="Karukrit Designs, home"><img src="${base}assets/brand/wordmark-dark-TRACED.svg" alt="Karukrit Designs" width="230" height="18"></a>
+    <nav aria-label="Main"><ul class="menu" data-ring-group>${navLinks(base, current)}</ul></nav>
     <button class="menu-btn" type="button" aria-label="Open menu"><i></i><i></i></button>
   </div>
 </header>`;
 }
 
-function mobileMenu(base, home) {
+function mobileMenu(base, current) {
   return `<div class="mobile-menu s-moss tx" data-cursor="light" inert aria-label="Menu">
   <div class="row">
     <img class="wordmark" src="${base}assets/brand/wordmark-light-TRACED.svg" alt="Karukrit Designs" width="160" height="13">
     <button class="menu-close cap link-cap" type="button">Close</button>
   </div>
-  <nav aria-label="Main"><ul data-ring-group>${NAV.map(([t, id]) => `<li><a href="${home ? '' : base + 'index.html'}#${id}" data-ring>${t}</a></li>`).join('')}</ul></nav>
+  <nav aria-label="Main"><ul data-ring-group><li><a href="${base}index.html" data-ring>Home</a></li>${NAV.map(([t, slug]) => `<li><a href="${pageHref(base, slug)}"${slug === current ? ' aria-current="page"' : ''} data-ring>${t}</a></li>`).join('')}</ul></nav>
+</div>`;
+}
+
+// 4 the chapter indicator: the current numeral, and a list of every chapter page
+const CHAPTERS = [['I', 'Home', ''], ['II', 'The architect and the author', 'about'], ['III', 'The studio', 'team'], ['IV', 'Philosophy', 'philosophy'], ['V', 'Work', 'projects'], ['VI', 'Contact', 'contact']];
+function indicator(base, current) {
+  return `<div class="indicator cap">
+  <button type="button" aria-expanded="false" aria-controls="chapter-list" aria-label="Chapters"><span class="cur">${CHAPTERS.find((c) => c[2] === current)?.[0] || 'I'}</span><span class="line"></span><span class="last">VI</span></button>
+  <ol id="chapter-list" class="tx" hidden data-ring-group>
+    ${CHAPTERS.map(([n, t, slug]) => `<li><a href="${slug ? pageHref(base, slug) : base + 'index.html'}"${slug === current ? ' aria-current="page"' : ''} data-ring><span>${n}</span><span>${t}</span></a></li>`).join('\n    ')}
+  </ol>
 </div>`;
 }
 
@@ -126,7 +139,7 @@ function home() {
   const first = CATS[0];
   return `${head({ base, title: 'Karukrit Designs | Architecture and interiors, Ludhiana', description: 'Karukrit Designs is an architecture and interior design studio in Ludhiana, founded in 2018 by Ar. Saptarshi Kapri.', path: '', home: true })}
 <body>
-<a class="skip-link cap" href="#about">Skip to content</a>
+<a class="skip-link cap" href="#contents">Skip to content</a>
 
 <div class="loader tx" aria-hidden="true">
   <!-- 5.1 the logo draws itself straight onto the moss leather: a transparent animation, no box behind it.
@@ -136,21 +149,10 @@ function home() {
   <video muted playsinline preload="none" src="assets/loader/KD_logo_animation_alpha_8s.mp4"></video>
 </div>
 
-${topbar(base, true)}
-${mobileMenu(base, true)}
+${topbar(base, '', true)}
+${mobileMenu(base, '')}
 
-<div class="indicator cap">
-  <button type="button" aria-expanded="false" aria-controls="chapter-list" aria-label="Chapters"><span class="cur">I</span><span class="line"></span><span class="last">VI</span></button>
-  <ol id="chapter-list" class="tx" hidden data-ring-group>
-    <li><a href="#home" data-ring><span>I</span><span>Home</span></a></li>
-    <li><a href="#about" data-ring><span>II</span><span>The architect</span></a></li>
-    <li><a href="#author" data-ring><span>II</span><span>The author</span></a></li>
-    <li><a href="#team" data-ring><span>III</span><span>The studio</span></a></li>
-    <li><a href="#philosophy" data-ring><span>IV</span><span>Philosophy</span></a></li>
-    <li><a href="#work" data-ring><span>V</span><span>Work</span></a></li>
-    <li><a href="#contact" data-ring><span>VI</span><span>Contact</span></a></li>
-  </ol>
-</div>
+${indicator(base, '')}
 
 <main>
 <!-- I · Home: frosted glass. Scrolling shrinks the glass into a card and the 3D house is drawn, modelled and finished behind it. -->
@@ -161,8 +163,8 @@ ${mobileMenu(base, true)}
   <div class="glass hero-fade" data-cursor="dark">
     <div class="pane tx" aria-hidden="true"></div>
     <div class="glass-top fades">
-      <a class="wordmark" href="#home" aria-label="Karukrit Designs, home"><img src="assets/brand/wordmark-dark-TRACED.svg" alt="Karukrit Designs" width="230" height="18"></a>
-      <nav aria-label="Chapters"><ul class="menu" data-ring-group>${navLinks(base, true)}</ul></nav>
+      <a class="wordmark" href="index.html" aria-label="Karukrit Designs, home"><img src="assets/brand/wordmark-dark-TRACED.svg" alt="Karukrit Designs" width="230" height="18"></a>
+      <nav aria-label="Chapters"><ul class="menu" data-ring-group>${navLinks(base, '')}</ul></nav>
       <button class="menu-btn" type="button" aria-label="Open menu"><i></i><i></i></button>
     </div>
     <div class="g12 glass-body">
@@ -177,7 +179,7 @@ ${mobileMenu(base, true)}
         <span class="cap">Chapter I</span>
         <h1 class="h1"><b class="hl">Every house</b> begins as a line on paper.</h1>
         <div class="build-stages cap" aria-hidden="true"><span class="on">Plan</span><i></i><span>Model</span><i></i><span>Home</span></div>
-        <a class="btn btn-orange tx" href="#work" data-ring>View projects</a>
+        <a class="btn btn-orange tx" href="projects/index.html" data-ring>View projects</a>
         <a class="cap link-cap" href="#build">Scroll to begin ↓</a>
       </div>
     </div>
@@ -350,8 +352,8 @@ function categoryPage(c) {
   return `${head({ base, title: `${c.name} | Karukrit Designs`, description: `${c.name} by Karukrit Designs, Ludhiana: completed, ongoing and concept projects.`, path: `projects/${c.slug}/` })}
 <body class="s-taupe tx" data-cursor="dark">
 <a class="skip-link cap" href="#main">Skip to content</a>
-${topbar(base, false)}
-${mobileMenu(base, false)}
+${topbar(base, 'projects')}
+${mobileMenu(base, 'projects')}
 <main id="main" class="page-top">
   <section class="wrap cat">
     <div class="work-head">
@@ -370,7 +372,7 @@ ${lightboxAndScripts(base, false)}`;
 
 function footer(base, next) {
   return `<footer class="wrap foot cap">
-  ${next || `<a href="${base}index.html#contact" class="link-cap">Your house begins here. Contact the studio →</a>`}
+  ${next || `<a href="${pageHref(base, 'contact')}" class="link-cap" data-ring>Your house begins here. Contact the studio →</a>`}
   <span>Karukrit Designs · Ludhiana</span>
   ${stripe}
 </footer>`;
@@ -425,8 +427,8 @@ function completedPage(p) {
   return `${head({ base, title: `${p.name} | Karukrit Designs`, description: `${p.name}, ${c.one.toLowerCase()} by Karukrit Designs, ${p.city}.`, path: `projects/${p.slug}/` })}
 <body class="s-taupe tx" data-cursor="dark">
 <a class="skip-link cap" href="#main">Skip to content</a>
-${topbar(base, false)}
-${mobileMenu(base, false)}
+${topbar(base, 'projects')}
+${mobileMenu(base, 'projects')}
 <main id="main" class="page-top">
   <div class="s-orange tx" data-cursor="light">
     <div class="walk">
@@ -473,8 +475,8 @@ function ongoingPage(p) {
   return `${head({ base, title: `${p.name} | Karukrit Designs`, description: `${p.name}, an ongoing ${c.one.toLowerCase()} by Karukrit Designs in ${p.city}, now at stage ${p.stage} of 6.`, path: `projects/${p.slug}/` })}
 <body class="s-taupe tx" data-cursor="dark">
 <a class="skip-link cap" href="#main">Skip to content</a>
-${topbar(base, false)}
-${mobileMenu(base, false)}
+${topbar(base, 'projects')}
+${mobileMenu(base, 'projects')}
 <main id="main" class="page-top">
   <section class="wrap ongoing">
     <div class="p-head">
@@ -509,11 +511,83 @@ ${footer(base, nextProject(base, p))}
 ${lightboxAndScripts(base)}`;
 }
 
+/* ---------- the home page and the chapter pages ---------- */
+// home() renders every chapter in one document; the pages below take their sections from it
+const between = (html, a, b) => { const i = html.indexOf(a), j = html.indexOf(b, i); if (i < 0 || j < 0) throw new Error(`missing ${a}`); return html.slice(i, j); };
+const rebase = (html) => html.replace(/(src|href|srcset)="(assets|projects)\//g, '$1="../$2/');
+
+function contents() {
+  const rows = [
+    ['II', 'The architect and the author', 'Ar. Saptarshi Kapri, and The 100 Decisions Before the First Brick', 'about'],
+    ['III', 'The studio', 'Kuljeet, Krishma, Sanchit and [fourth member]', 'team'],
+    ['IV', 'Philosophy', 'A home is a hundred decisions, made in the right order.', 'philosophy'],
+    ['V', 'Work', 'Residences, hotels, offices and convention centres', 'projects'],
+    ['VI', 'Contact', '3652/2, Green Field, Model Gram, Ludhiana', 'contact'],
+  ];
+  return `<section id="contents" class="contents s-taupe tx" data-cursor="dark" data-snap aria-labelledby="contents-h">
+  <div class="wrap" data-stagger>
+    <h2 id="contents-h" class="cap rv">Contents</h2>
+    <ol class="toc">${rows.map(([n, t, d, slug]) => `
+      <li class="rv"><a href="${pageHref('', slug)}" data-ring><span class="cap num">${n}</span><span class="t">${t}</span><span class="d">${esc(d)}</span><span class="arr" aria-hidden="true">→</span></a></li>`).join('')}
+    </ol>
+  </div>
+</section>`;
+}
+
+function pages() {
+  const full = home();
+  const sec = {
+    about: between(full, '<!-- II · The architect -->', '<!-- III · The studio -->'),
+    team: between(full, '<!-- III · The studio -->', '<!-- IV · Philosophy'),
+    philosophy: between(full, '<!-- IV · Philosophy', '<!-- V · Work -->'),
+    projects: between(full, '<!-- V · Work -->', '<!-- VI · Contact -->'),
+    contact: between(full, '<!-- VI · Contact -->', '</main>'),
+  };
+  const dialog = between(full, '<dialog id="pages-dialog"', '<script src=');
+  const scripts = full.slice(full.indexOf('<script src='));
+  const homePage = full.slice(0, full.indexOf('<!-- II · The architect -->')) + contents() + '\n</main>\n' + footer('') + '\n' + scripts;
+  const result = { 'index.html': homePage };
+  const META = {
+    about: ['The architect and the author | Karukrit Designs', 'Ar. Saptarshi Kapri, founder of Karukrit Designs, and his book The 100 Decisions Before the First Brick.'],
+    team: ['The studio | Karukrit Designs', 'The team at Karukrit Designs, Ludhiana.'],
+    philosophy: ['Philosophy | Karukrit Designs', 'A home is a hundred decisions, made in the right order.'],
+    projects: ['Work | Karukrit Designs', 'Residences, hotels, offices and convention centres by Karukrit Designs.'],
+    contact: ['Contact | Karukrit Designs', 'Visit the studio in Model Gram, Ludhiana, or call +91 88243 96618.'],
+  };
+  for (const [slug, body] of Object.entries(sec)) {
+    const base = '../';
+    let main = rebase(body);
+    // "Connect to the author" opens the contact form on the contact page, with "About the book" chosen
+    main = main.replace('<button class="btn btn-gold tx" type="button" data-ring data-open-form data-topic="About the book">Connect to the author</button>',
+      `<a class="btn btn-gold tx" href="${pageHref(base, 'contact')}#about-the-book" data-ring>Connect to the author</a>`);
+    result[`${slug}/index.html`] = `${head({ base, title: META[slug][0], description: META[slug][1], path: `${slug}/` })}
+<body class="s-taupe tx" data-cursor="dark">
+<a class="skip-link cap" href="#main">Skip to content</a>
+${topbar(base, slug)}
+${mobileMenu(base, slug)}
+${indicator(base, slug)}
+<main id="main" class="page-top">
+${main}
+</main>
+${slug === 'contact' ? '' : footer(base)}
+
+<script src="${base}assets/vendor/lenis-1.1.13.min.js"></script>
+<script src="${base}assets/js/site.js"></script>
+${slug === 'about' ? `<script src="${base}assets/vendor/page-flip-2.0.7.browser.js"></script>
+<script src="${base}assets/js/book.js"></script>` : ''}
+<script src="${base}assets/js/home.js"></script>
+</body>
+</html>
+`;
+  }
+  return result;
+}
+
 /* ---------- write everything ---------- */
 const out = (rel, html) => { const f = join(ROOT, rel); mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, html); };
 // clear old generated pages so removed projects disappear
 if (existsSync(join(ROOT, 'projects'))) for (const d of readdirSync(join(ROOT, 'projects'))) rmSync(join(ROOT, 'projects', d), { recursive: true, force: true });
-out('index.html', home());
+for (const [rel, html] of Object.entries(pages())) out(rel, html);
 CATS.forEach((c) => out(`projects/${c.slug}/index.html`, categoryPage(c)));
 PROJECTS.forEach((p) => out(`projects/${p.slug}/index.html`, p.status === 'ongoing' ? ongoingPage(p) : completedPage(p)));
-console.log(`Built index.html, ${CATS.length} category pages and ${PROJECTS.length} project pages.`);
+console.log(`Built the home page, ${NAV.length} chapter pages, ${CATS.length} category pages and ${PROJECTS.length} project pages.`);

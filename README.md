@@ -12,12 +12,24 @@ python3 -m http.server 8000
 
 Then open <http://localhost:8000>. The site also works when published as-is on GitHub Pages, Netlify or Vercel.
 
+## Pages
+
+The home page holds the opening scroll: the logo, the frosted glass, and the 3D house going from plan to model to home. It ends with a contents list. Every chapter after that is its own page, at the client's request (30 Oct). The spec had them all on one long home page.
+
+- `about/`: II · The architect and the author, with the book and the handbooks
+- `team/`: III · The studio
+- `philosophy/`: IV · Philosophy
+- `projects/`: V · Work, plus the category pages and one page per project
+- `contact/`: VI · Contact and the form
+
+The top menu links to these pages. The current page keeps its pencil circle, and moving between pages cross-fades where the browser supports it.
+
 ## Motion on top of the spec
 
 The spec sets the structure, colours, type, texture and interactions. On top of it the site keeps the 3D and scroll motion from the first prototype:
 
 - **Chapter I:** the page opens exactly as the spec describes, with the frosted glass, the sketch slideshow and the glows. As you scroll, the glass pane shrinks into a card around the headline. Behind it a 3D house (three.js) draws its plan on paper, raises its walls as line drawings, becomes a white model and then the finished home in colour, while the camera comes down to the front door. The house answers the cursor: it turns to follow it, a quick sweep sets it spinning before it settles back, dragging turns it directly, and when the cursor is over the house the drawing lifts slightly and its lines darken. The card leans gently toward the cursor and the Plan / Model / Home labels follow the stage. To show one of your own houses, export it as `.glb` and set `MODEL_URL` in `assets/js/hero3d.js`.
-- **The Author:** the book is a 3D object that turns as the chapter scrolls by and leans toward the cursor. Hovering lifts the cover, and clicking opens the sample pages.
+- **The Author:** the book is a 3D object that turns as the chapter scrolls by and leans toward the cursor. Hovering lifts the cover. Clicking it, or READ A SAMPLE, plays an opening: the book lifts toward you, the hard cover swings open on its hinge, and three leaves bend and riffle over to the first spread, with light and shadow following each angle. From there the pages turn like paper, using StPageFlip (`assets/vendor/page-flip-2.0.7.browser.js`, MIT licence). The paper curls, casts a moving shadow and can be dragged by its corner. The spread on the page itself turns the same way.
 - **The studio:** portraits lean toward the cursor with a soft light following it.
 - **Philosophy:** one plan drawing sits behind the three screens, draws itself and moves more slowly than the words.
 - **Work:** the two rows bend into a curved gallery wall. They still follow the spec's timing (6 tiles in 48 s, the second row half a cycle behind), pause on hover and can be dragged.
@@ -54,6 +66,7 @@ Anything in [square brackets] is placeholder text from the spec, waiting for the
 - `assets/brand/*-TRACED.svg`: traced wordmark, for layout only until the original artwork arrives
 - `assets/sketches/`: four placeholder sketches for the chapter I slideshow
 - `assets/js/hero3d.js`: the 3D house in Chapter I
+- `assets/js/book.js`: the book's opening and the page turns on the About page
 - `assets/vendor/lenis-1.1.13.min.js`: Lenis smooth scrolling (MIT licence)
 - `assets/vendor/three/`: three.js r160 (MIT licence)
 

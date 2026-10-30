@@ -120,7 +120,8 @@
 
   /* ---------- 7.2 book and handbook viewer ---------- */
   const pic = (base, alt, eager) => `<picture><source srcset="${base}.webp" type="image/webp"><img src="${base}.jpg" alt="${alt}"${eager ? '' : ' loading="lazy"'}></picture>`;
-  const B = 'assets/book/';
+  const BASE = document.querySelector('meta[name="kd-base"]')?.content || '';
+  const B = BASE + 'assets/book/';
   const BOOK = [
     { cap: 'Introduction · Why your home should be built on paper first', pages: [[B + 'book-p15', 'The 100 Decisions Before the First Brick, introduction, first page'], [B + 'book-p16', 'The 100 Decisions Before the First Brick, introduction, second page']] },
     { cap: 'Chapter 1 · Before I learned to build on paper', pages: [[B + 'book-p17', 'Chapter 1, Before I Learned to Build on Paper, opening page'], [B + 'book-p18', 'Chapter 1, second page']] },
@@ -203,7 +204,8 @@
 
   const viewerRoot = $('#book-viewer');
   let inline = null;
-  if (viewerRoot) {
+  // book.js takes over the book where it is loaded (the About page)
+  if (viewerRoot && !KD.bookOwned) {
     inline = Viewer(viewerRoot, () => (phone.matches ? singles(BOOK) : BOOK), 'spread');
     phone.addEventListener('change', () => inline.reset());
     let inView = false;
@@ -217,7 +219,7 @@
 
   // READ A SAMPLE and VIEW PAGES open the same viewer full screen
   const dlg = $('#pages-dialog');
-  if (dlg) {
+  if (dlg && !KD.bookOwned) {
     const box = $('.viewer', dlg), title = $('.full-title', dlg);
     let full = null, opener = null;
     const open = (which, btn) => {
@@ -247,7 +249,7 @@
       setTimeout(() => {
         rows.innerHTML = $(`template[data-cat="${tab.dataset.cat}"]`).innerHTML;
         foot.textContent = `View all ${tab.dataset.name.toLowerCase()} →`;
-        foot.href = `projects/${tab.dataset.cat}/index.html`;
+        foot.href = `${BASE}projects/${tab.dataset.cat}/index.html`;
         initWall();
         rows.classList.remove('fading');
       }, reduce ? 0 : 250);
@@ -349,6 +351,8 @@
       if (b.closest('#contact')) setTimeout(() => openForm(topic, b), reduce ? 0 : 300);
       else { KD.scrollTo('#contact'); setTimeout(() => openForm(topic, b), reduce ? 0 : 1200); }
     }));
+    // "Connect to the author" on the About page arrives here with the form ready and "About the book" chosen
+    if (location.hash === '#about-the-book') setTimeout(() => openForm('About the book', $('[data-open-form]')), reduce ? 0 : 700);
     $('.form-close', panel).addEventListener('click', closeForm);
     panel.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeForm(); });
     const messages = { name: 'Please add your name.', phone: 'Please add a phone number so we can call you.', planning: 'Please choose what you are planning.' };

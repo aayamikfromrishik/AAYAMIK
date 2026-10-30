@@ -115,6 +115,10 @@
     });
   }
   KD.drawRing = drawRing;
+  // the page you are on keeps its pencil circle in the menu
+  addEventListener('load', () => document.querySelectorAll('.menu a[aria-current="page"], #chapter-list a[aria-current="page"]').forEach((a) => {
+    if (a.offsetParent) setTimeout(() => drawRing(a), reduce ? 0 : 450);
+  }));
   const clearRings = (group) => group.querySelectorAll('svg.kd-ring').forEach((r) => r.remove());
   KD.clearRings = clearRings;
 

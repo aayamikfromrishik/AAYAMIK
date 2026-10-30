@@ -522,3 +522,75 @@ dialog.full[open] { display: flex; flex-direction: column; gap: 18px; }
   .walk-hint { display: none; }
   .stages.fill li::before, .grow g path, .grow g circle, .stages.fill li { transition: none !important; }
 }
+
+/* the home page ends with a contents page; each chapter is its own page */
+.contents { padding-block: 120px 96px; }
+.contents .wrap { display: flex; flex-direction: column; gap: 28px; }
+.toc { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--taupe-light); }
+.toc li { border-bottom: 1px solid var(--taupe-light); }
+.toc a { display: grid; grid-template-columns: 72px minmax(0, 1fr) minmax(0, 1fr) 40px; align-items: baseline; gap: 8px 24px; padding: 28px 10px 26px; }
+.toc a:hover { opacity: 1; }
+.toc .t { font-size: 40px; line-height: 1.2; font-weight: 300; transition: transform .6s var(--ease); }
+.toc .d { font-size: 15px; line-height: 1.7; color: var(--ink-2); }
+.toc .arr { font-size: 20px; transition: transform .6s var(--ease); }
+.toc a:hover .t { transform: translateX(10px); color: var(--moss); }
+.toc a:hover .arr { transform: translateX(8px); }
+.toc svg.kd-ring { display: none; }
+@media (max-width: 767px) {
+  .contents { padding-block: 80px 64px; }
+  .toc a { grid-template-columns: 44px minmax(0, 1fr) 24px; }
+  .toc .t { font-size: 28px; }
+  .toc .d { grid-column: 2 / 3; }
+  .toc .arr { grid-row: 1; grid-column: 3; }
+}
+/* a soft cross-fade from one page to the next, where the browser supports it */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .6s; animation-timing-function: cubic-bezier(.2,.7,.2,1); }
+@media (prefers-reduced-motion: reduce) { ::view-transition-old(root), ::view-transition-new(root) { animation: none; } }
+
+/* ---------- the book: real page turns (StPageFlip) and the opening sequence ---------- */
+.flip-host { position: relative; margin: 0 auto; }
+.inline-host { width: 100%; max-width: 570px; margin-left: auto; margin-right: 0; filter: drop-shadow(0 18px 40px rgba(0,0,0,.35)); }
+.big-host { filter: drop-shadow(0 24px 50px rgba(0,0,0,.45)); opacity: 0; transition: opacity .35s ease; }
+.reading.ready .big-host { opacity: 1; }
+.reading { gap: 12px; }
+.reading .reading-stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.reading .viewer-bar { opacity: 0; transition: opacity .5s ease .2s; }
+.reading.ready .viewer-bar { opacity: 1; }
+.reading.closing { opacity: 0; transition: opacity .4s ease; }
+/* paper: warm off-white, with the soft shadow a real book has where the pages run into the spine */
+.leafpage { background-color: #F7F2E8; overflow: hidden; }
+.leafpage picture, .leafpage img { width: 100%; height: 100%; object-fit: cover; display: block; user-select: none; -webkit-user-drag: none; }
+.leafpage .gutter { position: absolute; top: 0; bottom: 0; width: 14%; pointer-events: none; }
+.leafpage.--left .gutter { right: 0; background: linear-gradient(to left, rgba(40,32,20,.28), rgba(40,32,20,.08) 35%, rgba(40,32,20,0)); }
+.leafpage.--right .gutter { left: 0; background: linear-gradient(to right, rgba(40,32,20,.28), rgba(40,32,20,.08) 35%, rgba(40,32,20,0)); }
+.leafpage.--hard .gutter { display: none; }
+.leafpage.backcover { background-color: #E6DFD2; }
+
+/* the opening: a 3D book that lifts off the page, opens on its hinge and riffles to the first spread */
+.ob { position: fixed; z-index: 2147483000; width: calc(var(--W) * 2); height: var(--H); transform-origin: 75% 50%; transform-style: preserve-3d; pointer-events: none; }
+.ob.done { opacity: 0; transition: opacity .35s ease; }
+.ob > * { position: absolute; top: 0; height: 100%; transform-style: preserve-3d; }
+.ob-floor { left: 50%; width: 50%; top: 4%; height: 96%; background: rgba(20,22,12,.55); filter: blur(28px); transform: translateZ(-2px) translate(calc(var(--lift) * 24px), calc(var(--lift) * 40px)) scale(calc(1 + var(--lift) * .08)); opacity: calc(.55 - var(--lift) * .35); }
+.ob-right, .ob-block, .ob-leaf, .ob-cover { left: 50%; width: 50%; }
+.ob-face { position: absolute; inset: 0; background-color: #F7F2E8; background-size: cover; background-position: center; backface-visibility: hidden; }
+.ob-right .ob-face { box-shadow: inset 0 0 0 1px rgba(0,0,0,.04); }
+.ob-gutter { position: absolute; top: 0; bottom: 0; left: 0; width: 14%; background: linear-gradient(to right, rgba(40,32,20,.3), rgba(40,32,20,0)); }
+.ob-cast { position: absolute; inset: 0; background: linear-gradient(to right, rgba(20,16,8,.65), rgba(20,16,8,.2) 45%, rgba(20,16,8,0) 80%); opacity: 0; }
+/* the page block seen from the fore-edge while the book is still closed */
+.ob-block { left: calc(100% - var(--T) / 2); width: var(--T); background: repeating-linear-gradient(90deg, #F1EADC 0 1px, #D9CFBD 1px 2px); transform: rotateY(90deg) translateZ(calc(var(--T) / -2)); transform-origin: center; }
+.ob-leaf { transform-origin: left center; }
+.ob-half { position: absolute; top: 0; height: 100%; width: 50%; transform-style: preserve-3d; }
+.ob-half.in { left: 0; transform-origin: left center; }
+.ob-half.out { left: 100%; width: 100%; transform-origin: left center; }
+.ob-half .ob-face.f { background: linear-gradient(to right, #EFE8DA, #F7F2E8 30%); }
+.ob-half .ob-face.b { transform: rotateY(180deg); background-color: #F7F2E8; background-size: 200% 100%; }
+.ob-half.out .ob-face.f { background: #F7F2E8; }
+.ob-leaf .ob-half.in::after { content: ""; position: absolute; inset: 0 -100% 0 0; background: linear-gradient(to right, rgba(0,0,0,.25), rgba(0,0,0,0) 60%); opacity: var(--sh, 0); pointer-events: none; }
+.ob-cover { transform-origin: left center; }
+.ob-cover .ob-face.f { border-radius: 0 3px 3px 0; box-shadow: inset 6px 0 8px -4px rgba(0,0,0,.35); }
+.ob-cover .ob-face.b { transform: rotateY(180deg); border-radius: 3px 0 0 3px; }
+.ob-cover .endpaper { background: #E9E2D4 linear-gradient(to left, rgba(40,32,20,.22), rgba(40,32,20,0) 18%); }
+.ob-light { position: absolute; inset: 0; background: linear-gradient(105deg, rgba(0,0,0,.55), rgba(0,0,0,.15)); opacity: 0; backface-visibility: hidden; pointer-events: none; }
+.ob-edge { position: absolute; top: 0; bottom: 0; right: -3px; width: 3px; background: #CFC6B6; transform: rotateY(90deg); transform-origin: left; }
+@media (prefers-reduced-motion: reduce) { .ob { display: none; } .big-host, .reading .viewer-bar { transition: none; } }

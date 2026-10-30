@@ -227,7 +227,8 @@ const lerp = (a, b, t) => a + (b - a) * t;
 
 let buildStart = null;            // set when the glass starts to open
 let scrollS = 0;                  // smoothed progress through the 3D part of Chapter I
-const mouse = { x: 0, y: 0, sx: 0, sy: 0 };
+// the cursor: where it is (x, y), how fast it moves (spin), and whether it is over the house (hover)
+const mouse = { x: 0, y: 0, sx: 0, sy: 0, spin: 0, turn: 0, drag: false, lastX: 0, hover: 0, px: -9, py: -9 };
 const clay = new THREE.Color(C.clay);
 const groundPaper = new THREE.Color(C.paper), groundGrass = new THREE.Color(C.grass);
 const clock = new THREE.Clock();
@@ -240,8 +241,20 @@ if (!reduceMotion && matchMedia('(pointer: fine)').matches) {
   addEventListener('pointermove', (e) => {
     mouse.x = (e.clientX / innerWidth) * 2 - 1;
     mouse.y = (e.clientY / innerHeight) * 2 - 1;
+    const r = canvas.getBoundingClientRect();
+    mouse.px = ((e.clientX - r.left) / r.width) * 2 - 1;
+    mouse.py = -((e.clientY - r.top) / r.height) * 2 + 1;
+    // a quick sweep of the cursor sets the house turning; dragging turns it directly
+    const dx = e.clientX - mouse.lastX;
+    mouse.lastX = e.clientX;
+    if (heroP() > 0.1) mouse.spin += dx * (mouse.drag ? 0.0009 : 0.00018);
   });
+  // drag anywhere on the scene that is not a link or a button
+  stageEl.addEventListener('pointerdown', (e) => { if (!e.target.closest('a, button')) { mouse.drag = true; mouse.lastX = e.clientX; } });
+  addEventListener('pointerup', () => { mouse.drag = false; });
 }
+const ray = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
 
 function resize() {
   const w = stageEl.clientWidth, h = stageEl.clientHeight;
@@ -267,8 +280,18 @@ function frame() {
   const bt = Math.max(time - buildStart, sceneP() * 14);
 
   scrollS += (sceneP() - scrollS) * 0.08;
-  mouse.sx += (mouse.x - mouse.sx) * 0.05;
-  mouse.sy += (mouse.y - mouse.sy) * 0.05;
+  mouse.sx += (mouse.x - mouse.sx) * 0.06;
+  mouse.sy += (mouse.y - mouse.sy) * 0.06;
+  // the spin carries on a little after the cursor stops, then the house settles back gently
+  mouse.turn += mouse.spin;
+  mouse.spin *= mouse.drag ? 0.6 : 0.93;
+  if (!mouse.drag) mouse.turn *= 0.992;
+  // over the house, the drawing lifts slightly off the paper and the lines darken, like a pencil pressing
+  pointer.set(mouse.px, mouse.py);
+  ray.setFromCamera(pointer, camera);
+  const over = ray.intersectObject(house, true).length > 0 ? 1 : 0;
+  mouse.hover += (over - mouse.hover) * 0.08;
+  house.position.y = lines.position.y = mouse.hover * 0.35;
   const p = scrollS;
 
   // I · the plan draws itself, then the walls rise as lines
@@ -289,7 +312,7 @@ function frame() {
     m.color.copy(clay).lerp(m.userData.target, colour);
     mesh.castShadow = solid > 0.3;
   });
-  lineMat.opacity = lerp(0.9, 0.12, colour);
+  lineMat.opacity = Math.min(1, lerp(0.9, 0.12, colour) + mouse.hover * 0.25);
   sun.intensity = lerp(0.0, 2.6, solid) + colour * 0.6;
   hemi.intensity = lerp(1.1, 0.75, solid);
   groundMat.color.copy(groundPaper).lerp(groundGrass, colour * 0.85);
@@ -300,9 +323,9 @@ function frame() {
   const autoTheta = reduceMotion ? 0.9 : 0.9 + time * 0.045;
   const front = 0.42;
   const k = smooth(0.5, 1, p);
-  const theta = lerp(autoTheta, front + Math.round((autoTheta - front) / (Math.PI * 2)) * Math.PI * 2, k) + mouse.sx * 0.18;
+  const theta = lerp(autoTheta, front + Math.round((autoTheta - front) / (Math.PI * 2)) * Math.PI * 2, k) + mouse.sx * 0.5 + mouse.turn;
   const radius = lerp(40, 33, smooth(0, 1, p)) * (camera.aspect < 0.8 ? 1.55 : 1);
-  const height = lerp(26, 5.5, smooth(0.1, 1, p)) - mouse.sy * 1.2;
+  const height = Math.max(1.6, lerp(26, 5.5, smooth(0.1, 1, p)) - mouse.sy * lerp(5, 2.5, k));
   target.set(1, lerp(0.5, 3.4, k), lerp(0.5, 1, k));
   camera.position.set(target.x + Math.sin(theta) * radius, height, target.z + Math.cos(theta) * radius);
   camera.lookAt(target);

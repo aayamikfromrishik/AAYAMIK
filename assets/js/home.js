@@ -7,30 +7,75 @@
   const phone = matchMedia('(max-width: 767px)');
 
   /* ---------- 5.1 logo loader, first visit only ---------- */
+  // The animation has no background of its own: the video stores colour in its top half and
+  // transparency in its bottom half, and a small WebGL shader puts them back together on a canvas.
+  // This plays the same way in every browser, Safari included.
+  function alphaPlayer(video, canvas) {
+    const gl = canvas.getContext('webgl', { premultipliedAlpha: true, alpha: true, antialias: false });
+    if (!gl) return null;
+    const sh = (type, src) => { const o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o); return o; };
+    const prog = gl.createProgram();
+    gl.attachShader(prog, sh(gl.VERTEX_SHADER, 'attribute vec2 p; varying vec2 uv; void main(){ uv = vec2(p.x * .5 + .5, .5 - p.y * .5); gl_Position = vec4(p, 0., 1.); }'));
+    gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, 'precision mediump float; varying vec2 uv; uniform sampler2D t; void main(){ vec3 c = texture2D(t, vec2(uv.x, uv.y * .5)).rgb; float a = texture2D(t, vec2(uv.x, .5 + uv.y * .5)).r; a = clamp((a - .03) / .97, 0., 1.); gl_FragColor = vec4(c * a, a); }'));
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
+    gl.useProgram(prog);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, 'p');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+    [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach((k) => gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE));
+    [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach((k) => gl.texParameteri(gl.TEXTURE_2D, k, gl.LINEAR));
+    const size = () => {
+      const d = Math.min(devicePixelRatio || 1, 2);
+      canvas.width = Math.round(canvas.clientWidth * d); canvas.height = Math.round(canvas.clientHeight * d);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    };
+    size();
+    addEventListener('resize', size);
+    let on = true;
+    const draw = () => {
+      if (!on) return;
+      if (video.readyState >= 2) {
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video);
+        gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      }
+      // draw exactly once per decoded video frame where the browser can say when one arrives
+      if (video.requestVideoFrameCallback) video.requestVideoFrameCallback(draw); else requestAnimationFrame(draw);
+    };
+    draw();
+    return { stop() { on = false; } };
+  }
+
   const html = document.documentElement;
   if (html.classList.contains('kd-intro')) {
     KD.store.set('kd_intro_seen', '1');
-    const loader = $('.loader'), video = $('.loader video');
-    let done = false;
+    const loader = $('.loader'), video = $('.loader video'), canvas = $('.loader .logo-anim');
+    let done = false, player = null;
     KD.lock(true);
     const finish = () => {
       if (done) return;
       done = true;
       html.classList.add('kd-intro-out');
       loader.classList.add('out');
-      setTimeout(() => { video.pause(); html.classList.remove('kd-intro', 'kd-intro-out'); KD.lock(false); }, 900);
+      setTimeout(() => { video.pause(); player && player.stop(); html.classList.remove('kd-intro', 'kd-intro-out'); KD.lock(false); }, 900);
     };
-    if (reduce) {
-      // show the last frame for a second, then fade
-      const toEnd = () => { try { video.currentTime = Math.max(0, video.duration - 0.05); } catch (e) { /* not seekable yet */ } setTimeout(finish, 1000); };
-      if (video.readyState >= 1) toEnd(); else video.addEventListener('loadedmetadata', toEnd, { once: true });
-      setTimeout(finish, 3000);
-    } else {
-      video.addEventListener('ended', finish);
-      const p = video.play();
-      if (p && p.catch) p.catch(finish);
-      setTimeout(finish, 14000);
-      ['wheel', 'touchstart', 'pointerdown', 'keydown'].forEach((ev) => addEventListener(ev, finish, { once: true, passive: true }));
+    const still = (ms) => { loader.classList.add('still'); setTimeout(finish, ms); };
+    if (reduce) still(1000); // the finished logo for a second, then the fade
+    else {
+      video.preload = 'auto';
+      player = alphaPlayer(video, canvas);
+      if (!player) still(1600);
+      else {
+        video.addEventListener('ended', () => setTimeout(finish, 350));
+        const p = video.play();
+        if (p && p.catch) p.catch(() => still(1600));
+        setTimeout(finish, 11000);
+        ['wheel', 'touchstart', 'pointerdown', 'keydown'].forEach((ev) => addEventListener(ev, finish, { once: true, passive: true }));
+      }
     }
   }
 
@@ -395,6 +440,12 @@
   if (hs && reduce) {
     const bar = $('.topbar');
     new IntersectionObserver(([e]) => bar && bar.classList.toggle('show', !e.isIntersecting && e.boundingClientRect.top < 0), { threshold: 0.02 }).observe(hs);
+  }
+
+  if (hs && KD.mouse && !reduce) {
+    const hero = $('.hero', hs);
+    hero.addEventListener('pointerdown', (e) => { if (!e.target.closest('a, button')) hero.classList.add('dragging'); });
+    addEventListener('pointerup', () => hero.classList.remove('dragging'));
   }
 
   // Chapter II: the book turns as the chapter scrolls by and leans toward the cursor

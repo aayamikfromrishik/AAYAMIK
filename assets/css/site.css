@@ -100,7 +100,12 @@ html.kd-cursor-on .kd-cursor { display: block; }
 /* 5.1 logo loader, first visit only */
 .loader { position: fixed; inset: 0; z-index: 500; display: none; align-items: center; justify-content: center; background-color: var(--moss); transition: opacity .9s ease, visibility .9s; }
 html.kd-intro .loader { display: flex; }
-.loader video { width: 100%; height: 100%; object-fit: contain; }
+.loader .logo-anim, .loader .logo-last { width: min(78vw, 1100px, calc(78vh * 1600 / 880)); aspect-ratio: 1600 / 880; height: auto; }
+.loader .logo-last { position: absolute; opacity: 0; transition: opacity .6s ease; }
+.loader.still .logo-last { opacity: 1; }
+.loader.still .logo-anim { visibility: hidden; }
+.loader video { position: absolute; width: 2px; height: 2px; opacity: 0; pointer-events: none; }
+.hero.opened.dragging, .hero.opened.dragging * { user-select: none; }
 .loader.out { opacity: 0; visibility: hidden; }
 html.kd-intro .hero-fade { opacity: 0; }
 html.kd-intro.kd-intro-out .hero-fade { opacity: 1; transition: opacity .9s ease; }

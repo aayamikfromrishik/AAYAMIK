@@ -16,7 +16,7 @@ Then open <http://localhost:8000>. The site also works when published as-is on G
 
 The spec sets the structure, colours, type, texture and interactions. On top of it the site keeps the 3D and scroll motion from the first prototype:
 
-- **Chapter I:** the page opens exactly as the spec describes, with the frosted glass, the sketch slideshow and the glows. As you scroll, the glass pane shrinks into a card around the headline. Behind it a 3D house (three.js) draws its plan on paper, raises its walls as line drawings, becomes a white model and then the finished home in colour, while the camera comes down to the front door. The card leans gently toward the cursor and the Plan / Model / Home labels follow the stage. To show one of your own houses, export it as `.glb` and set `MODEL_URL` in `assets/js/hero3d.js`.
+- **Chapter I:** the page opens exactly as the spec describes, with the frosted glass, the sketch slideshow and the glows. As you scroll, the glass pane shrinks into a card around the headline. Behind it a 3D house (three.js) draws its plan on paper, raises its walls as line drawings, becomes a white model and then the finished home in colour, while the camera comes down to the front door. The house answers the cursor: it turns to follow it, a quick sweep sets it spinning before it settles back, dragging turns it directly, and when the cursor is over the house the drawing lifts slightly and its lines darken. The card leans gently toward the cursor and the Plan / Model / Home labels follow the stage. To show one of your own houses, export it as `.glb` and set `MODEL_URL` in `assets/js/hero3d.js`.
 - **The Author:** the book is a 3D object that turns as the chapter scrolls by and leans toward the cursor. Hovering lifts the cover, and clicking opens the sample pages.
 - **The studio:** portraits lean toward the cursor with a soft light following it.
 - **Philosophy:** one plan drawing sits behind the three screens, draws itself and moves more slowly than the words.
@@ -57,6 +57,18 @@ Anything in [square brackets] is placeholder text from the spec, waiting for the
 - `assets/vendor/lenis-1.1.13.min.js`: Lenis smooth scrolling (MIT licence)
 - `assets/vendor/three/`: three.js r160 (MIT licence)
 
+## The logo animation
+
+`assets/loader/KD_logo_animation_alpha_8s.mp4` is made from the client's transparent 4K master by `tools/logo/build-loader.sh`. The script:
+
+- crops to the logo and scales it to 1600 × 880;
+- removes the scattered glitter sparkles while keeping the star that leads the drawing, and drops near-invisible dust pixels;
+- gives antialiased edges the colour of the metal beside them;
+- keeps all 360 original frames, played at 45 fps for 8 s. The earlier 8 s file had dropped frames to speed up, which made the motion uneven;
+- stores colour in the top half of the video and transparency in the bottom half.
+
+`assets/js/home.js` recombines the two halves on a canvas with a small WebGL shader. That gives a transparent animation in Safari too, where transparent WebM does not play.
+
 ## Spec checklist
 
 Built and matching the spec:
@@ -69,7 +81,7 @@ Built and matching the spec:
 | 3.4 | Leather texture on every coloured surface, 512 px tile |
 | 3.5 | Letterhead stripe at the bottom of Contact and of the category and project pages |
 | 4 | 12-column grid with 64 px margins; one-screen chapters; Lenis smooth scroll (1.1 s) with proximity snapping on desktop only; reveals rising 24 px over 0.8 s, staggered 80 ms; chapter indicator with a chapter list; slim header after chapter I; square corners apart from the glass, pills and circles; shadows only on the book |
-| 5.1 | Logo animation (8 s MP4 on moss), first visit only, skippable by scroll, click, tap or key, 0.9 s fade; reduced motion shows the last frame for 1 s |
+| 5.1 | Logo animation, first visit only, skippable by scroll, click, tap or key, 0.9 s fade; reduced motion shows the finished logo for 1 s. At the client's request (30 Oct) the logo draws straight onto the page's moss leather with no box behind it: it is rebuilt from the transparent 4K master as a transparent animation that plays in every browser (see below) |
 | 5.2 | Pencil cursor following the pointer exactly, dark or light by surface, tilting over anything clickable and pressing on mouse down, off on touch screens, with the CSS cursor as fallback |
 | 5.3 | Hand-drawn circle on menu items, tabs, buttons and the chapter list; stays on the current menu item and tab; links wait 350 ms before navigating. At the client's request (30 Oct) it is drawn as grainy graphite pencil, dark on light surfaces and pale on moss and burnt orange, instead of the spec's orange and gold line |
 | 5.4 | Project images and portraits in black and white, colour and a 4 px lift on hover; on touch screens the image in the middle of the screen turns to colour |

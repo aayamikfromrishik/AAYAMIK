@@ -52,7 +52,7 @@ ${home ? `<script type="importmap">{ "imports": { "three": "./assets/vendor/thre
 <script>
   // 5.1 the logo animation plays on the first visit only
   try { if (!localStorage.getItem('kd_intro_seen')) { document.documentElement.classList.add('kd-intro');
-    var l = document.createElement('link'); l.rel = 'preload'; l.as = 'video'; l.href = 'assets/loader/KD_logo_animation_on_moss_1080p_8s.mp4'; document.head.appendChild(l); } } catch (e) {}
+    var l = document.createElement('link'); l.rel = 'preload'; l.as = 'video'; l.href = 'assets/loader/KD_logo_animation_alpha_8s.mp4'; document.head.appendChild(l); } } catch (e) {}
 </script>` : ''}
 </head>`;
 }
@@ -129,7 +129,11 @@ function home() {
 <a class="skip-link cap" href="#about">Skip to content</a>
 
 <div class="loader tx" aria-hidden="true">
-  <video muted playsinline preload="none" src="assets/loader/KD_logo_animation_on_moss_1080p_8s.mp4"></video>
+  <!-- 5.1 the logo draws itself straight onto the moss leather: a transparent animation, no box behind it.
+       The video holds colour in its top half and transparency in its bottom half; home.js combines them on a canvas. -->
+  <canvas class="logo-anim"></canvas>
+  <img class="logo-last" src="assets/loader/KD_logo_last.webp" alt="" width="1600" height="880">
+  <video muted playsinline preload="none" src="assets/loader/KD_logo_animation_alpha_8s.mp4"></video>
 </div>
 
 ${topbar(base, true)}

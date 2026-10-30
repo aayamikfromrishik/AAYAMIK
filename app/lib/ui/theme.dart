@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Palette chosen at build time: --dart-define=PALETTE=safety|green|toran|brick.
-const palette = String.fromEnvironment('PALETTE', defaultValue: 'safety');
+/// Final palette is Brick & Sage. Others kept for comparison: --dart-define=PALETTE=safety|green|toran.
+const palette = String.fromEnvironment('PALETTE', defaultValue: 'brick');
 
 Color _pick(int safety, int green, int toran, int brick) => Color(switch (palette) {
       'green' => green,

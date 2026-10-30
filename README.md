@@ -71,7 +71,7 @@ Built and matching the spec:
 | 4 | 12-column grid with 64 px margins; one-screen chapters; Lenis smooth scroll (1.1 s) with proximity snapping on desktop only; reveals rising 24 px over 0.8 s, staggered 80 ms; chapter indicator with a chapter list; slim header after chapter I; square corners apart from the glass, pills and circles; shadows only on the book |
 | 5.1 | Logo animation (8 s MP4 on moss), first visit only, skippable by scroll, click, tap or key, 0.9 s fade; reduced motion shows the last frame for 1 s |
 | 5.2 | Pencil cursor following the pointer exactly, dark or light by surface, tilting over anything clickable and pressing on mouse down, off on touch screens, with the CSS cursor as fallback |
-| 5.3 | Hand-drawn circle on menu items, tabs, buttons and the chapter list; stays on the current menu item and tab; links wait 350 ms before navigating |
+| 5.3 | Hand-drawn circle on menu items, tabs, buttons and the chapter list; stays on the current menu item and tab; links wait 350 ms before navigating. At the client's request (30 Oct) it is drawn as grainy graphite pencil, dark on light surfaces and pale on moss and burnt orange, instead of the spec's orange and gold line |
 | 5.4 | Project images and portraits in black and white, colour and a 4 px lift on hover; on touch screens the image in the middle of the screen turns to colour |
 | 5.5 | Orange and gold pill buttons, outline secondary buttons, visible focus outline per surface |
 | 6 | Frosted glass to the exact insets, blur and fill, with a fallback; six glows at the listed positions; slideshow every 6 s with a 1.2 s crossfade, background following it, pause on hover, clickable dots |

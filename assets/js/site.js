@@ -50,15 +50,34 @@
   };
   KD.lock = (on) => { if (lenis) on ? lenis.stop() : lenis.start(); document.documentElement.style.overflow = on ? 'hidden' : ''; };
 
-  /* ---------- 5.3 sketched circle ---------- */
-  function ringPath() {
-    const n = 26, turn = 1.15;
+  /* ---------- 5.3 sketched circle, drawn like a soft graphite pencil ---------- */
+  // one hidden filter gives every stroke the broken, grainy edge of pencil on paper
+  const NS = 'http://www.w3.org/2000/svg';
+  const defs = document.createElementNS(NS, 'svg');
+  defs.setAttribute('aria-hidden', 'true');
+  defs.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+  defs.innerHTML = `<filter id="kd-graphite" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="7" result="grain"/>
+      <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.2 1.75" result="mask"/>
+      <feComposite in="SourceGraphic" in2="mask" operator="in" result="grainy"/>
+      <feDisplacementMap in="grainy" in2="grain" scale="1.4" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>`;
+  document.body.appendChild(defs);
+
+  // a loose loop in pixels: a smooth hand wobble rather than jitter, about 1.15 turns,
+  // the second lap drifting slightly outward the way a quick pencil loop does
+  function ringPath(w, h) {
+    const cx = w / 2, cy = h / 2, rx = w / 2 - 2, ry = h / 2 - 2;
+    const turn = 1.15, n = Math.round(72 * turn);
+    const f1 = Math.random() * 6.28, f2 = Math.random() * 6.28;
+    const tilt = (Math.random() - 0.5) * 0.06;
     let d = '';
     for (let i = 0; i <= n; i++) {
-      const a = -1.9 + (i / n) * Math.PI * 2 * turn;
-      const j = 1 + (Math.random() - 0.5) * 0.08;
-      const x = 50 + 48 * Math.cos(a) * j;
-      const y = 50 + 44 * Math.sin(a) * j;
+      const t = i / n;
+      const a = -1.9 + t * Math.PI * 2 * turn;
+      const wob = 1 + 0.022 * Math.sin(2 * a + f1) + 0.012 * Math.sin(3 * a + f2) + 0.035 * t;
+      const x = cx + rx * wob * Math.cos(a + tilt * Math.sin(a));
+      const y = cy + ry * wob * Math.sin(a);
       d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1) + ' ';
     }
     return d;
@@ -66,25 +85,34 @@
   function drawRing(el) {
     el.classList.add('ringable');
     el.querySelectorAll(':scope > svg.kd-ring').forEach((r) => r.remove());
-    const colour = onDark(el) && !el.closest('.glass, .form-panel') ? '#DDB86E' : '#8B4729';
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    // graphite on light surfaces, a pale pencil on moss and burnt orange
+    const lead = onDark(el) && !el.closest('.glass, .form-panel') ? '#E4DACA' : '#2B2D20';
+    const w = el.offsetWidth + 20, h = el.offsetHeight + 16;
+    const svg = document.createElementNS(NS, 'svg');
     svg.setAttribute('class', 'kd-ring');
-    svg.setAttribute('viewBox', '0 0 100 100');
-    svg.setAttribute('preserveAspectRatio', 'none');
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
     svg.setAttribute('aria-hidden', 'true');
-    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    p.setAttribute('d', ringPath());
-    p.setAttribute('vector-effect', 'non-scaling-stroke');
-    p.style.cssText = `fill:none;stroke:${colour};stroke-width:1.3;stroke-linecap:round`;
-    svg.appendChild(p);
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('filter', 'url(#kd-graphite)');
+    // a firm first pass and a lighter second pass that never sits exactly on the first
+    const passes = [[1.5, 0.9, 0], [0.8, 0.45, 0.12]].map(([width, alpha, delay]) => {
+      const p = document.createElementNS(NS, 'path');
+      p.setAttribute('d', ringPath(w, h));
+      p.style.cssText = `fill:none;stroke:${lead};stroke-width:${width};stroke-opacity:${alpha};stroke-linecap:round;stroke-linejoin:round`;
+      g.appendChild(p);
+      return [p, delay];
+    });
+    svg.appendChild(g);
     el.appendChild(svg);
     if (reduce) return;
-    const L = p.getTotalLength();
-    p.style.strokeDasharray = L;
-    p.style.strokeDashoffset = L;
-    p.getBoundingClientRect();
-    p.style.transition = 'stroke-dashoffset .55s ease-out';
-    p.style.strokeDashoffset = 0;
+    passes.forEach(([p, delay]) => {
+      const L = p.getTotalLength();
+      p.style.strokeDasharray = L;
+      p.style.strokeDashoffset = L;
+      p.getBoundingClientRect();
+      p.style.transition = `stroke-dashoffset .55s cubic-bezier(.3,.6,.4,1) ${delay}s`;
+      p.style.strokeDashoffset = 0;
+    });
   }
   KD.drawRing = drawRing;
   const clearRings = (group) => group.querySelectorAll('svg.kd-ring').forEach((r) => r.remove());

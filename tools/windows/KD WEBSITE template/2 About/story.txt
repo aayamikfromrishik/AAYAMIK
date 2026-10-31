@@ -1,0 +1,4 @@
+Story:
+[Your story, first short paragraph.]
+
+[Your story, second short paragraph.]

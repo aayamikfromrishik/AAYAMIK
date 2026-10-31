@@ -1,0 +1,5 @@
+# the built website and its image cache are made by `npm run build`
+dist/
+.cache/
+node_modules/
+tools/windows/sync-config.json

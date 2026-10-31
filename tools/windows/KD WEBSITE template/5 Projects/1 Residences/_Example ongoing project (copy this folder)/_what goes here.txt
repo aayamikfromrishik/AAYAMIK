@@ -1,0 +1,5 @@
+render.jpg                         how it will look
+Site photos\Stage 4\2026-10-30 north wall.jpg     date first, then a short caption
+STAGE in info.txt is a number from 1 to 6:
+1 Design, 2 Approvals, 3 Structure, 4 Masonry and services, 5 Finishing, 6 Handover.
+The newest two site photos are shown at the top; the rest are grouped by stage.

@@ -1,0 +1,7 @@
+elevation.jpg            the front elevation, render or photo, in colour
+Site photographs\        exterior photos of the finished building
+Interiors\               interior photos
+Drawings\                presentation drawings only: coloured plan, a section, a concept diagram
+walkthrough.mp4          optional, under 80 MB (or a YouTube link in info.txt)
+Number photos to set their order: "01 Street view.jpg". The name after the number becomes the caption.
+STATUS in info.txt can be Completed, Ongoing or Concept. Keep "Brief:" as the last line.

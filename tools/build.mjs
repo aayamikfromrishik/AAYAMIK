@@ -1,13 +1,24 @@
-// Builds every page of the site from content/projects.json. Run: node tools/build.mjs
+// Builds the whole website into dist/. Run: npm run build
+// Content comes from the studio's folder (site-content/, a mirror of Z:\2_Office Data\KD WEBSITE).
+// Anything the folder does not have yet falls back to the placeholders in content/projects.json.
 // Section numbers in comments refer to docs/KARUKRIT_WEBSITE_SPEC.md.
-import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync, readdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync, cpSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadContent, Media } from './content.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const OUT = resolve(ROOT, process.env.KD_OUT || 'dist');
+const CONTENT_DIR = resolve(ROOT, process.env.KD_CONTENT || 'site-content');
 const data = JSON.parse(readFileSync(join(ROOT, 'content/projects.json'), 'utf8'));
-const CATS = data.categories;
-const PROJECTS = data.projects;
+rmSync(OUT, { recursive: true, force: true });
+mkdirSync(OUT, { recursive: true });
+const media = new Media(OUT, join(ROOT, '.cache/media'));
+const C = loadContent(CONTENT_DIR, media);
+await media.run();
+const PROJECTS = C.projects || data.projects;
+// a category shows only once it has a project in it
+const CATS = (C.categories || data.categories).filter((c) => PROJECTS.some((p) => p.category === c.slug));
 const SITE = 'https://karukritdesigns.com/';
 const HAS_SATOSHI = existsSync(join(ROOT, 'assets/fonts/Satoshi-Light.woff2'));
 const STAGES = ['Design', 'Approvals', 'Structure', 'Masonry and services', 'Finishing', 'Handover'];
@@ -19,9 +30,16 @@ const projectHref = (base, p) => `${base}projects/${p.slug}/index.html`;
 const catHref = (base, c) => `${base}projects/${c.slug}/index.html`;
 
 // an image from the studio, or a labelled placeholder in the project's tint until one exists
-const visual = (img, tint, label, base, eager = false) => img
-  ? `<picture>${img.webp ? `<source srcset="${base}${esc(img.webp)}" type="image/webp">` : ''}<img src="${base}${esc(img.src)}" alt="${esc(img.alt)}"${eager ? '' : ' loading="lazy"'}></picture>`
-  : `<div class="ph tx" style="background-color:${tint}" role="img" aria-label="${esc(label)}, placeholder"><span class="cap">[${esc(label)}]</span></div>`;
+const withBase = (base, srcset) => srcset.split(', ').map((x) => base + x).join(', ');
+const visual = (img, tint, label, base, eager = false, sizes = '(max-width: 767px) 100vw, 50vw') => {
+  if (!img) return `<div class="ph tx" style="background-color:${tint}" role="img" aria-label="${esc(label)}, placeholder"><span class="cap">[${esc(label)}]</span></div>`;
+  const lazy = eager ? '' : ' loading="lazy" decoding="async"';
+  // 16: AVIF and WebP with a JPEG fallback, each at two sizes
+  if (img.srcset) return `<picture><source type="image/avif" srcset="${withBase(base, img.srcset('avif'))}" sizes="${sizes}"><source type="image/webp" srcset="${withBase(base, img.srcset('webp'))}" sizes="${sizes}"><img src="${base}${img.src}" srcset="${withBase(base, img.srcset('jpg'))}" sizes="${sizes}" alt="${esc(img.alt)}"${lazy}></picture>`;
+  return `<picture>${img.webp ? `<source srcset="${base}${esc(img.webp)}" type="image/webp">` : ''}<img src="${base}${esc(img.src)}" alt="${esc(img.alt)}"${lazy}></picture>`;
+};
+// "*a hundred decisions*" in the studio's text becomes the highlighted words
+const highlight = (t) => esc(t).replace(/\*(.+?)\*/g, '<b class="hl">$1</b>');
 
 /* ---------- shared pieces ---------- */
 function head({ base, title, description, path, home = false }) {
@@ -109,7 +127,7 @@ function rowsFor(base, c) {
   const list = PROJECTS.filter((p) => p.category === c.slug);
   let r1 = list.filter((_, i) => i % 2 === 0), r2 = list.filter((_, i) => i % 2 === 1);
   if (!r2.length) r2 = r1.slice();
-  const fill = (row) => { const out = []; while (out.length < 6) out.push(...row); return out; };
+  const fill = (row) => { const out = []; while (row.length && out.length < 6) out.push(...row); return out; };
   const row = (items, cls) => {
     const full = fill(items);
     const seen = new Set();
@@ -120,6 +138,12 @@ function rowsFor(base, c) {
   return row(r1, 'row1') + row(r2, 'row2');
 }
 
+const CONTACT = C.contact || {};
+const ADDRESS = CONTACT.address || ['3652/2, 1st Floor, Green Field', 'Model Gram, Ludhiana 141002, Punjab'];
+const PHONE = CONTACT.phone || '+91 88243 96618';
+const EMAIL = CONTACT.email || 'ceo@karukritdesigns.com';
+const MEMBERS = C.members || [{ name: 'Kuljeet' }, { name: 'Krishma' }, { name: 'Sanchit' }, { name: '[Fourth member]' }];
+
 /* ---------- home page ---------- */
 const SKETCHES = [
   { src: 'assets/sketches/sketch-01.svg', name: '[Residence name]', alt: 'Pencil sketch of a two-storey house elevation', glow: ['#818865', '#BB8D3F', '#818865', '#8B4729', '#2A2D1B', '#BB8D3F'] },
@@ -127,6 +151,15 @@ const SKETCHES = [
   { src: 'assets/sketches/sketch-03.svg', name: '[Residence name]', alt: 'Pencil sketch of a three-storey house with a stair tower', glow: ['#8B4729', '#818865', '#BB8D3F', '#2A2D1B', '#818865', '#8B4729'] },
   { src: 'assets/sketches/sketch-04.svg', name: '[Residence name]', alt: 'Pencil sketch of a ground floor plan around a courtyard', glow: ['#818865', '#2A2D1B', '#BB8D3F', '#818865', '#8B4729', '#BB8D3F'] },
 ];
+const GLOW_SETS = SKETCHES.map((s) => s.glow);
+if (C.sketches && C.sketches.length) {
+  SKETCHES.length = 0;
+  C.sketches.forEach((s, i) => SKETCHES.push({
+    // sketches keep their transparent paper, so they are shown as WebP
+    src: `media/${s.image.name}-${s.image.widths[s.image.widths.length - 1]}.webp`, name: s.name, alt: s.alt,
+    render: s.render ? `media/${s.render.name}-${s.render.widths[0]}.jpg` : null, glow: GLOW_SETS[i % GLOW_SETS.length],
+  }));
+}
 // 6 the six glows on a 1440 x 900 screen, as percentages
 const GLOWS = [[-120, -140, 620, 540, 1], [480, -120, 520, 380, 0.9], [1000, -120, 560, 500, 0.85], [820, 380, 480, 420, 1], [140, 540, 600, 400, 1], [1140, 600, 400, 360, 0.7]];
 const glowset = (s, i) => `<div class="glowset${i === 0 ? ' on' : ''}">${s.render ? `<img src="${s.render}" alt="">` : GLOWS.map(([x, y, w, h, o], k) =>
@@ -159,7 +192,7 @@ ${indicator(base, '')}
 <div id="home" class="hero-scroll" data-chapter="I" data-cursor="light" data-snap>
 <section class="ch hero s-moss tx" aria-label="Chapter I, home">
   <div class="glowsets" aria-hidden="true">${SKETCHES.map(glowset).join('')}</div>
-  <canvas id="house" role="img" aria-label="A house drawn as a plan on paper, rising into walls, then shown as a white model and as the finished home"></canvas>
+  <canvas id="house" role="img" aria-label="A house drawn as a plan on paper, rising into walls, then shown as a white model and as the finished home"${C.model ? ` data-model="${C.model}"` : ''}></canvas>
   <div class="glass hero-fade" data-cursor="dark">
     <div class="pane tx" aria-hidden="true"></div>
     <div class="glass-top fades">
@@ -190,12 +223,11 @@ ${indicator(base, '')}
 
 <!-- II · The architect -->
 <section id="about" class="ch arch s-taupe tx" data-chapter="II" data-cursor="dark" data-snap aria-labelledby="arch-h">
-  <div class="portrait mono-host"><div class="mono ph tx" style="background-color:var(--sage);height:100%" role="img" aria-label="Portrait of Ar. Saptarshi Kapri, placeholder"><span class="cap">[Portrait · full height]</span></div></div>
+  <div class="portrait mono-host">${C.portrait ? `<div class="mono portrait-img">${visual(C.portrait, '', '', base, false, '(max-width: 767px) 100vw, 50vw')}</div>` : '<div class="mono ph tx" style="background-color:var(--sage);height:100%" role="img" aria-label="Portrait of Ar. Saptarshi Kapri, placeholder"><span class="cap">[Portrait · full height]</span></div>'}</div>
   <div class="arch-text" data-stagger>
     <span class="cap rv">Chapter II · The architect</span>
     <h2 id="arch-h" class="h1 rv"><b class="hl">Ar. Saptarshi</b> Kapri</h2>
-    <p class="body muted rv">[Your story, first short paragraph.]</p>
-    <p class="body muted rv">[Your story, second short paragraph.]</p>
+    ${(C.story || ['[Your story, first short paragraph.]', '[Your story, second short paragraph.]']).map((t) => `<p class="body muted rv">${esc(t)}</p>`).join('\n    ')}
     <a class="book-card s-moss tx rv" href="#author" data-cursor="light">
       ${bookPic('book-cover-front', 'Cover of The 100 Decisions Before the First Brick', ' width="70" height="96"')}
       <span class="stack"><span class="cap cap-gold">The book</span><span class="t">The 100 Decisions Before the First Brick</span></span>
@@ -251,12 +283,12 @@ ${indicator(base, '')}
 <section id="team" class="ch team s-gold tx" data-chapter="III" data-cursor="dark" data-snap aria-labelledby="team-h">
   <div class="wrap team-head" data-stagger>
     <div class="rv"><span class="cap">Chapter III</span><h2 id="team-h" class="h2">The studio</h2><i class="rule"></i></div>
-    <p class="body rv">[One sentence on how the team works together, from first sketch to site.]</p>
+    <p class="body rv">${esc(C.teamSentence || '[One sentence on how the team works together, from first sketch to site.]')}</p>
   </div>
   <ul class="wrap team-grid" data-stagger>
-    ${[['Kuljeet', '[Role]'], ['Krishma', '[Role]'], ['Sanchit', '[Role]'], ['[Fourth member]', '[Role]']].map(([n, r]) => `<li class="member mono-host rv">
-      <div class="frame tilt"><div class="mono ph tx" style="background-color:var(--sage)" role="img" aria-label="Portrait of ${esc(n)}, placeholder"><span class="cap">[Portrait]</span></div></div>
-      <span class="name">${esc(n)}</span><span class="cap">${esc(r)}</span>
+    ${MEMBERS.map((m) => `<li class="member mono-host rv">
+      <div class="frame tilt">${m.photo ? `<div class="mono portrait-img">${visual(m.photo, '', '', base, false, '(max-width: 767px) 50vw, 25vw')}</div>` : `<div class="mono ph tx" style="background-color:var(--sage)" role="img" aria-label="Portrait of ${esc(m.name)}, placeholder"><span class="cap">[Portrait]</span></div>`}</div>
+      <span class="name">${esc(m.name)}</span><span class="cap">${esc(m.role || '[Role]')}</span>
     </li>`).join('')}
   </ul>
 </section>
@@ -271,15 +303,15 @@ ${indicator(base, '')}
     <path d="M140 640h720M140 630v20M860 630v20M100 120v460M90 120h20M90 580h20"/>
     <circle cx="820" cy="520" r="40"/><circle cx="210" cy="560" r="28"/></g></svg>
 </div></div>
-${[
-    ['A home is <b class="hl">a hundred decisions</b>, made in the right order.', '[Two sentences that open up the idea, drawn from the book.]'],
-    ['[Second sentence, with <b class="hl">key words</b> highlighted.]', '[Two sentences that open up the idea, drawn from the book.]'],
-    ['[Third sentence, with <b class="hl">key words</b> highlighted.]', '[Two sentences that open up the idea, drawn from the book.]'],
-  ].map(([s, sub], i) => `<section class="ch thought" data-chapter="IV" data-cursor="dark" data-snap aria-label="Chapter IV, philosophy, ${i + 1} of 3">
-  <span class="cap">Chapter IV · ${i + 1} of 3</span>
+${(C.philosophy || [
+    { sentence: 'A home is *a hundred decisions*, made in the right order.', sub: '[Two sentences that open up the idea, drawn from the book.]' },
+    { sentence: '[Second sentence, with *key words* highlighted.]', sub: '[Two sentences that open up the idea, drawn from the book.]' },
+    { sentence: '[Third sentence, with *key words* highlighted.]', sub: '[Two sentences that open up the idea, drawn from the book.]' },
+  ]).map((x) => [highlight(x.sentence), esc(x.sub)]).map(([s, sub], i, all) => `<section class="ch thought" data-chapter="IV" data-cursor="dark" data-snap aria-label="Chapter IV, philosophy, ${i + 1} of 3">
+  <span class="cap">Chapter IV · ${i + 1} of ${all.length}</span>
   <p class="h1">${s}</p>
   <p class="body">${sub}</p>
-  <div class="bars" aria-hidden="true">${[0, 1, 2].map((k) => `<i${k === i ? ' class="on"' : ''}></i>`).join('')}</div>
+  <div class="bars" aria-hidden="true">${all.map((_, k) => `<i${k === i ? ' class="on"' : ''}></i>`).join('')}</div>
 </section>`).join('\n')}
 </div>
 
@@ -304,8 +336,8 @@ ${[
   <span class="cap cap-gold rv">Chapter VI</span>
   <h2 id="contact-h" class="h1 rv">Your house begins <b class="hl">here.</b></h2>
   <div class="contact-cols rv">
-    <div><span class="cap cap-gold">Studio</span><span>3652/2, 1st Floor, Green Field</span><span>Model Gram, Ludhiana 141002, Punjab</span></div>
-    <div><span class="cap cap-gold">Talk</span><a href="tel:+918824396618">+91 88243 96618</a><a href="mailto:ceo@karukritdesigns.com">ceo@karukritdesigns.com</a></div>
+    <div><span class="cap cap-gold">Studio</span>${ADDRESS.map((l) => `<span>${esc(l)}</span>`).join('')}${CONTACT.hours ? `<span class="muted">${esc(CONTACT.hours)}</span>` : ''}</div>
+    <div><span class="cap cap-gold">Talk</span><a href="tel:${PHONE.replace(/[^+\d]/g, '')}">${esc(PHONE)}</a><a href="mailto:${esc(EMAIL)}">${esc(EMAIL)}</a>${CONTACT.instagram ? `<a href="${esc(/^https?:/.test(CONTACT.instagram) ? CONTACT.instagram : 'https://instagram.com/' + CONTACT.instagram.replace(/^@/, ''))}" target="_blank" rel="noopener">Instagram</a>` : ''}</div>
   </div>
   <button class="btn btn-gold tx rv" type="button" data-ring data-open-form>Book a first meeting</button>
 
@@ -423,7 +455,7 @@ function completedPage(p) {
     ['walkthrough', 'III · Walkthrough', null],
     ['drawings', 'IV · Drawings', g.drawings || [{ label: 'Coloured furnished plan' }, { label: 'Section' }, { label: 'Concept diagram' }]],
   ];
-  const hasWalk = !!p.walkthrough;
+  const hasWalk = !!(p.walkthrough || p.walkthroughLink);
   return `${head({ base, title: `${p.name} | Karukrit Designs`, description: `${p.name}, ${c.one.toLowerCase()} by Karukrit Designs, ${p.city}.`, path: `projects/${p.slug}/` })}
 <body class="s-taupe tx" data-cursor="dark">
 <a class="skip-link cap" href="#main">Skip to content</a>
@@ -449,7 +481,7 @@ ${mobileMenu(base, 'projects')}
     </div>
   </div>
   ${sections.map(([id, title, items]) => {
-    if (id === 'walkthrough') return hasWalk ? `<section id="walkthrough" class="wrap gallery-sec"><h2 class="cap">${title}</h2><video controls preload="none" src="${base}${esc(p.walkthrough)}" style="width:100%"></video></section>` : '';
+    if (id === 'walkthrough') return !hasWalk ? '' : `<section id="walkthrough" class="wrap gallery-sec"><h2 class="cap">${title}</h2>${p.walkthrough ? `<video controls preload="none" src="${base}${esc(p.walkthrough)}" style="width:100%"></video>` : `<a class="btn btn-line" href="${esc(p.walkthroughLink)}" target="_blank" rel="noopener" data-ring>Watch the walkthrough →</a>`}</section>`;
     return `<section id="${id}" class="wrap gallery-sec" aria-label="${esc(title)}"><h2 class="cap">${title}</h2>${gallery(base, p, id, items)}</section>`;
   }).join('\n  ')}
   <section class="wrap gallery-sec" aria-label="Project facts">
@@ -471,7 +503,7 @@ function ongoingPage(p) {
   const c = cat(p.category);
   const stageClass = (k) => (k + 1 < p.stage ? 'done' : k + 1 === p.stage ? 'now' : 'later');
   const latest = p.latest || [{ label: 'Site photo', caption: 'Site photo · [Date]' }, { label: 'Site photo', caption: 'Site photo · [Date]' }];
-  const archive = STAGES.slice(0, p.stage).map((s, k) => ({ stage: `Stage ${k + 1} · ${s}`, photos: [{ label: 'Site photo', caption: `${s} · [Date]` }, { label: 'Site photo', caption: `${s} · [Date]` }] }));
+  const archive = p.archive || STAGES.slice(0, p.stage).map((s, k) => ({ stage: `Stage ${k + 1} · ${s}`, photos: [{ label: 'Site photo', caption: `${s} · [Date]` }, { label: 'Site photo', caption: `${s} · [Date]` }] }));
   return `${head({ base, title: `${p.name} | Karukrit Designs`, description: `${p.name}, an ongoing ${c.one.toLowerCase()} by Karukrit Designs in ${p.city}, now at stage ${p.stage} of 6.`, path: `projects/${p.slug}/` })}
 <body class="s-taupe tx" data-cursor="dark">
 <a class="skip-link cap" href="#main">Skip to content</a>
@@ -503,7 +535,7 @@ ${mobileMenu(base, 'projects')}
     </div>
     <div class="archive">
       <h2 class="cap">Site photo archive</h2>
-      ${archive.reverse().map((a, k) => `<section aria-label="${esc(a.stage)}"><h3 class="cap muted">${esc(a.stage)}</h3><div class="photo-grid">${a.photos.map((it) => `<figure><button type="button" data-lightbox="archive" data-caption="${esc(it.caption)}" aria-label="Open ${esc(it.caption)}">${visual(it.image, '#948E89', it.label, base)}</button><figcaption class="cap muted">${esc(it.caption)}</figcaption></figure>`).join('')}</div></section>`).join('')}
+      ${(p.archive ? archive : archive.reverse()).map((a, k) => `<section aria-label="${esc(a.stage)}"><h3 class="cap muted">${esc(a.stage)}</h3><div class="photo-grid">${a.photos.map((it) => `<figure><button type="button" data-lightbox="archive" data-caption="${esc(it.caption)}" aria-label="Open ${esc(it.caption)}">${visual(it.image, '#948E89', it.label, base)}</button><figcaption class="cap muted">${esc(it.caption)}</figcaption></figure>`).join('')}</div></section>`).join('')}
     </div>
   </section>
 </main>
@@ -514,15 +546,15 @@ ${lightboxAndScripts(base)}`;
 /* ---------- the home page and the chapter pages ---------- */
 // home() renders every chapter in one document; the pages below take their sections from it
 const between = (html, a, b) => { const i = html.indexOf(a), j = html.indexOf(b, i); if (i < 0 || j < 0) throw new Error(`missing ${a}`); return html.slice(i, j); };
-const rebase = (html) => html.replace(/(src|href|srcset)="(assets|projects)\//g, '$1="../$2/');
+const rebase = (html) => html.replace(/(src|href|srcset|data-model)="(assets|projects|media)\//g, '$1="../$2/').replace(/, media\//g, ', ../media/');
 
 function contents() {
   const rows = [
     ['II', 'The architect and the author', 'Ar. Saptarshi Kapri, and The 100 Decisions Before the First Brick', 'about'],
-    ['III', 'The studio', 'Kuljeet, Krishma, Sanchit and [fourth member]', 'team'],
+    ['III', 'The studio', MEMBERS.map((m) => m.name).join(', ').replace(/, ([^,]*)$/, ' and $1'), 'team'],
     ['IV', 'Philosophy', 'A home is a hundred decisions, made in the right order.', 'philosophy'],
     ['V', 'Work', 'Residences, hotels, offices and convention centres', 'projects'],
-    ['VI', 'Contact', '3652/2, Green Field, Model Gram, Ludhiana', 'contact'],
+    ['VI', 'Contact', ADDRESS.join(', '), 'contact'],
   ];
   return `<section id="contents" class="contents s-taupe tx" data-cursor="dark" data-snap aria-labelledby="contents-h">
   <div class="wrap" data-stagger>
@@ -583,11 +615,14 @@ ${slug === 'about' ? `<script src="${base}assets/vendor/page-flip-2.0.7.browser.
   return result;
 }
 
-/* ---------- write everything ---------- */
-const out = (rel, html) => { const f = join(ROOT, rel); mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, html); };
-// clear old generated pages so removed projects disappear
-if (existsSync(join(ROOT, 'projects'))) for (const d of readdirSync(join(ROOT, 'projects'))) rmSync(join(ROOT, 'projects', d), { recursive: true, force: true });
+/* ---------- write everything into dist/ ---------- */
+const out = (rel, html) => { const f = join(OUT, rel); mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, html); };
+cpSync(join(ROOT, 'assets'), join(OUT, 'assets'), { recursive: true });
 for (const [rel, html] of Object.entries(pages())) out(rel, html);
 CATS.forEach((c) => out(`projects/${c.slug}/index.html`, categoryPage(c)));
 PROJECTS.forEach((p) => out(`projects/${p.slug}/index.html`, p.status === 'ongoing' ? ongoingPage(p) : completedPage(p)));
-console.log(`Built the home page, ${NAV.length} chapter pages, ${CATS.length} category pages and ${PROJECTS.length} project pages.`);
+console.log(`Built the home page, ${NAV.length} chapter pages, ${CATS.length} category pages and ${PROJECTS.length} project pages into ${OUT}.`);
+console.log(C.found ? `Content folder: ${CONTENT_DIR}` : `No content folder at ${CONTENT_DIR}, so placeholders were used throughout.`);
+const notes = [...(C.warnings || [])];
+if (C.found && !C.projects) notes.push('No projects in the folder yet, so the placeholder projects are shown.');
+notes.forEach((n) => console.warn(`Note: ${n}`));

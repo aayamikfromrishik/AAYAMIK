@@ -1,0 +1,14 @@
+{
+  "name": "karukrit-website",
+  "private": true,
+  "description": "The Karukrit Designs website. Builds into dist/ from the studio's content folder.",
+  "scripts": {
+    "build": "node tools/build.mjs"
+  },
+  "dependencies": {
+    "sharp": "0.33.5"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

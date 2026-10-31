@@ -5,10 +5,10 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
-// To show one of your own houses, export it from SketchUp / Revit / Rhino as .glb,
-// put it in assets/models/ and set the path here, e.g. 'assets/models/house.glb'.
-// Metres, Y up, the front of the house facing +Z. Leave null for the built-in study house.
-const MODEL_URL = null;
+// The studio's own house: put a .glb export (from SketchUp, Revit or Rhino) in "1 Home/3D Model" in the
+// website folder and the build passes its address here. Metres, Y up, the front facing +Z.
+// Without one, the built-in study house is shown.
+const MODEL_URL = document.getElementById('house')?.dataset.model || null;
 
 const C = {
   ink: 0x23261a, paper: 0xefe8dc, clay: 0xe9e3d6, plaster: 0xf3ece2, taupe: 0xa8a29d,

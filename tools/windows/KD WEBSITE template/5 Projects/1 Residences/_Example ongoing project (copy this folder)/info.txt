@@ -1,0 +1,5 @@
+City: Ludhiana
+Status: Ongoing
+Stage: 4
+Brief:
+The brief and the one idea behind the design.

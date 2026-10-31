@@ -594,3 +594,8 @@ dialog.full[open] { display: flex; flex-direction: column; gap: 18px; }
 .ob-light { position: absolute; inset: 0; background: linear-gradient(105deg, rgba(0,0,0,.55), rgba(0,0,0,.15)); opacity: 0; backface-visibility: hidden; pointer-events: none; }
 .ob-edge { position: absolute; top: 0; bottom: 0; right: -3px; width: 3px; background: #CFC6B6; transform: rotateY(90deg); transform-origin: left; }
 @media (prefers-reduced-motion: reduce) { .ob { display: none; } .big-host, .reading .viewer-bar { transition: none; } }
+
+/* photos supplied by the studio fill their frames */
+.portrait-img { width: 100%; height: 100%; }
+.portrait-img picture, .portrait-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.arch .portrait-img { min-height: 100%; }

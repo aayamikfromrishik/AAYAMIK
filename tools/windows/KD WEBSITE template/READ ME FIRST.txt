@@ -1,0 +1,38 @@
+KD WEBSITE: HOW TO UPDATE THE WEBSITE
+=====================================
+
+Whatever is in this folder appears on karukritdesigns.com.
+Save your changes here. About 10 to 15 minutes later the website shows them.
+You do not need to open any program.
+
+THE RULES
+- A number at the start of a name sets the order: "01 Sharma Residence", "02 Gill Residence".
+- The rest of the name is what the website shows. Write it the way you want it to read.
+- Anything whose name starts with _ (underscore) is ignored. Use that for examples and notes.
+- Photos: JPG or PNG, straight from the camera or phone is fine. The website resizes them.
+- Text files: open with Notepad, change the text after the colon, save.
+- Videos larger than 80 MB are skipped. Export a smaller version, or put a YouTube link in info.txt.
+
+WHAT GOES WHERE
+1 Home
+    Sketches     Hand sketches, paper removed (transparent PNG), 8 to 12 of them.
+                 Name them "01 Sharma Residence.png". The colour render of the same house
+                 goes beside it as "01 Sharma Residence render.jpg".
+    3D Model     One house exported from SketchUp as glTF (.glb). It replaces the study house
+                 that draws itself on the home page.
+2 About          Your portrait (any .jpg) and story.txt.
+3 Team           One photo per person, named "01 Kuljeet - Site architect.jpg"
+                 (number, name, dash, role). team.txt holds the one sentence about the studio.
+4 Philosophy     sentences.txt: the three sentences.
+5 Projects       One folder per category, one folder per project inside it.
+                 Copy the _Example folder, rename it to the project's name, fill in info.txt.
+                 Completed project:  elevation.jpg, and folders "Site photographs", "Interiors", "Drawings".
+                 Ongoing project:    render.jpg, and "Site photos" with a folder per stage
+                                     ("Stage 4"), photos named with the date first:
+                                     "2026-10-30 north wall.jpg".
+                 Only presentation drawings, never working drawings with dimensions.
+6 Contact        details.txt
+
+IF SOMETHING DOES NOT APPEAR
+Look at _website-log.txt in this folder. It says when the website last updated and lists
+anything it could not use.

@@ -2,15 +2,35 @@
 
 The studio website for Karukrit Designs, Ludhiana, built to the client's specification in [`docs/KARUKRIT_WEBSITE_SPEC.md`](docs/KARUKRIT_WEBSITE_SPEC.md) (version 1.0, 30 October 2026).
 
-It is a static site with no framework. Every page is generated from one content file, so the studio can add projects without touching the HTML.
+It is a static site with no framework. Every page is generated from the studio's own folder, `Z:\2_Office Data\KD WEBSITE`: whatever is saved there appears on karukritdesigns.com about 10 to 15 minutes later.
 
-## Viewing it
+## How an update reaches the website
+
+1. Someone saves photos or text in `Z:\2_Office Data\KD WEBSITE`. The folder's `READ ME FIRST.txt` explains what goes where.
+2. Every 10 minutes, an office computer copies that folder into `site-content/` here and sends any changes to GitHub (`tools/windows/sync-website.ps1`).
+3. GitHub builds the site (`npm run build`), resizing every photo into AVIF, WebP and JPEG at two sizes.
+4. GitHub uploads the result to Erichost by FTP. Only changed files are sent (`.github/workflows/deploy.yml`).
+
+Anything the folder does not have yet (a story, team photos, projects) falls back to the placeholders, so the site always builds. A category appears only once it has a project.
+
+## Launching (one time)
+
+1. **Publish branch.** The website is published from the `main` branch. Merge this work into `main` on GitHub.
+2. **Erichost FTP details.** In Erichost's cPanel, under FTP Accounts, find (or create) an FTP account for the website. On GitHub, open the repository's Settings > Secrets and variables > Actions and add three secrets: `FTP_SERVER` (for example `ftp.karukritdesigns.com`), `FTP_USERNAME` and `FTP_PASSWORD`. If the site should not go in `public_html/`, add a variable `FTP_DIR` with the right folder.
+3. **First publish.** In the repository's Actions tab, run "Publish website". It takes a few minutes. The domain already points at Erichost, so the site appears at karukritdesigns.com.
+4. **Office computer.** On a computer that is on during working hours and can see the Z: drive, right-click `tools/windows/setup-website-sync.ps1` and choose Run with PowerShell. It installs Git if needed, makes a copy of this repository in `C:\KD-Website`, fills the KD WEBSITE folder with the starter folders if it is empty, asks once for a GitHub sign-in, and schedules the sync every 10 minutes.
+
+Progress and problems are written to `_website-log.txt` in the KD WEBSITE folder. A build's notes (for example a video over 80 MB, or a 3D model that is not a .glb) appear in the Actions tab.
+
+## Building on your own computer
 
 ```bash
-python3 -m http.server 8000
+npm install
+npm run build
+python3 -m http.server 8000 --directory dist
 ```
 
-Then open <http://localhost:8000>. The site also works when published as-is on GitHub Pages, Netlify or Vercel.
+Then open <http://localhost:8000>. To build from a different folder, set `KD_CONTENT`, for example `KD_CONTENT="Z:/2_Office Data/KD WEBSITE" npm run build`.
 
 ## Pages
 
@@ -28,7 +48,7 @@ The top menu links to these pages. The current page keeps its pencil circle, and
 
 The spec sets the structure, colours, type, texture and interactions. On top of it the site keeps the 3D and scroll motion from the first prototype:
 
-- **Chapter I:** the page opens exactly as the spec describes, with the frosted glass, the sketch slideshow and the glows. As you scroll, the glass pane shrinks into a card around the headline. Behind it a 3D house (three.js) draws its plan on paper, raises its walls as line drawings, becomes a white model and then the finished home in colour, while the camera comes down to the front door. The house answers the cursor: it turns to follow it, a quick sweep sets it spinning before it settles back, dragging turns it directly, and when the cursor is over the house the drawing lifts slightly and its lines darken. The card leans gently toward the cursor and the Plan / Model / Home labels follow the stage. To show one of your own houses, export it as `.glb` and set `MODEL_URL` in `assets/js/hero3d.js`.
+- **Chapter I:** the page opens exactly as the spec describes, with the frosted glass, the sketch slideshow and the glows. As you scroll, the glass pane shrinks into a card around the headline. Behind it a 3D house (three.js) draws its plan on paper, raises its walls as line drawings, becomes a white model and then the finished home in colour, while the camera comes down to the front door. The house answers the cursor: it turns to follow it, a quick sweep sets it spinning before it settles back, dragging turns it directly, and when the cursor is over the house the drawing lifts slightly and its lines darken. The card leans gently toward the cursor and the Plan / Model / Home labels follow the stage. To show one of your own houses, export it from SketchUp as glTF (`.glb`) into `1 Home/3D Model` in the KD WEBSITE folder.
 - **The Author:** the book is a 3D object that turns as the chapter scrolls by and leans toward the cursor. Hovering lifts the cover. Clicking it, or READ A SAMPLE, plays an opening: the book lifts toward you, the hard cover swings open on its hinge, and three leaves bend and riffle over to the first spread, with light and shadow following each angle. From there the pages turn like paper, using StPageFlip (`assets/vendor/page-flip-2.0.7.browser.js`, MIT licence). The paper curls, casts a moving shadow and can be dragged by its corner. The spread on the page itself turns the same way.
 - **The studio:** portraits lean toward the cursor with a soft light following it.
 - **Philosophy:** one plan drawing sits behind the three screens, draws itself and moves more slowly than the words.
@@ -38,25 +58,15 @@ The spec sets the structure, colours, type, texture and interactions. On top of 
 
 With reduced motion turned on, all of this switches off and the spec's still layout shows instead.
 
-
-
-1. Edit `content/projects.json`: categories, projects, status (`completed`, `ongoing`, `concept`), current stage 1–6, city, year, and images.
-2. Rebuild the pages:
-
-```bash
-node tools/build.mjs
-```
-
-This rewrites `index.html`, the four category pages in `projects/<category>/` and one page per project in `projects/<slug>/`. Projects removed from the JSON disappear on the next build.
-
-Anything in [square brackets] is placeholder text from the spec, waiting for the client.
-
 ## Files
 
-- `index.html`: home page, chapters I to VI (generated)
-- `projects/`: category pages and project pages (generated)
-- `content/projects.json`: every project on the site
+- `dist/`: the finished website, made by `npm run build` (not stored in the repository)
+- `site-content/`: the copy of the studio's KD WEBSITE folder, kept up to date by the office computer
+- `content/projects.json`: placeholder projects, used until the folder has real ones
 - `tools/build.mjs`: the page generator
+- `tools/content.mjs`: reads the KD WEBSITE folder and prepares the photos
+- `tools/windows/`: the office computer's setup and sync scripts, and the starter `KD WEBSITE template`
+- `.github/workflows/deploy.yml`: builds the site and uploads it to Erichost
 - `assets/css/site.css`: all styles; comments point to spec sections
 - `assets/css/fonts.css`: the Satoshi font faces, linked automatically once the font files are present
 - `assets/js/site.js`: smooth scroll and snapping, pencil cursor, sketched circles, reveals, header, phone menu
@@ -109,7 +119,7 @@ Built and matching the spec:
 | 13 | Contact on moss with the form panel sliding up, fields with a bottom border, inline errors |
 | 14 | Tablet and phone layouts; phone menu on moss; 44 px touch targets |
 | 15 | Real links and buttons, labelled icon buttons, alt text, one H1 per page, reduced motion respected throughout |
-| 16 | Book pages served as WebP with JPEG fallback; everything below chapter I lazy-loaded; page titles, descriptions and an Open Graph image (wordmark on moss leather) |
+| 16 | Studio photos served as AVIF and WebP with a JPEG fallback at two sizes (book pages as WebP and JPEG); everything below chapter I lazy-loaded; page titles, descriptions and an Open Graph image (wordmark on moss leather) |
 
 Waiting for the client (spec sections 17 and 18):
 
@@ -124,6 +134,6 @@ Waiting for the client (spec sections 17 and 18):
 
 Not built yet:
 
-- A CMS (the spec suggests Sanity, Strapi or similar). For now the studio edits `content/projects.json` and runs the build
-- AVIF images and 2× `srcset`: the handoff has only one size of each page, served as WebP and JPEG
+- A CMS (the spec suggests Sanity, Strapi or similar). Instead, the studio updates the KD WEBSITE folder on the Z: drive, which reaches the site automatically
+- The book pages from the handoff are served as WebP and JPEG at their one supplied size. Every photo from the KD WEBSITE folder gets AVIF, WebP and JPEG at two sizes
 - Lighthouse has not been measured yet

@@ -1,0 +1,9 @@
+City: Ludhiana
+Year: 2024
+Status: Completed
+Plot: 500 sq yd
+Built-up area: 6,200 sq ft
+Scope: Architecture, interiors
+Walkthrough:
+Brief:
+The brief and the one idea behind the design, in three or four sentences.

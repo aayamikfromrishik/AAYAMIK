@@ -34,7 +34,7 @@ class UnlockPayment {
       'name': 'BAAKI BUILD',
       'description': 'Unlock contact: ${listing.title}',
       'prefill': {'contact': ?buyerPhone},
-      'theme': {'color': '#B23A1E'},
+      'theme': {'color': '#B33A1E'},
     });
 
     final verifyRes = await _db.functions.invoke('verify-unlock-payment', body: {

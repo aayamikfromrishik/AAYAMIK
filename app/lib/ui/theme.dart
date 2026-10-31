@@ -11,27 +11,28 @@ Color _pick(int safety, int green, int toran, int brick) => Color(switch (palett
     });
 
 /// BAAKI BUILD colour roles. No pure black anywhere: text is a dark grey.
+/// Brick values match the logo: brick #B33A1E, forest #3E5A47, mustard #E2B33C, cream #FAF6F1.
 abstract final class Brand {
   /// Buttons and filled brand surfaces.
-  static final primary = _pick(0xFFC2410C, 0xFF15803D, 0xFFF2A900, 0xFFB23A1E);
+  static final primary = _pick(0xFFC2410C, 0xFF15803D, 0xFFF2A900, 0xFFB33A1E);
 
   /// Text and icons on [primary].
   static final onPrimary = _pick(0xFFFFFFFF, 0xFFFFFFFF, 0xFF1F2933, 0xFFFFFFFF);
 
   /// Icon tint on light backgrounds.
-  static final accent = _pick(0xFFC2410C, 0xFF15803D, 0xFF1E6B3A, 0xFFB23A1E);
+  static final accent = _pick(0xFFC2410C, 0xFF15803D, 0xFF1E6B3A, 0xFFB33A1E);
 
   /// Light tint behind accent icons and info boxes.
   static final soft = _pick(0xFFFFEDE3, 0xFFE3F4E8, 0xFFFFF4CF, 0xFFFBE9E3);
 
   /// Coloured band behind the hero, login panel and profile card.
-  static final header = _pick(0xFF334155, 0xFF14532D, 0xFF1E6B3A, 0xFF3D5A47);
+  static final header = _pick(0xFF334155, 0xFF14532D, 0xFF1E6B3A, 0xFF3E5A47);
   static final headerSoft = _pick(0xFF475569, 0xFF1D6B3D, 0xFF2A7D48, 0xFF4C6B56);
 
   /// Icons that must stand out on [header].
-  static final highlight = _pick(0xFFFB923C, 0xFFF2B705, 0xFFF2A900, 0xFFE0B23C);
+  static final highlight = _pick(0xFFFB923C, 0xFFF2B705, 0xFFF2A900, 0xFFE2B33C);
 
-  static final sand = _pick(0xFFF4F5F7, 0xFFF5F7F2, 0xFFFAF8F1, 0xFFFAF6F0);
+  static final sand = _pick(0xFFF4F5F7, 0xFFF5F7F2, 0xFFFAF8F1, 0xFFFAF6F1);
   static final line = _pick(0xFFE2E5EA, 0xFFDFE6DC, 0xFFE9E3D3, 0xFFE8DFD5);
   static final ink = _pick(0xFF1F2933, 0xFF1F2A24, 0xFF1F2933, 0xFF2B2622);
   static final muted = _pick(0xFF64707D, 0xFF5F6B64, 0xFF6B6A5F, 0xFF6E655D);

@@ -1,0 +1,226 @@
+/*
+ * BAAKI BUILD — "App 02" section for the AAYAMIK workdesk page.
+ * Every class starts with "bb-" and all colours live in the variables below,
+ * so nothing here leaks into the rest of the site.
+ * Fonts inherit from the page. To use the app's own font instead, load
+ * Plus Jakarta Sans and set --bb-font.
+ */
+.bb-app {
+  --bb-brick: #B23A1E;
+  --bb-brick-dark: #96301A;
+  --bb-sage: #3D5A47;
+  --bb-sage-soft: #4C6B56;
+  --bb-mustard: #E0B23C;
+  --bb-cream: #FAF6F0;
+  --bb-tint: #FBE9E3;
+  --bb-ink: #2B2622;
+  --bb-muted: #6E655D;
+  --bb-line: #E8DFD5;
+  --bb-font: inherit;
+  --bb-radius: 24px;
+
+  font-family: var(--bb-font);
+  color: var(--bb-ink);
+  padding: clamp(48px, 7vw, 96px) 16px;
+}
+
+.bb-app *,
+.bb-app *::before,
+.bb-app *::after { box-sizing: border-box; }
+
+.bb-app__card {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  border-radius: var(--bb-radius);
+  overflow: hidden;
+  background: var(--bb-sage);
+  box-shadow: 0 30px 60px -30px rgba(43, 38, 34, .45);
+}
+
+/* ---------- text side ---------- */
+.bb-app__text {
+  position: relative;
+  padding: clamp(28px, 4.5vw, 64px);
+  color: #fff;
+  overflow: hidden;
+}
+.bb-app__text::after {
+  content: "";
+  position: absolute;
+  left: -180px;
+  bottom: -220px;
+  width: 460px;
+  height: 460px;
+  border-radius: 50%;
+  background: var(--bb-sage-soft);
+  opacity: .5;
+  pointer-events: none;
+}
+.bb-app__text > * { position: relative; z-index: 1; }
+
+.bb-app__top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.bb-app__mark { width: 52px; height: 52px; flex: none; }
+.bb-app__name { line-height: 1.1; }
+.bb-app__name strong { display: block; font-size: 22px; font-weight: 800; letter-spacing: .5px; }
+.bb-app__name span { font-size: 12px; font-weight: 600; letter-spacing: 2px; color: rgba(255, 255, 255, .75); }
+
+.bb-app__badge {
+  margin-left: auto;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .12);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.bb-app__badge b { color: var(--bb-mustard); }
+
+.bb-app__title {
+  margin: clamp(28px, 4vw, 48px) 0 0;
+  font-size: clamp(36px, 5vw, 60px);
+  line-height: 1.04;
+  font-weight: 800;
+  letter-spacing: -.5px;
+  color: #fff;
+}
+.bb-app__title em { font-style: normal; color: var(--bb-mustard); }
+
+.bb-app__lead {
+  margin: 18px 0 0;
+  max-width: 520px;
+  font-size: clamp(16px, 1.6vw, 19px);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, .85);
+}
+
+.bb-app__features {
+  list-style: none;
+  margin: 28px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.bb-app__features li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 16px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, .92);
+}
+.bb-app__features svg { flex: none; width: 22px; height: 22px; margin-top: 1px; fill: var(--bb-mustard); }
+.bb-app__features b { color: #fff; }
+
+.bb-app__actions {
+  margin-top: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.bb-app__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color .15s ease, transform .15s ease;
+}
+.bb-app__btn--primary { background: var(--bb-brick); color: #fff; }
+.bb-app__btn--primary:hover { background: var(--bb-brick-dark); transform: translateY(-1px); }
+.bb-app__btn--ghost { color: #fff; border: 2px solid rgba(255, 255, 255, .45); }
+.bb-app__btn--ghost:hover { border-color: #fff; }
+.bb-app__btn:focus-visible { outline: 3px solid var(--bb-mustard); outline-offset: 3px; }
+
+.bb-app__status {
+  margin-top: 22px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, .7);
+}
+.bb-app__status span {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--bb-mustard);
+  color: var(--bb-ink);
+  font-weight: 800;
+}
+
+/* ---------- visual side ---------- */
+.bb-app__visual {
+  position: relative;
+  background: var(--bb-cream);
+  min-height: 460px;
+}
+.bb-app__phone {
+  position: absolute;
+  width: 44%;
+  max-width: 260px;
+  padding: 9px;
+  border-radius: 34px;
+  background: #3A3633;
+  box-shadow: 0 24px 48px rgba(43, 38, 34, .28), 0 6px 14px rgba(43, 38, 34, .16);
+}
+.bb-app__phone img { display: block; width: 100%; height: auto; border-radius: 26px; }
+.bb-app__phone--back { left: 10%; top: 9%; transform: rotate(-6deg); }
+.bb-app__phone--front { right: 9%; top: 15%; transform: rotate(5deg); }
+
+.bb-app__fee {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--bb-line);
+  box-shadow: 0 10px 24px rgba(43, 38, 34, .12);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--bb-ink);
+}
+.bb-app__fee b { color: var(--bb-brick); }
+
+.bb-app__cats {
+  max-width: 1200px;
+  margin: 18px auto 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--bb-muted);
+  letter-spacing: .3px;
+}
+
+/* ---------- tablet & phone ---------- */
+@media (max-width: 900px) {
+  .bb-app__card { grid-template-columns: 1fr; }
+  .bb-app__visual { min-height: 0; aspect-ratio: 4 / 3.9; }
+  .bb-app__phone { width: 40%; }
+}
+@media (max-width: 520px) {
+  .bb-app__badge { margin-left: 0; }
+  .bb-app__visual { aspect-ratio: 4 / 5.4; }
+  .bb-app__phone { width: 46%; }
+  .bb-app__phone--back { left: 4%; }
+  .bb-app__phone--front { right: 4%; }
+  .bb-app__btn { flex: 1 1 100%; justify-content: center; }
+  .bb-app__fee { font-size: 13px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bb-app__btn { transition: none; }
+}

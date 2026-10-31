@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: PJ; src: url(PlusJakartaSans-500.ttf); font-weight: 500; }
+  @font-face { font-family: PJ; src: url(PlusJakartaSans-600.ttf); font-weight: 600; }
+  @font-face { font-family: PJ; src: url(PlusJakartaSans-700.ttf); font-weight: 700; }
+  @font-face { font-family: PJ; src: url(PlusJakartaSans-800.ttf); font-weight: 800; }
+  :root {
+    --brick: #B23A1E; --sage: #3D5A47; --sage2: #4C6B56; --mustard: #E0B23C;
+    --cream: #FAF6F0; --tint: #FBE9E3; --ink: #2B2622; --muted: #6E655D; --line: #E8DFD5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: PJ, sans-serif; color: var(--ink); background: #ddd; }
+  .poster { position: relative; overflow: hidden; background: var(--cream); }
+
+  /* ---------- shared pieces ---------- */
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .tile { width: 58px; height: 58px; border-radius: 16px; background: var(--brick); display: grid; place-items: center; }
+  .tile svg { width: 36px; height: 36px; fill: #fff; }
+  .wordmark b { display: block; font-weight: 800; font-size: 28px; letter-spacing: .6px; color: #fff; line-height: 1.05; }
+  .wordmark span { font-weight: 600; font-size: 14px; letter-spacing: 2px; color: rgba(255,255,255,.75); }
+  .tag { margin-left: auto; padding: 8px 16px; border-radius: 30px; background: rgba(255,255,255,.12);
+         color: #fff; font-weight: 700; font-size: 15px; letter-spacing: 1.5px; text-transform: uppercase; }
+  .tag i { font-style: normal; color: var(--mustard); }
+  h1 { font-weight: 800; color: #fff; letter-spacing: -.5px; }
+  h1 em { font-style: normal; color: var(--mustard); }
+  .sub { color: rgba(255,255,255,.82); font-weight: 500; }
+  .phone { position: absolute; border-radius: 44px; background: #3a3633; padding: 12px;
+           box-shadow: 0 30px 60px rgba(43,38,34,.28), 0 6px 14px rgba(43,38,34,.18); }
+  .phone img { display: block; width: 100%; border-radius: 34px; }
+  .points { display: grid; gap: 14px; }
+  .point { display: flex; gap: 14px; align-items: center; background: #fff; border: 1px solid var(--line);
+           border-radius: 18px; padding: 14px 18px; }
+  .point .ic { flex: none; width: 46px; height: 46px; border-radius: 14px; background: var(--tint); display: grid; place-items: center; }
+  .point .ic svg { width: 26px; height: 26px; fill: var(--brick); }
+  .point b { display: block; font-weight: 800; font-size: 19px; }
+  .point span { font-weight: 500; font-size: 15px; color: var(--muted); }
+  .fee { display: inline-flex; align-items: center; gap: 10px; background: var(--brick); color: #fff;
+         border-radius: 40px; padding: 12px 22px; font-weight: 800; font-size: 20px; }
+  .fee small { font-weight: 600; font-size: 15px; opacity: .85; }
+  .cats { font-weight: 600; color: var(--muted); letter-spacing: .3px; }
+  .cats b { color: var(--sage); }
+  .soon { font-weight: 700; color: var(--sage); }
+  .soon span { display: inline-block; margin-left: 8px; padding: 6px 14px; border: 2px solid var(--sage); border-radius: 30px; font-size: 15px; }
+
+  /* ---------- portrait 1080 x 1350 ---------- */
+  #portrait { width: 1080px; height: 1350px; }
+  #portrait .top { position: absolute; inset: 0 0 auto 0; height: 760px; background: var(--sage); padding: 56px 60px; }
+  #portrait .top::after { content: ""; position: absolute; right: -160px; top: -160px; width: 520px; height: 520px;
+                          border-radius: 50%; background: var(--sage2); opacity: .55; }
+  #portrait .top > * { position: relative; z-index: 1; }
+  #portrait h1 { margin-top: 64px; font-size: 74px; line-height: 1.04; max-width: 560px; }
+  #portrait .sub { margin-top: 22px; font-size: 24px; line-height: 1.4; max-width: 400px; }
+  #portrait .phone.a { width: 330px; right: 230px; top: 300px; transform: rotate(-6deg); z-index: 2; }
+  #portrait .phone.b { width: 330px; right: 40px; top: 360px; transform: rotate(5deg); z-index: 3; }
+  #portrait .bottom { position: absolute; left: 60px; top: 820px; width: 540px; }
+  #portrait .points { gap: 18px; }
+  #portrait .point { padding: 18px 20px; }
+  #portrait .fee { margin-bottom: 22px; }
+  #portrait .foot { position: absolute; left: 60px; right: 60px; bottom: 44px; display: flex; justify-content: space-between; align-items: center;
+                    border-top: 2px solid var(--line); padding-top: 22px; }
+  #portrait .cats { font-size: 17px; }
+
+  /* ---------- landscape 1600 x 900 ---------- */
+  #landscape { width: 1600px; height: 900px; margin-top: 40px; }
+  #landscape .left { position: absolute; left: 0; top: 0; bottom: 0; width: 860px; background: var(--sage); padding: 64px 72px; }
+  #landscape .left::after { content: ""; position: absolute; left: -200px; bottom: -260px; width: 560px; height: 560px;
+                            border-radius: 50%; background: var(--sage2); opacity: .5; }
+  #landscape .left > * { position: relative; z-index: 1; }
+  #landscape h1 { margin-top: 70px; font-size: 76px; line-height: 1.04; }
+  #landscape .sub { margin-top: 22px; font-size: 25px; line-height: 1.4; max-width: 640px; }
+  #landscape .row { display: flex; gap: 18px; margin-top: 38px; align-items: center; }
+  #landscape .left .fee { background: var(--brick); }
+  #landscape .left .soon { color: #fff; }
+  #landscape .left .soon span { border-color: rgba(255,255,255,.6); }
+  #landscape .left .cats { position: absolute; bottom: 56px; left: 72px; color: rgba(255,255,255,.7); font-size: 18px; z-index: 1; }
+  #landscape .left .cats b { color: var(--mustard); }
+  #landscape .phone.a { width: 300px; left: 780px; top: 120px; transform: rotate(-5deg); z-index: 2; }
+  #landscape .phone.b { width: 300px; left: 1010px; top: 170px; transform: rotate(4deg); z-index: 3; }
+  #landscape .points { position: absolute; right: 56px; top: 150px; width: 270px; z-index: 4; gap: 16px; }
+  #landscape .point { padding: 14px; box-shadow: 0 10px 24px rgba(43,38,34,.10); }
+  #landscape .point b { font-size: 17px; }
+  #landscape .point span { font-size: 14px; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <path id="foundation" d="M19 12h3L12 3 2 12h3v3H3v2h2v3h2v-3h4v3h2v-3h4v3h2v-3h2v-2h-2v-3zM7 15v-4.81l4-3.6V15H7zm6 0V6.59l4 3.6V15h-4z"/>
+    <path id="sell" d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
+    <path id="shield" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+    <path id="check" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+  </defs>
+</svg>
+
+<!-- ============ PORTRAIT ============ -->
+<div class="poster" id="portrait">
+  <div class="top">
+    <div class="brand">
+      <div class="tile"><svg viewBox="0 0 24 24"><use href="#foundation"/></svg></div>
+      <div class="wordmark"><b>BAAKI BUILD</b><span>BY AAYAMIK</span></div>
+      <div class="tag">App <i>02</i></div>
+    </div>
+    <h1>Leftover material.<br><em>Fair price.</em></h1>
+    <p class="sub">India's free marketplace for builders to buy and sell surplus construction material.</p>
+  </div>
+
+  <div class="phone a"><img src="browse.png"></div>
+  <div class="phone b"><img src="unlocked.png"></div>
+
+  <div class="bottom">
+    <div class="fee">Buyers unlock seller contact from ₹10</div>
+    <div class="points">
+      <div class="point"><div class="ic"><svg viewBox="0 0 24 24"><use href="#sell"/></svg></div>
+        <div><b>List free in 2 minutes</b><span>No subscription. No commission for sellers.</span></div></div>
+      <div class="point"><div class="ic"><svg viewBox="0 0 24 24"><use href="#shield"/></svg></div>
+        <div><b>Your number stays private</b><span>Shared only after a buyer pays to unlock.</span></div></div>
+      <div class="point"><div class="ic"><svg viewBox="0 0 24 24"><use href="#check"/></svg></div>
+        <div><b>Clean, verified listings</b><span>Every photo checked. No spam numbers or QR codes.</span></div></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="cats"><b>Cement</b> · Steel · Tiles · Bricks · Plywood · Pipes · Wiring · Paint</div>
+    <div class="soon">Coming soon <span>Android · iOS · Web</span></div>
+  </div>
+</div>
+
+<!-- ============ LANDSCAPE ============ -->
+<div class="poster" id="landscape">
+  <div class="left">
+    <div class="brand">
+      <div class="tile"><svg viewBox="0 0 24 24"><use href="#foundation"/></svg></div>
+      <div class="wordmark"><b>BAAKI BUILD</b><span>BY AAYAMIK</span></div>
+      <div class="tag" style="margin-left:24px">App <i>02</i></div>
+    </div>
+    <h1>Leftover material.<br><em>Fair price.</em></h1>
+    <p class="sub">India's free marketplace for builders to buy and sell surplus construction material.</p>
+    <div class="row">
+      <div class="fee">Unlock seller contact from ₹10</div>
+      <div class="soon">Coming soon <span>Android · iOS · Web</span></div>
+    </div>
+    <div class="cats"><b>Cement</b> · Steel · Tiles · Bricks · Plywood · Pipes · Wiring · Paint</div>
+  </div>
+
+  <div class="phone a"><img src="browse.png"></div>
+  <div class="phone b"><img src="unlocked.png"></div>
+
+  <div class="points">
+    <div class="point"><div class="ic"><svg viewBox="0 0 24 24"><use href="#sell"/></svg></div>
+      <div><b>List free</b><span>No subscription, no seller commission.</span></div></div>
+    <div class="point"><div class="ic"><svg viewBox="0 0 24 24"><use href="#shield"/></svg></div>
+      <div><b>Number stays private</b><span>Shared only after a buyer pays.</span></div></div>
+    <div class="point"><div class="ic"><svg viewBox="0 0 24 24"><use href="#check"/></svg></div>
+      <div><b>Verified listings</b><span>Photos checked, no spam numbers.</span></div></div>
+  </div>
+</div>
+
+</body>
+</html>

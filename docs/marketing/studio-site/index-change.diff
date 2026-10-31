@@ -1,0 +1,21 @@
+--- index.original.html	2026-10-31 16:19:15.208034198 +0000
++++ index.html	2026-10-31 16:22:19.075463909 +0000
+@@ -48,10 +48,14 @@
+ <span class="gold" style="display: block; margin-top: 24px; font-size: 12px; letter-spacing: 0.3em; font-weight: 500">EXPLORE WORK DESK →</span>
+ </span>
+ </a>
+-<div class="glass" aria-disabled="true" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 400px; border-radius: 20px; padding: 40px; opacity: 0.5">
+-<span style="font-size: 11px; letter-spacing: 0.34em; color: #A8927C">SOFTWARE 02</span>
+-<span><span class="champ" style="display: block; font-family: 'Cormorant', serif; font-size: clamp(34px, 3.61vw, 52px); line-height: 1">Coming soon</span><span style="display: block; margin-top: 14px; font-size: 15px; color: #A8927C">In development</span></span>
+-</div>
++<a href="baakibuild" class="glass" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 400px; border-radius: 20px; padding: 40px; text-decoration: none; color: #EFE3D3">
++<span class="gold" style="font-size: 11px; letter-spacing: 0.34em; font-weight: 500">SOFTWARE 02 · COMING SOON</span>
++<span>
++<span class="champ" style="display: block; font-family: 'Cormorant', serif; font-size: clamp(34px, 3.61vw, 52px); line-height: 1">Baaki Build</span>
++<span style="display: block; margin-top: 14px; font-size: 15px; line-height: 1.7; color: #DCCDBA">A marketplace for leftover construction material. Free to list; buyers unlock the seller’s contact from ₹10.</span>
++<span class="gold" style="display: block; margin-top: 24px; font-size: 12px; letter-spacing: 0.3em; font-weight: 500">EXPLORE BAAKI BUILD →</span>
++</span>
++</a>
+ <div class="glass" aria-disabled="true" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 400px; border-radius: 20px; padding: 40px; opacity: 0.5">
+ <span style="font-size: 11px; letter-spacing: 0.34em; color: #A8927C">SOFTWARE 03</span>
+ <span><span class="champ" style="display: block; font-family: 'Cormorant', serif; font-size: clamp(34px, 3.61vw, 52px); line-height: 1">Coming soon</span><span style="display: block; margin-top: 14px; font-size: 15px; color: #A8927C">In development</span></span>

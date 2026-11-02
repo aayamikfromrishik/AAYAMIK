@@ -22,6 +22,19 @@ Anything the folder does not have yet (a story, team photos, projects) falls bac
 
 Progress and problems are written to `_website-log.txt` in the KD WEBSITE folder. A build's notes (for example a video over 80 MB, or a 3D model that is not a .glb) appear in the Actions tab.
 
+## The client questionnaire
+
+The Manus quiz opens at `karukritdesigns.com/quiz/`, but only from a personal link.
+
+- **Making a link.** Anyone signed in to the Karukrit Work Desk opens **Client quiz**, picks the project (or types a new client's name), chooses 7, 14 or 30 days, and presses Create link. The link can be copied or sent straight to WhatsApp.
+- **What a link carries.** For example `?c=RES-03_261202_ENGD_BBE2B3F8CA`: the project code, the last day it works (2 Dec 2026), four random letters, and a signature made with a key only the Work Desk and the website know. `quiz/index.php` checks the signature and the date on the server, so no list has to be kept in step. A link that is altered or out of date shows a polite message with the studio's phone and email instead.
+- **Tagging the results.** The quiz page opens the Manus quiz with `?client=<the code>` added, so Manus can save each result in Google Drive under the right project. Manus needs to read that `client` value and put it in the saved file's name.
+- **Setup.**
+  1. Copy the key from the Work Desk (Saptarshi's login, Client quiz, Show the key) into a GitHub secret named `QUIZ_SECRET`.
+  2. Paste the Manus quiz address into `7 Quiz/quiz-link.txt` in the KD WEBSITE folder, or set it as a GitHub variable `QUIZ_URL`.
+  3. Erichost runs the PHP. `quiz/.htaccess` keeps the settings file out of reach of the browser.
+- **One limit.** The check guards the page on karukritdesigns.com. Anyone who learned the Manus address itself could still open the quiz there, unless Manus also checks the code.
+
 ## Building on your own computer
 
 ```bash

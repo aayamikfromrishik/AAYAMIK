@@ -4,8 +4,10 @@
 #   FTP_SERVER     the FTP host from Erichost's cPanel, for example ftp.karukritdesigns.com
 #   FTP_USERNAME   the FTP account's username
 #   FTP_PASSWORD   the FTP account's password
-# and optionally this repository variable:
+#   QUIZ_SECRET    the key that signs client quiz links (the same key is in the Karukrit Work Desk)
+# and optionally these repository variables:
 #   FTP_DIR        the folder the site lives in on the server (default: public_html/)
+#   QUIZ_URL       the Manus quiz address (or put it in "7 Quiz/quiz-link.txt" in the KD WEBSITE folder)
 name: Publish website
 
 on:
@@ -39,6 +41,9 @@ jobs:
       - run: npm ci
 
       - run: npm run build
+        env:
+          QUIZ_SECRET: ${{ secrets.QUIZ_SECRET }}
+          QUIZ_URL: ${{ vars.QUIZ_URL }}
 
       - name: Upload to Erichost
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5

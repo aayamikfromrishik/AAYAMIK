@@ -32,6 +32,7 @@ WHAT GOES WHERE
                                      "2026-10-30 north wall.jpg".
                  Only presentation drawings, never working drawings with dimensions.
 6 Contact        details.txt
+7 Quiz           quiz-link.txt: the Manus quiz link. Client links themselves are made in the Karukrit Work Desk.
 
 IF SOMETHING DOES NOT APPEAR
 Look at _website-log.txt in this folder. It says when the website last updated and lists

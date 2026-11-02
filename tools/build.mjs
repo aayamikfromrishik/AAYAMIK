@@ -615,14 +615,72 @@ ${slug === 'about' ? `<script src="${base}assets/vendor/page-flip-2.0.7.browser.
   return result;
 }
 
+/* ---------- the client quiz: /quiz/?c=CODE ----------
+   Links are made in the Karukrit Work Desk. Each code carries the project code, an expiry date and a signature
+   made with QUIZ_SECRET, so the server can check it without keeping a list. The Manus quiz opens inside the page
+   and receives the code as ?client=..., so every result saved in Google Drive is tagged with the project. */
+const QUIZ_LINK_FILE = join(CONTENT_DIR, '7 Quiz', 'quiz-link.txt');
+const QUIZ_URL = (process.env.QUIZ_URL || (existsSync(QUIZ_LINK_FILE) ? (readFileSync(QUIZ_LINK_FILE, 'utf8').match(/https?:\/\/\S+/) || [''])[0] : '')).trim();
+const phpStr = (v) => `'${String(v).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+function quizPage() {
+  const base = '../';
+  const msg = (title, text) => `<section class="quiz-msg wrap"><span class="cap">Client questionnaire</span><h1 class="h2">${title}</h1><p class="body">${text}</p>
+    <p class="body">Call <a href="tel:${PHONE.replace(/[^+\d]/g, '')}">${esc(PHONE)}</a> or write to <a href="mailto:${esc(EMAIL)}">${esc(EMAIL)}</a>.</p></section>`;
+  return `<?php
+// Checks the invite code, then shows the Manus quiz. Settings are in config.php, written by the build.
+header('X-Robots-Tag: noindex, nofollow');
+header('Referrer-Policy: no-referrer');
+$cfg = is_file(__DIR__ . '/config.php') ? include __DIR__ . '/config.php' : ['secret' => '', 'quiz' => ''];
+$code = isset($_GET['c']) ? strtoupper(trim($_GET['c'])) : '';
+$state = 'missing';
+if ($code !== '' && preg_match('/^([A-Z0-9-]{2,24})_(\\d{6})_([A-Z0-9]{4})_([A-F0-9]{10})$/', $code, $m)) {
+  $expected = strtoupper(substr(hash_hmac('sha256', $m[1] . '_' . $m[2] . '_' . $m[3], $cfg['secret']), 0, 10));
+  if ($cfg['secret'] === '' || !hash_equals($expected, $m[4])) { $state = 'invalid'; }
+  else {
+    $tz = new DateTimeZone('Asia/Kolkata');
+    $until = DateTime::createFromFormat('ymd H:i:s', $m[2] . ' 23:59:59', $tz);
+    $state = ($until && $until >= new DateTime('now', $tz)) ? 'ok' : 'expired';
+  }
+} elseif ($code !== '') { $state = 'invalid'; }
+if ($state === 'ok' && $cfg['quiz'] === '') { $state = 'notready'; }
+$src = $state === 'ok' ? $cfg['quiz'] . (strpos($cfg['quiz'], '?') === false ? '?' : '&') . 'client=' . rawurlencode($code) : '';
+?>${head({ base, title: 'Client questionnaire | Karukrit Designs', description: 'A private questionnaire for Karukrit Designs clients.', path: 'quiz/' }).replace('<meta name="description"', '<meta name="robots" content="noindex, nofollow">\n<meta name="description"')}
+<body class="s-taupe tx quiz-body" data-cursor="dark">
+${topbar(base, '')}
+<main id="main" class="page-top">
+<?php if ($state === 'ok'): ?>
+  <div class="quiz-frame">
+    <iframe src="<?= htmlspecialchars($src, ENT_QUOTES) ?>" title="Karukrit Designs client questionnaire" allow="clipboard-write; fullscreen" loading="eager"></iframe>
+  </div>
+  <p class="quiz-alt cap wrap">If the questionnaire does not load, <a class="underline" href="<?= htmlspecialchars($src, ENT_QUOTES) ?>" target="_blank" rel="noopener">open it in a new tab</a>.</p>
+<?php elseif ($state === 'expired'): ?>
+  ${msg('This link has expired.', 'Questionnaire links are valid for a limited time. Ask your project in-charge for a new one.')}
+<?php elseif ($state === 'notready'): ?>
+  ${msg('The questionnaire is being set up.', 'Please try again shortly.')}
+<?php else: ?>
+  ${msg('This questionnaire is by invitation.', 'It opens from the personal link your project in-charge sends you. If you are a client and need a link, get in touch.')}
+<?php endif; ?>
+</main>
+<script src="${base}assets/js/site.js"></script>
+</body>
+</html>
+`;
+}
+
 /* ---------- write everything into dist/ ---------- */
+const notesLater = [];
 const out = (rel, html) => { const f = join(OUT, rel); mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, html); };
 cpSync(join(ROOT, 'assets'), join(OUT, 'assets'), { recursive: true });
 for (const [rel, html] of Object.entries(pages())) out(rel, html);
+out('quiz/index.php', quizPage());
+// keep the settings file out of reach of the browser; PHP still reads it
+out('quiz/.htaccess', 'DirectoryIndex index.php\n<Files "config.php">\n  Require all denied\n</Files>\n');
+if (process.env.QUIZ_SECRET) out('quiz/config.php', `<?php return ['secret' => ${phpStr(process.env.QUIZ_SECRET)}, 'quiz' => ${phpStr(QUIZ_URL)}];\n`);
+else notesLater.push('QUIZ_SECRET is not set, so quiz links will not open yet.');
 CATS.forEach((c) => out(`projects/${c.slug}/index.html`, categoryPage(c)));
 PROJECTS.forEach((p) => out(`projects/${p.slug}/index.html`, p.status === 'ongoing' ? ongoingPage(p) : completedPage(p)));
 console.log(`Built the home page, ${NAV.length} chapter pages, ${CATS.length} category pages and ${PROJECTS.length} project pages into ${OUT}.`);
 console.log(C.found ? `Content folder: ${CONTENT_DIR}` : `No content folder at ${CONTENT_DIR}, so placeholders were used throughout.`);
-const notes = [...(C.warnings || [])];
+const notes = [...(C.warnings || []), ...notesLater];
 if (C.found && !C.projects) notes.push('No projects in the folder yet, so the placeholder projects are shown.');
 notes.forEach((n) => console.warn(`Note: ${n}`));

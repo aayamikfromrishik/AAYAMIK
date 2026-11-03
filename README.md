@@ -31,7 +31,8 @@ The Manus quiz opens at `karukritdesigns.com/quiz/`, but only from a personal li
 - **Tagging the results.** The quiz page opens the Manus quiz with `?client=<the code>` added, so Manus can save each result in Google Drive under the right project. Manus needs to read that `client` value and put it in the saved file's name.
 - **Setup.**
   1. Copy the key from the Work Desk (Saptarshi's login, Client quiz, Show the key) into a GitHub secret named `QUIZ_SECRET`.
-  2. Paste the Manus quiz address into `7 Quiz/quiz-link.txt` in the KD WEBSITE folder, or set it as a GitHub variable `QUIZ_URL`.
+  2. The Manus quiz address is in `content/quiz-link.txt`. To change it, edit that file, put a new one in `7 Quiz/quiz-link.txt` in the KD WEBSITE folder, or set a GitHub variable `QUIZ_URL`.
+  If Manus does not allow the quiz to be shown inside the page, set a GitHub variable `QUIZ_MODE` to `redirect`: clients are then sent straight to the quiz once their link is checked.
   3. Erichost runs the PHP. `quiz/.htaccess` keeps the settings file out of reach of the browser.
 - **One limit.** The check guards the page on karukritdesigns.com. Anyone who learned the Manus address itself could still open the quiz there, unless Manus also checks the code.
 

@@ -619,8 +619,11 @@ ${slug === 'about' ? `<script src="${base}assets/vendor/page-flip-2.0.7.browser.
    Links are made in the Karukrit Work Desk. Each code carries the project code, an expiry date and a signature
    made with QUIZ_SECRET, so the server can check it without keeping a list. The Manus quiz opens inside the page
    and receives the code as ?client=..., so every result saved in Google Drive is tagged with the project. */
-const QUIZ_LINK_FILE = join(CONTENT_DIR, '7 Quiz', 'quiz-link.txt');
-const QUIZ_URL = (process.env.QUIZ_URL || (existsSync(QUIZ_LINK_FILE) ? (readFileSync(QUIZ_LINK_FILE, 'utf8').match(/https?:\/\/\S+/) || [''])[0] : '')).trim();
+// the quiz address: a GitHub variable, else "7 Quiz/quiz-link.txt" in the studio folder, else content/quiz-link.txt
+const linkIn = (f) => (existsSync(f) ? (readFileSync(f, 'utf8').match(/https?:\/\/\S+/) || [''])[0] : '');
+const QUIZ_URL = (process.env.QUIZ_URL || linkIn(join(CONTENT_DIR, '7 Quiz', 'quiz-link.txt')) || linkIn(join(ROOT, 'content', 'quiz-link.txt'))).trim();
+// "embed" shows the quiz inside the page; "redirect" sends the client straight to it once the link is checked
+const QUIZ_MODE = process.env.QUIZ_MODE === 'redirect' ? 'redirect' : 'embed';
 const phpStr = (v) => `'${String(v).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 function quizPage() {
   const base = '../';
@@ -644,6 +647,7 @@ if ($code !== '' && preg_match('/^([A-Z0-9-]{2,24})_(\\d{6})_([A-Z0-9]{4})_([A-F
 } elseif ($code !== '') { $state = 'invalid'; }
 if ($state === 'ok' && $cfg['quiz'] === '') { $state = 'notready'; }
 $src = $state === 'ok' ? $cfg['quiz'] . (strpos($cfg['quiz'], '?') === false ? '?' : '&') . 'client=' . rawurlencode($code) : '';
+if ($state === 'ok' && ($cfg['mode'] ?? 'embed') === 'redirect') { header('Location: ' . $src, true, 302); exit; }
 ?>${head({ base, title: 'Client questionnaire | Karukrit Designs', description: 'A private questionnaire for Karukrit Designs clients.', path: 'quiz/' }).replace('<meta name="description"', '<meta name="robots" content="noindex, nofollow">\n<meta name="description"')}
 <body class="s-taupe tx quiz-body" data-cursor="dark">
 ${topbar(base, '')}
@@ -675,7 +679,7 @@ for (const [rel, html] of Object.entries(pages())) out(rel, html);
 out('quiz/index.php', quizPage());
 // keep the settings file out of reach of the browser; PHP still reads it
 out('quiz/.htaccess', 'DirectoryIndex index.php\n<Files "config.php">\n  Require all denied\n</Files>\n');
-if (process.env.QUIZ_SECRET) out('quiz/config.php', `<?php return ['secret' => ${phpStr(process.env.QUIZ_SECRET)}, 'quiz' => ${phpStr(QUIZ_URL)}];\n`);
+if (process.env.QUIZ_SECRET) out('quiz/config.php', `<?php return ['secret' => ${phpStr(process.env.QUIZ_SECRET)}, 'quiz' => ${phpStr(QUIZ_URL)}, 'mode' => ${phpStr(QUIZ_MODE)}];\n`);
 else notesLater.push('QUIZ_SECRET is not set, so quiz links will not open yet.');
 CATS.forEach((c) => out(`projects/${c.slug}/index.html`, categoryPage(c)));
 PROJECTS.forEach((p) => out(`projects/${p.slug}/index.html`, p.status === 'ongoing' ? ongoingPage(p) : completedPage(p)));

@@ -7,7 +7,8 @@
 #   QUIZ_SECRET    the key that signs client quiz links (the same key is in the Karukrit Work Desk)
 # and optionally these repository variables:
 #   FTP_DIR        the folder the site lives in on the server (default: public_html/)
-#   QUIZ_URL       the Manus quiz address (or put it in "7 Quiz/quiz-link.txt" in the KD WEBSITE folder)
+#   QUIZ_URL       the Manus quiz address (default: content/quiz-link.txt, or "7 Quiz/quiz-link.txt" in the KD WEBSITE folder)
+#   QUIZ_MODE      "redirect" to send clients straight to the quiz instead of showing it inside the page
 name: Publish website
 
 on:
@@ -44,6 +45,7 @@ jobs:
         env:
           QUIZ_SECRET: ${{ secrets.QUIZ_SECRET }}
           QUIZ_URL: ${{ vars.QUIZ_URL }}
+          QUIZ_MODE: ${{ vars.QUIZ_MODE }}
 
       - name: Upload to Erichost
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5

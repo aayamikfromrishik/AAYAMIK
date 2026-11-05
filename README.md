@@ -82,7 +82,7 @@ With reduced motion turned on, all of this switches off and the spec's still lay
 - `tools/windows/`: the office computer's setup and sync scripts, and the starter `KD WEBSITE template`
 - `.github/workflows/deploy.yml`: builds the site and uploads it to Erichost
 - `assets/css/site.css`: all styles; comments point to spec sections
-- `assets/css/fonts.css`: the Satoshi font faces, linked automatically once the font files are present
+- `assets/css/fonts.css` and `assets/fonts/`: Satoshi Light, Regular and Medium, self-hosted. The Fontshare licence (`docs/Satoshi-Fontshare-licence.txt`) allows commercial use on the web, but not passing the font files on, so keep this repository private
 - `assets/js/site.js`: smooth scroll and snapping, pencil cursor, sketched circles, reveals, header, phone menu
 - `assets/js/home.js`: logo loader, sketch slideshow, chapter indicator, book viewer, work rows, philosophy, contact form
 - `assets/js/project.js`: category filters and the image lightbox
@@ -114,7 +114,7 @@ Built and matching the spec:
 |---|---|
 | 1, 2 | Chapters story order; home chapters numbered I to VI; separate category and project pages; four categories in order; bachelor projects inside the normal categories with honest status tags |
 | 3.2 | Main and supporting colours exactly as listed, with the readability pairs (moss highlights on taupe, light gold on moss, pale gold on burnt orange) |
-| 3.3 | Type scale, weights 300/400/500, CAP labels at 11 px and 0.28em; Satoshi wired up and loaded automatically once the files are added |
+| 3.3 | Satoshi, self-hosted and preloaded, in weights 300/400/500; type scale and CAP labels at 11 px and 0.28em. Web use confirmed by the Fontshare licence |
 | 3.4 | Leather texture on every coloured surface, 512 px tile |
 | 3.5 | Letterhead stripe at the bottom of Contact and of the category and project pages |
 | 4 | 12-column grid with 64 px margins; one-screen chapters; Lenis smooth scroll (1.1 s) with proximity snapping on desktop only; reveals rising 24 px over 0.8 s, staggered 80 ms; chapter indicator with a chapter list; slim header after chapter I; square corners apart from the glass, pills and circles; shadows only on the book |
@@ -138,7 +138,6 @@ Built and matching the spec:
 Waiting for the client (spec sections 17 and 18):
 
 - Original logo vector (the traced wordmark is in place meanwhile)
-- Satoshi WOFF2 files and confirmation of the web licence. Until then the site uses Manrope, the stand-in from the design boards
 - 8–12 hand sketches with their colour renders (four placeholder sketches and coloured glows are in place)
 - Portraits, the about-me story, the team sentence and roles, philosophy sentences 2 and 3
 - Every project's details, photos and drawings, plus final print pages of the book and where to buy it

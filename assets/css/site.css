@@ -1,6 +1,6 @@
 /* Karukrit Designs. Values follow docs/KARUKRIT_WEBSITE_SPEC.md; section numbers in comments point there. */
 
-/* 3.3 Satoshi is declared in fonts.css, which the build links once the WOFF2 files are in assets/fonts/. */
+/* 3.3 Satoshi (Light, Regular, Medium) is self-hosted from assets/fonts/ and declared in fonts.css. Licence: docs/Satoshi-Fontshare-licence.txt */
 
 :root {
   /* 3.2 main palette */
@@ -8,7 +8,7 @@
   /* 3.2 supporting tones */
   --ink: #23261A; --ink-2: #3A3D28; --taupe-dark: #948E89; --taupe-light: #C9C4BF;
   --cream: #EFE8DC; --cream-warm: #F3ECE2; --cream-muted: #D9CFBF; --gold-light: #DDB86E; --gold-pale: #F0DDB5; --moss-deep: #2A2D1B;
-  --font: "Satoshi", "Manrope", "Helvetica Neue", Arial, sans-serif;
+  --font: "Satoshi", "Helvetica Neue", Arial, sans-serif;
   --ease: cubic-bezier(.2,.7,.2,1);
   --side: 64px;
   --focus: var(--orange);

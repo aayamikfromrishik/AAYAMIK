@@ -142,6 +142,8 @@ const CONTACT = C.contact || {};
 const ADDRESS = CONTACT.address || ['3652/2, 1st Floor, Green Field', 'Model Gram, Ludhiana 141002, Punjab'];
 const PHONE = CONTACT.phone || '+91 88243 96618';
 const EMAIL = CONTACT.email || 'ceo@karukritdesigns.com';
+// the curved K of the KARUKRIT wordmark, used for the K of Kapri; thinned slightly to match the light weight of the name
+const K_KARUKRIT = `<svg viewBox="1.6 2.2 40 50" focusable="false"><filter id="kd-k-thin" x="-5%" y="-5%" width="110%" height="110%"><feMorphology operator="erode" radius="0.7"/></filter><path fill="currentColor" fill-rule="evenodd" filter="url(#kd-k-thin)" d="${readFileSync(join(ROOT, 'assets/brand/k-karukrit.svg'), 'utf8').match(/ d="([^"]+)"/)[1]}"/></svg>`;
 const MEMBERS = C.members || [{ name: 'Kuljeet' }, { name: 'Krishma' }, { name: 'Sanchit' }, { name: '[Fourth member]' }];
 
 /* ---------- home page ---------- */
@@ -226,7 +228,7 @@ ${indicator(base, '')}
   <div class="portrait mono-host">${C.portrait ? `<div class="mono portrait-img">${visual(C.portrait, '', '', base, false, '(max-width: 767px) 100vw, 50vw')}</div>` : '<div class="mono ph tx" style="background-color:var(--sage);height:100%" role="img" aria-label="Portrait of Ar. Saptarshi Kapri, placeholder"><span class="cap">[Portrait · full height]</span></div>'}</div>
   <div class="arch-text" data-stagger>
     <span class="cap rv">Chapter II · The architect</span>
-    <h2 id="arch-h" class="h1 rv"><b class="hl">Ar. Saptarshi</b> Kapri</h2>
+    <h2 id="arch-h" class="h1 rv"><b class="hl">Ar. Saptarshi</b> <span class="kname"><span class="kd-k" aria-hidden="true">${K_KARUKRIT}</span><span aria-hidden="true">apri</span><span class="sr-only">Kapri</span></span></h2>
     ${(C.story || ['[Your story, first short paragraph.]', '[Your story, second short paragraph.]']).map((t) => `<p class="body muted rv">${esc(t)}</p>`).join('\n    ')}
     <a class="book-card s-moss tx rv" href="#author" data-cursor="light">
       ${bookPic('book-cover-front', 'Cover of The 100 Decisions Before the First Brick', ' width="70" height="96"')}

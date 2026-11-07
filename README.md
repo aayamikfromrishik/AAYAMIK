@@ -28,6 +28,14 @@ While `content/coming-soon.txt` holds a date, every page says "We are coming soo
 
 To open the whole site, delete `content/coming-soon.txt` (or set the GitHub variable `SITE_MODE` to `full`) and publish again. To change the date, edit the date in that file.
 
+## Colour themes
+
+`content/theme.txt` picks the colours: `bottle` (deep bottle green, light grey, bright yellow; the current choice), `maroon` (deep brownish maroon, warm grey, yellow) or `leather` (the original moss, taupe and gold). Change the first word and publish again, or set the GitHub variable `SITE_THEME`. Every surface, the 3D scene and the logo reveal follow the theme.
+
+## The 3D house
+
+`assets/model/house.glb` is the Gaurav Jain residence (Zira), converted from the SketchUp .dae: roads, interior furniture and carpets removed, the boundary wall left out and drawn as the plot line instead, textures recoloured into the site palette, ten simple trees added in the lawn, and a plan cut at 1.2 m stored with it for the drawing stage. A .glb put in "1 Home/3D Model" in the studio folder takes its place.
+
 ## The client questionnaire
 
 The Manus quiz opens at `karukritdesigns.com/quiz/`, but only from a personal link.

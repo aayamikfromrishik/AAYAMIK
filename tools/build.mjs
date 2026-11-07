@@ -44,7 +44,7 @@ const highlight = (t) => esc(t).replace(/\*(.+?)\*/g, '<b class="hl">$1</b>');
 /* ---------- shared pieces ---------- */
 function head({ base, title, description, path, home = false }) {
   return `<!doctype html>
-<html lang="en">
+<html lang="en" data-theme="${THEME}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -148,6 +148,10 @@ const K_KARUKRIT = `<svg viewBox="1.6 2.2 40 50" focusable="false"><filter id="k
    While content/coming-soon.txt holds a date, every page says "We are coming soon" with a countdown to that date;
    the effects stay, the photos and writing wait, and only the book keeps its details.
    Delete the file (or set the GitHub variable SITE_MODE to "full") to open the whole site. */
+// the colour theme: the GitHub variable SITE_THEME, else the first word of content/theme.txt (leather, bottle or maroon)
+const THEMES = ['leather', 'bottle', 'maroon'];
+const themeIn = existsSync(join(ROOT, 'content/theme.txt')) ? readFileSync(join(ROOT, 'content/theme.txt'), 'utf8').trim().split(/\s+/)[0].toLowerCase() : '';
+const THEME = THEMES.find((t) => t === (process.env.SITE_THEME || themeIn)) || 'leather';
 const SOON_FILE = join(ROOT, 'content/coming-soon.txt');
 const SOON_DATE = process.env.SITE_MODE === 'full' ? '' : process.env.SITE_MODE === 'soon' || existsSync(SOON_FILE)
   ? ((existsSync(SOON_FILE) ? readFileSync(SOON_FILE, 'utf8') : '').match(/\d{4}-\d{2}-\d{2}/) || ['2027-01-01'])[0] : '';
@@ -166,6 +170,8 @@ const soonSection = ({ id, scheme, chapter, label, cursor, title = 'We are <b cl
     <div class="rv">${soonNote()}</div>${extra}
   </div>
 </section>`;
+// the 3D house: a .glb in "1 Home/3D Model" in the studio folder, else the studio's model kept with the site
+const MODEL = C.model || (existsSync(join(ROOT, 'assets/model/house.glb')) ? 'assets/model/house.glb' : '');
 const MEMBERS = C.members || [{ name: 'Kuljeet' }, { name: 'Krishma' }, { name: 'Sanchit' }, { name: '[Fourth member]' }];
 
 /* ---------- home page ---------- */
@@ -229,7 +235,7 @@ ${indicator(base, '')}
 <div id="home" class="hero-scroll" data-chapter="I" data-cursor="light" data-snap>
 <section class="ch hero s-moss tx" aria-label="Chapter I, home">
   <div class="glowsets" aria-hidden="true">${SKETCHES.map(glowset).join('')}</div>
-  <canvas id="house" role="img" aria-label="A house drawn as a plan on paper, rising into walls, then shown as a white model and as the finished home"${C.model ? ` data-model="${C.model}"` : ''}></canvas>
+  <canvas id="house" role="img" aria-label="A house drawn as a plan on paper, rising into walls, then shown as a white model and as the finished home"${MODEL ? ` data-model="${MODEL}"` : ''}></canvas>
   <div class="glass hero-fade" data-cursor="dark">
     <div class="pane tx" aria-hidden="true"></div>
     <div class="glass-top fades">

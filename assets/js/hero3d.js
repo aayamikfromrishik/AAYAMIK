@@ -14,6 +14,13 @@ const C = {
   ink: 0x23261a, paper: 0xefe8dc, clay: 0xe9e3d6, plaster: 0xf3ece2, taupe: 0xa8a29d,
   moss: 0x45492d, sage: 0x818865, gold: 0xbb8d3f, orange: 0x8b4729, glass: 0x2a2d1b, grass: 0x6f7752,
 };
+// the colour theme's own values, when the page sets them
+{
+  const css = getComputedStyle(document.documentElement);
+  const read = (name) => { const v = css.getPropertyValue(name).trim(); return /^#[0-9a-f]{6}$/i.test(v) ? parseInt(v.slice(1), 16) : null; };
+  [['ink', '--ink'], ['paper', '--paper'], ['taupe', '--taupe'], ['moss', '--moss'], ['sage', '--sage'], ['gold', '--gold'], ['orange', '--orange'], ['glass', '--moss-deep'], ['grass', '--grass']]
+    .forEach(([k, name]) => { const v = read(name); if (v !== null) C[k] = v; });
+}
 
 const stageEl = document.querySelector('.hero');
 const canvas = document.getElementById('house');
@@ -200,23 +207,58 @@ function finishBuild() {
 }
 let planLines;
 
+// textures stay hidden through the white-model stage and fade in with the colour
+const mapMix = { value: 0 };
+function fadeInMap(m) {
+  m.onBeforeCompile = (sh) => {
+    sh.uniforms.uMapMix = mapMix;
+    sh.fragmentShader = 'uniform float uMapMix;\n' + sh.fragmentShader.replace('#include <map_fragment>',
+      '#ifdef USE_MAP\n  diffuseColor *= mix(vec4(1.0), texture2D(map, vMapUv), uMapMix);\n#endif');
+  };
+}
+
 function fromModel(gltf) {
   const root = gltf.scene;
-  // centre it on the site and sit it on the ground
+  const kd = (root.userData && root.userData.kd) || {};
+  // a plan made with the model (a cut through the walls, the trees, the plot line) is drawn first
+  const planObj = root.getObjectByName('kd-plan');
+  if (planObj) planObj.removeFromParent();
+  // centre it on the site, sit it on the ground, and scale a large plot down to the size of the scene
   const bb = new THREE.Box3().setFromObject(root);
-  const c = bb.getCenter(new THREE.Vector3());
-  root.position.sub(new THREE.Vector3(c.x, bb.min.y, c.z));
+  const c = bb.getCenter(new THREE.Vector3()), size = bb.getSize(new THREE.Vector3());
+  const fit = kd.fit || (Math.max(size.x, size.z) > 34 ? 30 : 0);
+  const k = fit ? fit / Math.max(size.x, size.z) : 1;
+  const toScene = (x, y, z) => new THREE.Vector3((x - c.x) * k, (y - bb.min.y) * k, (z - c.z) * k);
+  root.scale.setScalar(k);
+  root.position.copy(toScene(0, 0, 0));
   house.add(root);
   root.traverse((o) => {
     if (!o.isMesh) return;
     const src = Array.isArray(o.material) ? o.material[0] : o.material;
-    const m = mat(src.color ? src.color.getHex() : C.plaster, { map: src.map || null, roughness: src.roughness ?? 0.8, metalness: src.metalness ?? 0 });
+    const glassy = src.transparent && src.opacity < 0.95;
+    const m = mat(src.color ? src.color.getHex() : C.plaster, { map: src.map || null, roughness: src.roughness ?? 0.8, metalness: src.metalness ?? 0, side: src.side, envMapIntensity: glassy ? 1.2 : 0.4 });
+    if (glassy) m.userData.maxOpacity = src.opacity;
+    if (m.map) fadeInMap(m);
     o.material = m;
-    o.castShadow = o.receiveShadow = true;
+    o.castShadow = o.receiveShadow = !glassy;
   });
-  const b2 = new THREE.Box3().setFromObject(root);
-  rect((b2.min.x + b2.max.x) / 2, (b2.min.z + b2.max.z) / 2, b2.max.x - b2.min.x, b2.max.z - b2.min.z);
-  dim(b2.min.x, b2.max.z, b2.max.x, b2.max.z, 2);
+  if (planObj) {
+    const pos = planObj.geometry.attributes.position;
+    for (let i = 0; i < pos.count; i++) { const v = toScene(pos.getX(i), bb.min.y, pos.getZ(i)); planPts.push(v.x, 0.01, v.z); }
+  } else {
+    const b2 = new THREE.Box3().setFromObject(root);
+    rect((b2.min.x + b2.max.x) / 2, (b2.min.z + b2.max.z) / 2, b2.max.x - b2.min.x, b2.max.z - b2.min.z);
+  }
+  if (kd.plot) {
+    const [x0, z0, x1, z1] = kd.plot, a = toScene(x0, 0, z0), b = toScene(x1, 0, z1);
+    dim(a.x, b.z, b.x, b.z, 1.6);
+    dim(b.x, a.z, b.x, b.z, -1.6);
+  } else {
+    const b2 = new THREE.Box3().setFromObject(root);
+    dim(b2.min.x, b2.max.z, b2.max.x, b2.max.z, 2);
+  }
+  if (kd.focus) focus.copy(toScene(...kd.focus));
+  if (typeof kd.front === 'number') front = kd.front;
 }
 
 // ---------- timeline ----------
@@ -271,6 +313,9 @@ addEventListener('resize', resize);
 new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(stageEl);
 
 const target = new THREE.Vector3();
+const start = new THREE.Vector3(1, 0.5, 0.5);   // what the camera circles while the plan is drawn
+const focus = new THREE.Vector3(1, 3.4, 1);     // where it comes to rest: the front of the house
+let front = 0.42;                                // and the angle it looks from
 function frame() {
   requestAnimationFrame(frame);
   if (!visible || !ready || heroP() < 0.015) return;
@@ -305,13 +350,14 @@ function frame() {
   const colour = smooth(0.55, 0.85, p);
   pieces.forEach(({ mesh }) => {
     const m = mesh.material;
-    m.opacity = solid;
-    const opaque = solid > 0.98;
+    m.opacity = solid * (m.userData.maxOpacity ?? 1);
+    const opaque = solid > 0.98 && m.userData.maxOpacity === undefined;
     if (m.transparent === opaque) { m.transparent = !opaque; m.needsUpdate = true; }
-    m.depthWrite = solid > 0.5;
+    m.depthWrite = solid > 0.5 && m.userData.maxOpacity === undefined;
     m.color.copy(clay).lerp(m.userData.target, colour);
     mesh.castShadow = solid > 0.3;
   });
+  mapMix.value = colour;
   lineMat.opacity = Math.min(1, lerp(0.9, 0.12, colour) + mouse.hover * 0.25);
   sun.intensity = lerp(0.0, 2.6, solid) + colour * 0.6;
   hemi.intensity = lerp(1.1, 0.75, solid);
@@ -321,12 +367,11 @@ function frame() {
 
   // camera: a slow orbit high above the drawing, coming down to the front door by the end
   const autoTheta = reduceMotion ? 0.9 : 0.9 + time * 0.045;
-  const front = 0.42;
   const k = smooth(0.5, 1, p);
   const theta = lerp(autoTheta, front + Math.round((autoTheta - front) / (Math.PI * 2)) * Math.PI * 2, k) + mouse.sx * 0.5 + mouse.turn;
   const radius = lerp(40, 33, smooth(0, 1, p)) * (camera.aspect < 0.8 ? 1.55 : 1);
   const height = Math.max(1.6, lerp(26, 5.5, smooth(0.1, 1, p)) - mouse.sy * lerp(5, 2.5, k));
-  target.set(1, lerp(0.5, 3.4, k), lerp(0.5, 1, k));
+  target.lerpVectors(start, focus, k);
   camera.position.set(target.x + Math.sin(theta) * radius, height, target.z + Math.cos(theta) * radius);
   camera.lookAt(target);
 

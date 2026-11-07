@@ -8,6 +8,9 @@
   /* 3.2 supporting tones */
   --ink: #23261A; --ink-2: #3A3D28; --taupe-dark: #948E89; --taupe-light: #C9C4BF;
   --cream: #EFE8DC; --cream-warm: #F3ECE2; --cream-muted: #D9CFBF; --gold-light: #DDB86E; --gold-pale: #F0DDB5; --moss-deep: #2A2D1B;
+  --taupe-rgb: 168 162 157;   /* the light surface, for the frosted bar and glass */
+  --paper: #EFE8DC; --grass: #6F7752; /* the 3D scene: the drawing paper and the lawn it becomes */
+  --glow: rgba(221,184,110,.16); /* the light behind the logo as it is revealed */
   --font: "Satoshi", "Helvetica Neue", Arial, sans-serif;
   --ease: cubic-bezier(.2,.7,.2,1);
   --side: 64px;
@@ -111,7 +114,7 @@ html.kd-intro .hero-fade { opacity: 0; }
 html.kd-intro.kd-intro-out .hero-fade { opacity: 1; transition: opacity .9s ease; }
 
 /* 4 slim header after chapter I, and on every other page */
-.topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 60; height: calc(64px + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); background-color: rgba(168,162,157,.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transform: translateY(-100%); transition: transform .5s var(--ease); }
+.topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 60; height: calc(64px + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); background-color: rgb(var(--taupe-rgb) / .85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transform: translateY(-100%); transition: transform .5s var(--ease); }
 .topbar.show, .topbar.always { transform: none; }
 .topbar .wrap { height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .wordmark { display: block; width: 230px; }
@@ -154,8 +157,8 @@ html.kd-intro.kd-intro-out .hero-fade { opacity: 1; transition: opacity .9s ease
 /* the glass content stays put; only its pane (the frosted surface) shrinks into a card as Chapter I scrolls */
 .glass { position: absolute; top: 64px; bottom: 56px; left: 72px; right: 72px; padding: 36px 56px 44px; display: flex; flex-direction: column; color: var(--ink); --focus: var(--orange); transform-origin: var(--card-x, 80%) var(--card-y, 80%); }
 .glass > :not(.pane) { position: relative; z-index: 1; }
-.pane { position: absolute; left: 0; top: 0; width: 100%; height: 100%; border-radius: 24px; border: 1px solid rgba(255,255,255,.3); background-color: rgba(168,162,157,.62); backdrop-filter: blur(36px) saturate(1.05); -webkit-backdrop-filter: blur(36px) saturate(1.05); }
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .pane { background-color: rgba(168,162,157,.92); } }
+.pane { position: absolute; left: 0; top: 0; width: 100%; height: 100%; border-radius: 24px; border: 1px solid rgba(255,255,255,.3); background-color: rgb(var(--taupe-rgb) / .62); backdrop-filter: blur(36px) saturate(1.05); -webkit-backdrop-filter: blur(36px) saturate(1.05); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .pane { background-color: rgb(var(--taupe-rgb) / .92); } }
 .fades { opacity: var(--fade, 1); }
 .hero.opened .fades { pointer-events: none; visibility: hidden; }
 .build-stages { display: flex; gap: 14px; align-items: center; opacity: var(--stg, 0); margin-block: -8px; }
@@ -631,3 +634,28 @@ dialog.full[open] { display: flex; flex-direction: column; gap: 18px; }
   .countdown b, .countdown.big b { font-size: 44px; }
   .soon-hero { gap: 14px; align-self: stretch; }
 }
+
+/* ---------- colour themes ----------
+   The build sets data-theme on <html> from content/theme.txt (leather, bottle or maroon).
+   Every surface, text colour and highlight comes from these tokens, so a theme is only a set of values. */
+html[data-theme="bottle"] {
+  --moss: #123D2F; --moss-deep: #0A251C; --sage: #5F8A72; --orange: #B5512A; --gold: #E8B12B; --taupe: #D2D4D0;
+  --ink: #0E1D17; --ink-2: #1D3329; --taupe-dark: #B7BAB5; --taupe-light: #E6E7E3;
+  --cream: #F3F1EA; --cream-warm: #F7F5EF; --cream-muted: #C9D2CB; --gold-light: #F3C54A; --gold-pale: #FBE3A1;
+  --taupe-rgb: 210 212 208; --paper: #EEEFEA; --grass: #2E5A43; --glow: rgba(243,197,74,.22);
+}
+html[data-theme="maroon"] {
+  --moss: #4A1D1F; --moss-deep: #2B0F10; --sage: #8C6F5F; --orange: #A8432A; --gold: #E3A93A; --taupe: #D7D2CC;
+  --ink: #1F1112; --ink-2: #3A2224; --taupe-dark: #BDB6AF; --taupe-light: #E8E4DF;
+  --cream: #F4EEE6; --cream-warm: #F7F2EB; --cream-muted: #D8C8BC; --gold-light: #F0C060; --gold-pale: #F8DFAE;
+  --taupe-rgb: 215 210 204; --paper: #F0ECE6; --grass: #5E6B45; --glow: rgba(240,192,96,.22);
+}
+
+/* the logo is revealed out of the dark, under a soft light that swells and settles */
+.loader::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 46% 40% at 50% 50%, var(--glow), transparent 70%), radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(0,0,0,.45) 100%);
+  opacity: 0; animation: kd-glow 3.2s .3s var(--ease) forwards; }
+@keyframes kd-glow { 0% { opacity: 0; transform: scale(.85); } 60% { opacity: 1; transform: scale(1.04); } 100% { opacity: .85; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .loader::before { animation: none; opacity: .85; } }
+.loader .logo-anim { position: relative; z-index: 1; }
+.loader .logo-last { z-index: 1; }

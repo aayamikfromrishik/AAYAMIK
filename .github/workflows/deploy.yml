@@ -48,6 +48,7 @@ jobs:
           QUIZ_URL: ${{ vars.QUIZ_URL }}
           QUIZ_MODE: ${{ vars.QUIZ_MODE }}
           SITE_MODE: ${{ vars.SITE_MODE }}
+          SITE_THEME: ${{ vars.SITE_THEME }}
 
       - name: Upload to Erichost
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5

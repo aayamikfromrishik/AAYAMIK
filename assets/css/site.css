@@ -4,13 +4,15 @@
 
 :root {
   /* 3.2 main palette */
-  --moss: #45492D; --orange: #8B4729; --gold: #BB8D3F; --sage: #818865; --taupe: #A8A29D;
+  --moss: #45492D; --orange: #8B4729; --gold: #BB8D3F; --sage: #818865; --taupe: #CBC7C2;
   /* 3.2 supporting tones */
-  --ink: #23261A; --ink-2: #3A3D28; --taupe-dark: #948E89; --taupe-light: #C9C4BF;
+  --ink: #23261A; --ink-2: #3A3D28; --taupe-dark: #B3AEA8; --taupe-light: #DEDAD6;
   --cream: #EFE8DC; --cream-warm: #F3ECE2; --cream-muted: #D9CFBF; --gold-light: #DDB86E; --gold-pale: #F0DDB5; --moss-deep: #2A2D1B;
-  --taupe-rgb: 168 162 157;   /* the light surface, for the frosted bar and glass */
+  --taupe-rgb: 203 199 194;   /* the light surface, for the frosted bar and glass */
   --paper: #EFE8DC; --grass: #6F7752; /* the 3D scene: the drawing paper and the lawn it becomes */
-  --glow: rgba(221,184,110,.16); /* the light behind the logo as it is revealed */
+  /* soft layered shadows: a close contact shadow, a mid shadow and a wide, faint one */
+  --shadow-1: 0 1px 2px rgba(20,22,12,.10), 0 4px 10px rgba(20,22,12,.10), 0 14px 30px rgba(20,22,12,.12);
+  --shadow-2: 0 2px 4px rgba(20,22,12,.10), 0 12px 28px rgba(20,22,12,.16), 0 34px 70px rgba(20,22,12,.20);
   --font: "Satoshi", "Helvetica Neue", Arial, sans-serif;
   --ease: cubic-bezier(.2,.7,.2,1);
   --side: 64px;
@@ -32,8 +34,9 @@ b, strong { font-weight: 400; }
 .skip-link { position: fixed; left: 16px; top: -60px; z-index: 300; background-color: var(--moss); color: var(--cream); padding: 12px 18px; }
 .skip-link:focus { top: 16px; }
 
-/* 3.4 leather on every coloured surface */
-.tx { background-image: url("../texture/leather-grain.png"); background-size: 512px 512px; background-repeat: repeat; }
+/* 3.4 silk suede on every coloured surface: a fine nap that repeats, under one broad soft sheen that does not */
+.tx { background-image: linear-gradient(118deg, rgba(255,250,240,0) 18%, rgba(255,250,240,.07) 42%, rgba(255,250,240,.02) 58%, rgba(0,0,0,.05) 82%), url("../texture/leather-grain.png");
+  background-size: 100% 100%, 512px 512px; background-repeat: no-repeat, repeat; }
 .s-taupe { background-color: var(--taupe); color: var(--ink); }
 .s-moss { background-color: var(--moss); color: var(--cream); }
 .s-orange { background-color: var(--orange); color: var(--cream-warm); }
@@ -60,11 +63,12 @@ b, strong { font-weight: 400; }
 .stack { display: flex; flex-direction: column; }
 
 /* 5.5 buttons */
-.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 16px 26px; border-radius: 999px; font-size: 11px; font-weight: 500; letter-spacing: .28em; text-transform: uppercase; line-height: 1.2; transition: filter .3s ease; position: relative; }
-.btn:hover { filter: brightness(1.06); }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 16px 26px; border-radius: 999px; font-size: 11px; font-weight: 500; letter-spacing: .28em; text-transform: uppercase; line-height: 1.2; transition: filter .3s ease, transform .35s var(--ease), box-shadow .35s var(--ease); position: relative; box-shadow: var(--shadow-1); }
+.btn:hover { filter: brightness(1.06); transform: translateY(-2px); box-shadow: var(--shadow-2); }
 .btn-orange { background-color: var(--orange); color: var(--cream-warm); }
 .btn-gold { background-color: var(--gold); color: var(--ink); }
-.btn-line { padding: 15px 22px; border: 1px solid currentColor; }
+.btn-line { padding: 15px 22px; border: 1px solid currentColor; box-shadow: none; }
+.btn-line:hover { box-shadow: none; }
 .btn-line:hover { filter: none; background-color: rgba(239,232,220,.08); }
 .link-cap { display: inline-flex; align-items: center; min-height: 44px; position: relative; }
 .underline { border-bottom: 1px solid var(--orange); padding-bottom: 4px; }
@@ -642,20 +646,31 @@ html[data-theme="bottle"] {
   --moss: #123D2F; --moss-deep: #0A251C; --sage: #5F8A72; --orange: #B5512A; --gold: #E8B12B; --taupe: #D2D4D0;
   --ink: #0E1D17; --ink-2: #1D3329; --taupe-dark: #B7BAB5; --taupe-light: #E6E7E3;
   --cream: #F3F1EA; --cream-warm: #F7F5EF; --cream-muted: #C9D2CB; --gold-light: #F3C54A; --gold-pale: #FBE3A1;
-  --taupe-rgb: 210 212 208; --paper: #EEEFEA; --grass: #2E5A43; --glow: rgba(243,197,74,.22);
+  --taupe-rgb: 210 212 208; --paper: #EEEFEA; --grass: #2E5A43;
 }
 html[data-theme="maroon"] {
   --moss: #4A1D1F; --moss-deep: #2B0F10; --sage: #8C6F5F; --orange: #A8432A; --gold: #E3A93A; --taupe: #D7D2CC;
   --ink: #1F1112; --ink-2: #3A2224; --taupe-dark: #BDB6AF; --taupe-light: #E8E4DF;
   --cream: #F4EEE6; --cream-warm: #F7F2EB; --cream-muted: #D8C8BC; --gold-light: #F0C060; --gold-pale: #F8DFAE;
-  --taupe-rgb: 215 210 204; --paper: #F0ECE6; --grass: #5E6B45; --glow: rgba(240,192,96,.22);
+  --taupe-rgb: 215 210 204; --paper: #F0ECE6; --grass: #5E6B45;
 }
 
-/* the logo is revealed out of the dark, under a soft light that swells and settles */
+/* the logo is revealed on the flat green, with the edges falling into darkness */
 .loader::before { content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(ellipse 46% 40% at 50% 50%, var(--glow), transparent 70%), radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(0,0,0,.45) 100%);
+  background: radial-gradient(ellipse 75% 70% at 50% 50%, rgba(0,0,0,0) 38%, rgba(0,0,0,.42) 100%);
   opacity: 0; animation: kd-glow 3.2s .3s var(--ease) forwards; }
 @keyframes kd-glow { 0% { opacity: 0; transform: scale(.85); } 60% { opacity: 1; transform: scale(1.04); } 100% { opacity: .85; transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .loader::before { animation: none; opacity: .85; } }
 .loader .logo-anim { position: relative; z-index: 1; }
 .loader .logo-last { z-index: 1; }
+
+/* smooth shadows: things that sit on the leather cast a soft, layered shadow */
+.loader .logo-anim, .loader .logo-last { filter: drop-shadow(0 2px 2px rgba(0,0,0,.25)) drop-shadow(0 10px 22px rgba(0,0,0,.30)); }
+.pane { box-shadow: var(--shadow-2); }
+.topbar.show, .topbar.always { box-shadow: 0 1px 0 rgba(20,22,12,.06), 0 10px 30px rgba(20,22,12,.10); }
+.book-card { box-shadow: var(--shadow-2); transition: transform .4s var(--ease), box-shadow .4s var(--ease); }
+.book-card:hover { transform: translateY(-3px); }
+.member .frame, .tile .img, .handbook .pg { box-shadow: var(--shadow-1); }
+/* where one coloured chapter meets the next, the upper one throws a soft shadow, like overlapping hides */
+main > .ch + .ch, main > .ch + .philosophy, main > .philosophy + .ch, main > .contents, main > .hero-scroll + * { box-shadow: inset 0 26px 40px -30px rgba(10,12,6,.38); }
+@media (prefers-reduced-motion: reduce) { .btn:hover, .book-card:hover { transform: none; } }

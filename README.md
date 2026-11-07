@@ -30,7 +30,7 @@ To open the whole site, delete `content/coming-soon.txt` (or set the GitHub vari
 
 ## Colour themes
 
-`content/theme.txt` picks the colours: `bottle` (deep bottle green, light grey, bright yellow; the current choice), `maroon` (deep brownish maroon, warm grey, yellow) or `leather` (the original moss, taupe and gold). Change the first word and publish again, or set the GitHub variable `SITE_THEME`. Every surface, the 3D scene and the logo reveal follow the theme.
+`content/theme.txt` picks the colours: `leather` (moss green, a bright stone grey and gold; the current choice), `bottle` (deep bottle green, light grey, bright yellow) or `maroon` (deep brownish maroon, warm grey, yellow). Every surface has a silk suede finish with one soft sheen, and things that sit on it cast smooth layered shadows. Change the first word and publish again, or set the GitHub variable `SITE_THEME`. Every surface, the 3D scene and the logo reveal follow the theme.
 
 ## The 3D house
 

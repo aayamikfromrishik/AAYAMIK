@@ -34,7 +34,7 @@ To open the whole site, delete `content/coming-soon.txt` (or set the GitHub vari
 
 ## The 3D house
 
-`assets/model/house.glb` is the Gaurav Jain residence (Zira), converted from the SketchUp .dae: roads, interior furniture and carpets removed, the boundary wall left out and drawn as the plot line instead, textures recoloured into the site palette, ten simple trees added in the lawn, and a plan cut at 1.2 m stored with it for the drawing stage. A .glb put in "1 Home/3D Model" in the studio folder takes its place.
+`assets/model/house.glb` is the Gaurav Jain residence (Zira), converted from the SketchUp .dae: roads, interior furniture and carpets removed, the boundary wall left out and drawn as the plot line instead, textures dropped (the house is shown as a model, not a render), ten simple trees added in the lawn, and a plan cut at 1.2 m stored with it for the drawing stage. After the plan and the white study model it frosts over in the theme's colours: cream walls, gold where the model has wood, a faint glass, a sage lawn and trees, fine ink lines, on stone. A .glb put in "1 Home/3D Model" in the studio folder takes its place and is finished the same way.
 
 ## The client questionnaire
 

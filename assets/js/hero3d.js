@@ -18,7 +18,7 @@ const C = {
 {
   const css = getComputedStyle(document.documentElement);
   const read = (name) => { const v = css.getPropertyValue(name).trim(); return /^#[0-9a-f]{6}$/i.test(v) ? parseInt(v.slice(1), 16) : null; };
-  [['ink', '--ink'], ['paper', '--paper'], ['taupe', '--taupe'], ['moss', '--moss'], ['sage', '--sage'], ['gold', '--gold'], ['orange', '--orange'], ['glass', '--moss-deep'], ['grass', '--grass']]
+  [['ink', '--ink'], ['cream', '--cream'], ['paper', '--paper'], ['taupe', '--taupe'], ['moss', '--moss'], ['sage', '--sage'], ['gold', '--gold'], ['orange', '--orange'], ['glass', '--moss-deep'], ['grass', '--grass']]
     .forEach(([k, name]) => { const v = read(name); if (v !== null) C[k] = v; });
 }
 
@@ -194,8 +194,35 @@ function addLinesFor(mesh) {
   pieces.push({ mesh, wrap, baseY });
 }
 
+// ---------- the finished house: a softly frosted model in the theme's colours ----------
+// cream walls, gold where the model has wood, a faint glass, a sage lawn and trees, fine ink lines, on stone
+const FINISH = {
+  body: [C.cream ?? 0xefe8dc, 0.55], accent: [C.gold, 0.75], glass: [C.glass, 0.3], lawn: [C.sage, 0.7], tree: [C.sage, 0.6],
+};
+function familyOf(mesh) {
+  const n = `${mesh.name} ${mesh.parent ? mesh.parent.name : ''}`;
+  if (/tree/i.test(n)) return 'tree';
+  if (/Glass/.test(n) || mesh.userData.glass) return 'glass';
+  if (/Grass|Gravel/.test(n)) return 'lawn';
+  if (/Wood|Veneer|Fencing|Parquet|brass|Ashlar/.test(n)) return 'accent';
+  // the built-in study house is named by colour instead
+  const t = mesh.material.userData.target && mesh.material.userData.target.getHex();
+  if (t === new THREE.Color(C.gold).getHex() || t === new THREE.Color(C.orange).getHex()) return 'accent';
+  if (t === new THREE.Color(C.glass).getHex()) return 'glass';
+  if (t === new THREE.Color(C.sage).getHex()) return 'tree';
+  return 'body';
+}
+
 function finishBuild() {
-  house.traverse((o) => { if (o.isMesh) addLinesFor(o); });
+  house.traverse((o) => {
+    if (!o.isMesh) return;
+    o.userData.fam = familyOf(o);
+    const [colour, opacity] = FINISH[o.userData.fam];
+    o.material.userData.target = new THREE.Color(colour);
+    o.material.userData.finish = opacity;
+    o.material.map = null;
+    addLinesFor(o);
+  });
   // rise from the ground up, the way it is built
   pieces.sort((a, b) => a.baseY - b.baseY);
   pieces.forEach((p, i) => { p.delay = i * (1.6 / pieces.length) + p.baseY * 0.06; });
@@ -207,15 +234,6 @@ function finishBuild() {
 }
 let planLines;
 
-// textures stay hidden through the white-model stage and fade in with the colour
-const mapMix = { value: 0 };
-function fadeInMap(m) {
-  m.onBeforeCompile = (sh) => {
-    sh.uniforms.uMapMix = mapMix;
-    sh.fragmentShader = 'uniform float uMapMix;\n' + sh.fragmentShader.replace('#include <map_fragment>',
-      '#ifdef USE_MAP\n  diffuseColor *= mix(vec4(1.0), texture2D(map, vMapUv), uMapMix);\n#endif');
-  };
-}
 
 function fromModel(gltf) {
   const root = gltf.scene;
@@ -236,9 +254,8 @@ function fromModel(gltf) {
     if (!o.isMesh) return;
     const src = Array.isArray(o.material) ? o.material[0] : o.material;
     const glassy = src.transparent && src.opacity < 0.95;
-    const m = mat(src.color ? src.color.getHex() : C.plaster, { map: src.map || null, roughness: src.roughness ?? 0.8, metalness: src.metalness ?? 0, side: src.side, envMapIntensity: glassy ? 1.2 : 0.4 });
-    if (glassy) m.userData.maxOpacity = src.opacity;
-    if (m.map) fadeInMap(m);
+    const m = mat(C.cream ?? C.plaster, { roughness: glassy ? 0.1 : 0.7, metalness: 0, side: src.side, envMapIntensity: glassy ? 1.2 : 0.5 });
+    o.userData.glass = glassy;
     o.material = m;
     o.castShadow = o.receiveShadow = !glassy;
   });
@@ -272,7 +289,7 @@ let scrollS = 0;                  // smoothed progress through the 3D part of Ch
 // the cursor: where it is (x, y), how fast it moves (spin), and whether it is over the house (hover)
 const mouse = { x: 0, y: 0, sx: 0, sy: 0, spin: 0, turn: 0, drag: false, lastX: 0, hover: 0, px: -9, py: -9 };
 const clay = new THREE.Color(C.clay);
-const groundPaper = new THREE.Color(C.paper), groundGrass = new THREE.Color(C.grass);
+const groundPaper = new THREE.Color(C.paper), groundStone = new THREE.Color(C.taupe);
 const clock = new THREE.Clock();
 let visible = true, ready = false, lastStage = -1;
 
@@ -345,23 +362,23 @@ function frame() {
   planLines.geometry.setDrawRange(0, Math.floor((planT * planCount) / 2) * 2);
   pieces.forEach((pc) => { pc.wrap.scale.y = Math.max(0.0001, ease(clamp((bt - 2.0 - pc.delay) / 1.3))); });
 
-  // II · the lines fill in as a white study model; III · colour, sun and grass
+  // II · the lines fill in as a white study model; III · it frosts over in the theme's colours
   const solid = smooth(0.18, 0.45, p);
   const colour = smooth(0.55, 0.85, p);
   pieces.forEach(({ mesh }) => {
     const m = mesh.material;
-    m.opacity = solid * (m.userData.maxOpacity ?? 1);
-    const opaque = solid > 0.98 && m.userData.maxOpacity === undefined;
+    const glass = mesh.userData.fam === 'glass';
+    m.opacity = lerp(solid * (glass ? 0.35 : 1), m.userData.finish, colour);
+    const opaque = solid > 0.98 && colour < 0.01 && !glass;
     if (m.transparent === opaque) { m.transparent = !opaque; m.needsUpdate = true; }
-    m.depthWrite = solid > 0.5 && m.userData.maxOpacity === undefined;
+    m.depthWrite = solid > 0.5 && !glass;
     m.color.copy(clay).lerp(m.userData.target, colour);
-    mesh.castShadow = solid > 0.3;
+    mesh.castShadow = solid > 0.3 && !glass;
   });
-  mapMix.value = colour;
-  lineMat.opacity = Math.min(1, lerp(0.9, 0.12, colour) + mouse.hover * 0.25);
+  lineMat.opacity = Math.min(1, lerp(0.9, 0.35, colour) + mouse.hover * 0.25);
   sun.intensity = lerp(0.0, 2.6, solid) + colour * 0.6;
   hemi.intensity = lerp(1.1, 0.75, solid);
-  groundMat.color.copy(groundPaper).lerp(groundGrass, colour * 0.85);
+  groundMat.color.copy(groundPaper).lerp(groundStone, colour);
   groundMat.emissiveIntensity = 0.55 * (1 - solid * 0.8);
   grid.material.opacity = 0.06 * (1 - colour);
 

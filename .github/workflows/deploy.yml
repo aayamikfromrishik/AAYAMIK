@@ -9,6 +9,7 @@
 #   FTP_DIR        the folder the site lives in on the server (default: public_html/)
 #   QUIZ_URL       the Manus quiz address (default: content/quiz-link.txt, or "7 Quiz/quiz-link.txt" in the KD WEBSITE folder)
 #   QUIZ_MODE      "redirect" to send clients straight to the quiz instead of showing it inside the page
+#   SITE_MODE      "full" to open the whole site even while content/coming-soon.txt is there
 name: Publish website
 
 on:
@@ -46,6 +47,7 @@ jobs:
           QUIZ_SECRET: ${{ secrets.QUIZ_SECRET }}
           QUIZ_URL: ${{ vars.QUIZ_URL }}
           QUIZ_MODE: ${{ vars.QUIZ_MODE }}
+          SITE_MODE: ${{ vars.SITE_MODE }}
 
       - name: Upload to Erichost
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5

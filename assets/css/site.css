@@ -609,3 +609,25 @@ dialog.full[open] { display: flex; flex-direction: column; gap: 18px; }
 /* the K of Kapri is the K from the KARUKRIT wordmark */
 .kname { white-space: nowrap; }
 .kd-k svg { height: .7em; width: auto; vertical-align: baseline; overflow: visible; margin-right: .01em; }
+
+/* coming soon: each chapter keeps its colour and motion, and holds a countdown */
+.soon-ch { display: flex; flex-direction: column; justify-content: center; padding: 140px var(--side) 100px; overflow: hidden; }
+.soon-ch .philo-back { z-index: 0; }
+.soon { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 28px; max-width: 980px; }
+.soon .h1 { font-size: clamp(44px, 5.3vw, 76px); }
+.soon-sub { font-weight: 300; margin-top: -8px; }
+.soon .book-card { margin-top: 8px; }
+.countdown { display: flex; gap: clamp(20px, 4vw, 56px); align-items: flex-start; }
+.countdown .unit { display: flex; flex-direction: column; gap: 10px; min-width: 2.2ch; }
+.countdown b { display: block; font-size: clamp(44px, 6vw, 92px); line-height: 1; font-weight: 300; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.countdown .cap { opacity: .75; }
+.soon-note { opacity: .8; }
+.soon-hero { justify-content: flex-end; align-self: end; gap: 22px; }
+.countdown.big b { font-size: clamp(56px, 7vw, 120px); }
+@media (max-width: 767px) {
+  .soon-ch { padding: 120px var(--side) 80px; }
+  .countdown { gap: 18px; }
+  .countdown .cap { letter-spacing: .16em; font-size: 10px; }
+  .countdown b, .countdown.big b { font-size: 44px; }
+  .soon-hero { gap: 14px; align-self: stretch; }
+}

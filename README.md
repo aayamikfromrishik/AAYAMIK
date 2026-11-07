@@ -22,6 +22,12 @@ Anything the folder does not have yet (a story, team photos, projects) falls bac
 
 Progress and problems are written to `_website-log.txt` in the KD WEBSITE folder. A build's notes (for example a video over 80 MB, or a 3D model that is not a .glb) appear in the Actions tab.
 
+## Coming soon (until 1 January 2027)
+
+While `content/coming-soon.txt` holds a date, every page says "We are coming soon" with a live countdown to midnight (India time) on that date. All pages, the menu, the logo animation, the 3D house, the pencil cursor and circle, and the smooth scroll still work; photos and writing wait. Only the book (About page, "The author") is shown in full, and "Connect to the author" opens an email to the studio. Project pages are not published yet. The client questionnaire keeps working.
+
+To open the whole site, delete `content/coming-soon.txt` (or set the GitHub variable `SITE_MODE` to `full`) and publish again. To change the date, edit the date in that file.
+
 ## The client questionnaire
 
 The Manus quiz opens at `karukritdesigns.com/quiz/`, but only from a personal link.

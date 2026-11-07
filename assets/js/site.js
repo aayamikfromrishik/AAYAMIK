@@ -218,4 +218,24 @@
       if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) fn(dx < 0 ? 1 : -1);
     });
   };
+
+  /* ---------- coming soon: the countdown to opening day ---------- */
+  const clocks = [...document.querySelectorAll('[data-countdown]')];
+  if (clocks.length) {
+    const pad = (n) => String(n).padStart(2, '0');
+    const tick = () => {
+      clocks.forEach((el) => {
+        let s = Math.max(0, Math.floor((Date.parse(el.dataset.countdown) - Date.now()) / 1000));
+        const v = { d: Math.floor(s / 86400), h: Math.floor(s / 3600) % 24, m: Math.floor(s / 60) % 60, s: s % 60 };
+        el.querySelectorAll('[data-u]').forEach((b) => { const t = pad(v[b.dataset.u]); if (b.textContent !== t) b.textContent = t; });
+        if (!s && !el.dataset.done) {
+          el.dataset.done = '1';
+          const note = el.parentElement.parentElement.querySelector('[data-soon-done]') || el.parentElement.querySelector('[data-soon-done]');
+          if (note) note.textContent = note.dataset.soonDone;
+        }
+      });
+    };
+    tick();
+    setInterval(tick, 1000);
+  }
 })();

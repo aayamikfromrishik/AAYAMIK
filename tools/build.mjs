@@ -144,6 +144,28 @@ const PHONE = CONTACT.phone || '+91 88243 96618';
 const EMAIL = CONTACT.email || 'ceo@karukritdesigns.com';
 // the curved K of the KARUKRIT wordmark, used for the K of Kapri; thinned slightly to match the light weight of the name
 const K_KARUKRIT = `<svg viewBox="1.6 2.2 40 50" focusable="false"><filter id="kd-k-thin" x="-5%" y="-5%" width="110%" height="110%"><feMorphology operator="erode" radius="0.7"/></filter><path fill="currentColor" fill-rule="evenodd" filter="url(#kd-k-thin)" d="${readFileSync(join(ROOT, 'assets/brand/k-karukrit.svg'), 'utf8').match(/ d="([^"]+)"/)[1]}"/></svg>`;
+/* ---------- coming soon ----------
+   While content/coming-soon.txt holds a date, every page says "We are coming soon" with a countdown to that date;
+   the effects stay, the photos and writing wait, and only the book keeps its details.
+   Delete the file (or set the GitHub variable SITE_MODE to "full") to open the whole site. */
+const SOON_FILE = join(ROOT, 'content/coming-soon.txt');
+const SOON_DATE = process.env.SITE_MODE === 'full' ? '' : process.env.SITE_MODE === 'soon' || existsSync(SOON_FILE)
+  ? ((existsSync(SOON_FILE) ? readFileSync(SOON_FILE, 'utf8') : '').match(/\d{4}-\d{2}-\d{2}/) || ['2027-01-01'])[0] : '';
+const SOON = !!SOON_DATE;
+const SOON_AT = `${SOON_DATE}T00:00:00+05:30`; // midnight in India
+const SOON_TEXT = SOON ? new Date(`${SOON_DATE}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }) : '';
+const countdown = (cls = '') => `<div class="countdown ${cls}" data-countdown="${SOON_AT}" role="timer" aria-label="Countdown to ${SOON_TEXT}">${[['d', 'Days'], ['h', 'Hours'], ['m', 'Minutes'], ['s', 'Seconds']].map(([u, t]) => `<span class="unit"><b data-u="${u}">00</b><span class="cap">${t}</span></span>`).join('')}</div>`;
+const soonNote = () => `<p class="cap soon-note" data-soon-done="Opening shortly">Opening ${SOON_TEXT}</p>`;
+// one chapter, held back: its name, the line, the countdown
+const soonSection = ({ id, scheme, chapter, label, cursor, title = 'We are <b class="hl">coming soon.</b>', sub = '', extra = '', back = '' }) =>
+  `<section id="${id}" class="ch soon-ch ${scheme} tx" data-chapter="${chapter}" data-cursor="${cursor}" data-snap aria-label="${esc(label.replace(/ · /g, ', '))}">${back}
+  <div class="soon" data-stagger>
+    <span class="cap rv${cursor === 'light' ? ' cap-gold' : ''}">${label}</span>
+    <h2 class="h1 rv">${title}</h2>${sub}
+    <div class="rv">${countdown()}</div>
+    <div class="rv">${soonNote()}</div>${extra}
+  </div>
+</section>`;
 const MEMBERS = C.members || [{ name: 'Kuljeet' }, { name: 'Krishma' }, { name: 'Sanchit' }, { name: '[Fourth member]' }];
 
 /* ---------- home page ---------- */
@@ -169,6 +191,19 @@ const glowset = (s, i) => `<div class="glowset${i === 0 ? ' on' : ''}">${s.rende
 
 const bookPic = (n, alt, extra = '') => `<picture><source srcset="assets/book/${n}.webp" type="image/webp"><img src="assets/book/${n}.jpg" alt="${esc(alt)}" loading="lazy"${extra}></picture>`;
 
+const PHILO_BACK = `<div class="philo-back" aria-hidden="true"><div class="philo-draw">
+  <svg viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke="currentColor" stroke-width="1.2">
+    <rect x="140" y="120" width="720" height="460"/><rect x="220" y="190" width="300" height="300"/><rect x="520" y="230" width="140" height="260"/>
+    <rect x="660" y="150" width="120" height="140"/><path d="M220 400h300M370 190v300M520 360h140"/>
+    <path d="M300 490a50 50 0 0 1 50-50M560 230a40 40 0 0 0 40 40"/>
+    <path d="M140 640h720M140 630v20M860 630v20M100 120v460M90 120h20M90 580h20"/>
+    <circle cx="820" cy="520" r="40"/><circle cx="210" cy="560" r="28"/></g></svg>
+</div></div>`;
+const ARCH_NAME = `<b class="hl">Ar. Saptarshi</b> <span class="kname"><span class="kd-k" aria-hidden="true">${K_KARUKRIT}</span><span aria-hidden="true">apri</span><span class="sr-only">Kapri</span></span>`;
+const BOOK_CARD = `<a class="book-card s-moss tx rv" href="#author" data-cursor="light">
+      ${bookPic('book-cover-front', 'Cover of The 100 Decisions Before the First Brick', ' width="70" height="96"')}
+      <span class="stack"><span class="cap cap-gold">The book</span><span class="t">The 100 Decisions Before the First Brick</span></span>
+    </a>`;
 function home() {
   const base = '';
   const first = CATS[0];
@@ -203,18 +238,18 @@ ${indicator(base, '')}
       <button class="menu-btn" type="button" aria-label="Open menu"><i></i><i></i></button>
     </div>
     <div class="g12 glass-body">
-      <div class="sketch-col fades">
+      ${SOON ? `<div class="sketch-col soon-hero fades">${countdown('big')}${soonNote()}</div>` : `<div class="sketch-col fades">
         <div class="sketches">${SKETCHES.map((s, i) => `<img src="${s.src}" alt="${esc(s.alt)}" data-name="${esc(s.name)}"${i === 0 ? ' class="on"' : ' loading="lazy"'}>`).join('')}</div>
         <div class="sketch-meta">
           <span class="cap sketch-cap" aria-live="polite">Sketch 01 · ${esc(SKETCHES[0].name)}</span>
           <div class="dots">${SKETCHES.map((_, i) => `<button type="button" aria-label="Show sketch ${i + 1}" aria-current="${i === 0}"></button>`).join('')}</div>
         </div>
-      </div>
+      </div>`}
       <div class="hero-text">
         <span class="cap">Chapter I</span>
-        <h1 class="h1"><b class="hl">Every house</b> begins as a line on paper.</h1>
+        <h1 class="h1">${SOON ? 'We are <b class="hl">coming soon.</b>' : '<b class="hl">Every house</b> begins as a line on paper.'}</h1>
         <div class="build-stages cap" aria-hidden="true"><span class="on">Plan</span><i></i><span>Model</span><i></i><span>Home</span></div>
-        <a class="btn btn-orange tx" href="projects/index.html" data-ring>View projects</a>
+        ${SOON ? '<a class="btn btn-orange tx" href="about/index.html#author" data-ring>Read the book</a>' : '<a class="btn btn-orange tx" href="projects/index.html" data-ring>View projects</a>'}
         <a class="cap link-cap" href="#build">Scroll to begin ↓</a>
       </div>
     </div>
@@ -224,18 +259,16 @@ ${indicator(base, '')}
 </div>
 
 <!-- II · The architect -->
-<section id="about" class="ch arch s-taupe tx" data-chapter="II" data-cursor="dark" data-snap aria-labelledby="arch-h">
+${SOON ? soonSection({ id: 'about', scheme: 's-taupe', chapter: 'II', label: 'Chapter II · The architect', cursor: 'dark', title: ARCH_NAME,
+  sub: '\n    <p class="h2 rv soon-sub">We are <b class="hl">coming soon.</b></p>', extra: `\n    ${BOOK_CARD}` }) : `<section id="about" class="ch arch s-taupe tx" data-chapter="II" data-cursor="dark" data-snap aria-labelledby="arch-h">
   <div class="portrait mono-host">${C.portrait ? `<div class="mono portrait-img">${visual(C.portrait, '', '', base, false, '(max-width: 767px) 100vw, 50vw')}</div>` : '<div class="mono ph tx" style="background-color:var(--sage);height:100%" role="img" aria-label="Portrait of Ar. Saptarshi Kapri, placeholder"><span class="cap">[Portrait · full height]</span></div>'}</div>
   <div class="arch-text" data-stagger>
     <span class="cap rv">Chapter II · The architect</span>
-    <h2 id="arch-h" class="h1 rv"><b class="hl">Ar. Saptarshi</b> <span class="kname"><span class="kd-k" aria-hidden="true">${K_KARUKRIT}</span><span aria-hidden="true">apri</span><span class="sr-only">Kapri</span></span></h2>
+    <h2 id="arch-h" class="h1 rv">${ARCH_NAME}</h2>
     ${(C.story || ['[Your story, first short paragraph.]', '[Your story, second short paragraph.]']).map((t) => `<p class="body muted rv">${esc(t)}</p>`).join('\n    ')}
-    <a class="book-card s-moss tx rv" href="#author" data-cursor="light">
-      ${bookPic('book-cover-front', 'Cover of The 100 Decisions Before the First Brick', ' width="70" height="96"')}
-      <span class="stack"><span class="cap cap-gold">The book</span><span class="t">The 100 Decisions Before the First Brick</span></span>
-    </a>
+    ${BOOK_CARD}
   </div>
-</section>
+</section>`}
 
 <!-- II · The author -->
 <section id="author" class="ch author s-moss tx" data-chapter="II" data-cursor="light" data-snap aria-labelledby="author-h">
@@ -255,7 +288,7 @@ ${indicator(base, '')}
         <button class="btn btn-gold tx" type="button" data-ring data-open-form data-topic="About the book">Connect to the author</button>
         <button class="btn btn-line" type="button" data-ring data-pages="book">Read a sample</button>
       </div>
-      <span class="cap rv">[Where to buy]</span>
+      ${SOON ? '' : '<span class="cap rv">[Where to buy]</span>'}
     </div>
     <div class="author-right">
       <div id="book-viewer" class="viewer" aria-label="Sample pages from the book"></div>
@@ -282,7 +315,7 @@ ${indicator(base, '')}
 </section>
 
 <!-- III · The studio -->
-<section id="team" class="ch team s-gold tx" data-chapter="III" data-cursor="dark" data-snap aria-labelledby="team-h">
+${SOON ? soonSection({ id: 'team', scheme: 's-gold', chapter: 'III', label: 'Chapter III · The studio', cursor: 'dark' }) : `<section id="team" class="ch team s-gold tx" data-chapter="III" data-cursor="dark" data-snap aria-labelledby="team-h">
   <div class="wrap team-head" data-stagger>
     <div class="rv"><span class="cap">Chapter III</span><h2 id="team-h" class="h2">The studio</h2><i class="rule"></i></div>
     <p class="body rv">${esc(C.teamSentence || '[One sentence on how the team works together, from first sketch to site.]')}</p>
@@ -293,18 +326,11 @@ ${indicator(base, '')}
       <span class="name">${esc(m.name)}</span><span class="cap">${esc(m.role || '[Role]')}</span>
     </li>`).join('')}
   </ul>
-</section>
+</section>`}
 
 <!-- IV · Philosophy: three screens, one sentence each -->
-<div id="philosophy" class="philosophy s-taupe tx">
-<div class="philo-back" aria-hidden="true"><div class="philo-draw">
-  <svg viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke="currentColor" stroke-width="1.2">
-    <rect x="140" y="120" width="720" height="460"/><rect x="220" y="190" width="300" height="300"/><rect x="520" y="230" width="140" height="260"/>
-    <rect x="660" y="150" width="120" height="140"/><path d="M220 400h300M370 190v300M520 360h140"/>
-    <path d="M300 490a50 50 0 0 1 50-50M560 230a40 40 0 0 0 40 40"/>
-    <path d="M140 640h720M140 630v20M860 630v20M100 120v460M90 120h20M90 580h20"/>
-    <circle cx="820" cy="520" r="40"/><circle cx="210" cy="560" r="28"/></g></svg>
-</div></div>
+${SOON ? soonSection({ id: 'philosophy', scheme: 's-taupe philosophy', chapter: 'IV', label: 'Chapter IV · Philosophy', cursor: 'dark', back: PHILO_BACK }) : `<div id="philosophy" class="philosophy s-taupe tx">
+${PHILO_BACK}
 ${(C.philosophy || [
     { sentence: 'A home is *a hundred decisions*, made in the right order.', sub: '[Two sentences that open up the idea, drawn from the book.]' },
     { sentence: '[Second sentence, with *key words* highlighted.]', sub: '[Two sentences that open up the idea, drawn from the book.]' },
@@ -315,10 +341,10 @@ ${(C.philosophy || [
   <p class="body">${sub}</p>
   <div class="bars" aria-hidden="true">${all.map((_, k) => `<i${k === i ? ' class="on"' : ''}></i>`).join('')}</div>
 </section>`).join('\n')}
-</div>
+</div>`}
 
 <!-- V · Work -->
-<section id="work" class="ch work s-taupe tx" data-chapter="V" data-cursor="dark" data-snap aria-labelledby="work-h">
+${SOON ? soonSection({ id: 'work', scheme: 's-taupe', chapter: 'V', label: 'Chapter V · Work', cursor: 'dark' }) : `<section id="work" class="ch work s-taupe tx" data-chapter="V" data-cursor="dark" data-snap aria-labelledby="work-h">
   <div class="wrap work-head">
     <div class="rv"><span class="cap">Chapter V</span><h2 id="work-h" class="h2">Work</h2></div>
     <div class="tabs cap" role="tablist" aria-label="Project categories" data-ring-group>
@@ -331,10 +357,10 @@ ${(C.philosophy || [
     <span class="muted">Hover to pause · Click a project to open it</span>
     <a class="underline" href="${catHref(base, first)}" data-ring>View all ${first.name.toLowerCase()} →</a>
   </div>
-</section>
+</section>`}
 
 <!-- VI · Contact -->
-<section id="contact" class="ch contact s-moss tx" data-chapter="VI" data-cursor="light" data-snap aria-labelledby="contact-h">
+${SOON ? soonSection({ id: 'contact', scheme: 's-moss', chapter: 'VI', label: 'Chapter VI · Contact', cursor: 'light', back: stripe }) : `<section id="contact" class="ch contact s-moss tx" data-chapter="VI" data-cursor="light" data-snap aria-labelledby="contact-h">
   <span class="cap cap-gold rv">Chapter VI</span>
   <h2 id="contact-h" class="h1 rv">Your house begins <b class="hl">here.</b></h2>
   <div class="contact-cols rv">
@@ -362,7 +388,7 @@ ${(C.philosophy || [
     <p class="thanks" tabindex="-1" hidden>Thank you. We'll call you within two working days.</p>
   </div>
   ${stripe}
-</section>
+</section>`}
 </main>
 
 <dialog id="pages-dialog" class="full tx" data-cursor="light" aria-labelledby="pages-title">
@@ -557,7 +583,7 @@ function contents() {
     ['IV', 'Philosophy', 'A home is a hundred decisions, made in the right order.', 'philosophy'],
     ['V', 'Work', 'Residences, hotels, offices and convention centres', 'projects'],
     ['VI', 'Contact', ADDRESS.join(', '), 'contact'],
-  ];
+  ].map((row) => (SOON && row[3] !== 'about' ? [row[0], row[1], 'Coming soon', row[3]] : row));
   return `<section id="contents" class="contents s-taupe tx" data-cursor="dark" data-snap aria-labelledby="contents-h">
   <div class="wrap" data-stagger>
     <h2 id="contents-h" class="cap rv">Contents</h2>
@@ -593,7 +619,9 @@ function pages() {
     let main = rebase(body);
     // "Connect to the author" opens the contact form on the contact page, with "About the book" chosen
     main = main.replace('<button class="btn btn-gold tx" type="button" data-ring data-open-form data-topic="About the book">Connect to the author</button>',
-      `<a class="btn btn-gold tx" href="${pageHref(base, 'contact')}#about-the-book" data-ring>Connect to the author</a>`);
+      SOON // the contact form waits with the rest of the site, so the author is written to directly
+        ? `<a class="btn btn-gold tx" href="mailto:${esc(EMAIL)}?subject=${encodeURIComponent('About the book')}" data-ring>Connect to the author</a>`
+        : `<a class="btn btn-gold tx" href="${pageHref(base, 'contact')}#about-the-book" data-ring>Connect to the author</a>`);
     result[`${slug}/index.html`] = `${head({ base, title: META[slug][0], description: META[slug][1], path: `${slug}/` })}
 <body class="s-taupe tx" data-cursor="dark">
 <a class="skip-link cap" href="#main">Skip to content</a>
@@ -683,9 +711,12 @@ out('quiz/index.php', quizPage());
 out('quiz/.htaccess', 'DirectoryIndex index.php\n<Files "config.php">\n  Require all denied\n</Files>\n');
 if (process.env.QUIZ_SECRET) out('quiz/config.php', `<?php return ['secret' => ${phpStr(process.env.QUIZ_SECRET)}, 'quiz' => ${phpStr(QUIZ_URL)}, 'mode' => ${phpStr(QUIZ_MODE)}];\n`);
 else notesLater.push('QUIZ_SECRET is not set, so quiz links will not open yet.');
-CATS.forEach((c) => out(`projects/${c.slug}/index.html`, categoryPage(c)));
-PROJECTS.forEach((p) => out(`projects/${p.slug}/index.html`, p.status === 'ongoing' ? ongoingPage(p) : completedPage(p)));
-console.log(`Built the home page, ${NAV.length} chapter pages, ${CATS.length} category pages and ${PROJECTS.length} project pages into ${OUT}.`);
+if (SOON) console.log(`Coming soon: every page counts down to ${SOON_TEXT}; only the book is shown in full. Project pages wait until then.`);
+else {
+  CATS.forEach((c) => out(`projects/${c.slug}/index.html`, categoryPage(c)));
+  PROJECTS.forEach((p) => out(`projects/${p.slug}/index.html`, p.status === 'ongoing' ? ongoingPage(p) : completedPage(p)));
+}
+console.log(`Built the home page, ${NAV.length} chapter pages${SOON ? '' : `, ${CATS.length} category pages and ${PROJECTS.length} project pages`} into ${OUT}.`);
 console.log(C.found ? `Content folder: ${CONTENT_DIR}` : `No content folder at ${CONTENT_DIR}, so placeholders were used throughout.`);
 const notes = [...(C.warnings || []), ...notesLater];
 if (C.found && !C.projects) notes.push('No projects in the folder yet, so the placeholder projects are shown.');

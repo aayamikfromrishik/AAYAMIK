@@ -1,153 +1,76 @@
-# BAAKI BUILD by AAYAMIK
+# SHRAVAN — Listen. Reflect. Apply.
 
-A free marketplace where builders resell leftover construction material
-(cement, steel, tiles, bricks, pipes…) to other builders.
+*by AAYAMIK*
 
-- **Listing is free.** No subscription.
-- **Buyers pay a small unlock fee** to see the seller's exact location and phone number.
-- **No contact details outside the app.** Phone numbers, emails, links, QR codes and
-  human faces are blocked in listing text and photos.
+A phone and iPad web app (installable as a PWA) that teaches books one chapter at a time:
+**Listen** to a spoken lesson, **Reflect** with a few questions kept in a private journal, and **Apply** with small measurable actions and an end-of-book plan.
 
-## Unlock fee
+The full product spec lives in the SHRAVAN Product Spec doc. This README covers running and deploying the app.
 
-| Listed price | Unlock fee |
+## How it is built
+
+| Part | Choice |
 |---|---|
-| Up to ₹1,000 | ₹10 flat |
-| ₹1,001 – ₹50,000 | 1% (rounded to the nearest rupee) |
-| ₹50,001 – ₹1,00,000 | ₹500 flat |
-| Above ₹1,00,000 | ₹1,000 flat |
+| App | Next.js 16 (App Router), React 19, TypeScript |
+| Sign-in, database, file storage | Supabase (Google sign-in + 6-digit email code) |
+| Lessons, actions, plans, Ask, Read-along | Claude API (`claude-sonnet-5-5`), written once per version and saved |
+| Voice | The phone's own voice (Web Speech API), free |
+| Hosting | Vercel (daily cron for timed-free books and reminders) |
+| Payments | Razorpay subscriptions, switched off (`PAYMENTS_ENABLED=false`) |
 
-**Refunds:** the buyer can get the unlock fee back within 7 days if the item was
-already sold, or if the seller hasn't responded after 48 hours.
+Key rules the code enforces:
 
-## How it works
+- Every lesson version (3 modes × 3 English levels × 3 languages) is generated once, saved in `chapter_versions` and reused for every learner.
+- Every "from the book" quote or example is checked word for word against the chapter text; anything that does not match is removed (`verifyLesson` in `src/lib/ai.ts`).
+- Free learners get chapter 1 (max 7 pages) of up to 5 books in their lifetime. A subscription unlocks everything. The admin can make any book free for N days.
+- Journals, actions and plans are private to each learner.
 
+## Setting it up (one time)
+
+### 1. Supabase
+1. Create a free project at supabase.com.
+2. Open **SQL Editor**, paste all of `supabase/schema.sql` and run it. This creates the tables and the private `uploads` storage bucket.
+3. **Authentication → Providers**: turn on **Google** (needs a Google Cloud OAuth client; add `https://<your-project>.supabase.co/auth/v1/callback` as the redirect URL) and keep **Email** on.
+4. **Authentication → Email templates → Magic link**: make the email show the code with `{{ .Token }}`, e.g. *"Your SHRAVAN code is {{ .Token }}"*.
+5. **Authentication → URL configuration**: set the Site URL to your Vercel address and add it to Redirect URLs.
+
+### 2. Vercel
+1. Import this GitHub repository at vercel.com → **Add New → Project**.
+2. Add the environment variables from `.env.example` (Settings → Environment Variables).
+3. Deploy. The daily cron in `vercel.json` runs `/api/cron/daily`.
+
+### 3. First admin steps
+1. Sign in with an email listed in `ADMIN_EMAILS`, then open `/admin`.
+2. **Starter library** tab → *Import the 5 sample books*.
+3. **Add a book** tab → upload *The 100 Decisions Before the First Brick* PDF, copyright status *My own work*, subject *Business & Creative Practice*.
+4. **Starter library** tab → *Attach sample lessons*. Chapter 1 of one book per subject now has all 3 modes ready (English, Normal level).
+5. Check the books in the **Library** tab and publish or unpublish as needed. *Import everything else* adds the rest of the catalogue.
+
+## Working on the code
+
+```bash
+npm install
+cp .env.example .env.local   # fill in the values
+npm run dev                  # http://localhost:3000
+npm test                     # unit tests (chapter detection, quote checking, library data)
+npm run build                # production build
 ```
-Seller                          Server (Supabase)                        Buyer
-──────                          ─────────────────                        ─────
-Posts listing ───────────────▶  Blocks text with phone/email/links
-Uploads photos ──────────────▶  moderate-image: rejects faces, QR codes,
-                                phone numbers in photo; publishes clean ones
-                                Public: title, price, photos, area, ~1 km map ◀── Browses
-                                                                    ◀── Taps "Unlock (₹300)"
-                                create-unlock-order → Razorpay order ──▶ Pays
-                                verify-unlock-payment / webhook marks paid
-                                Exact address + phone now readable ──▶ Calls seller
-Sees who unlocked + their phone ◀─
-```
 
-The rules live in the database (row-level security), not in the app, so a
-modified app can't get around them.
-
-## What's built
-
-### Backend (`supabase/`)
-
-| Path | What it does |
+| Folder | What is in it |
 |---|---|
-| `migrations/` | Tables, fee calculation, contact-detail detector, privacy rules, storage buckets |
-| `functions/create-unlock-order` | Creates the Razorpay order for an unlock |
-| `functions/verify-unlock-payment` | Confirms payment right after checkout so the contact unlocks instantly |
-| `functions/razorpay-webhook` | Backup confirmation from Razorpay; also records refunds |
-| `functions/moderate-image` | Checks each photo with Google Cloud Vision |
-| `tests/local/` | Tests for fees, the contact detector and every privacy rule |
+| `src/app` | Screens (`page.tsx`) and API routes (`api/**/route.ts`) |
+| `src/lib` | Text extraction, chapter detection, AI prompts, access rules, saved versions |
+| `src/components` | Shared UI, the voice player, mic button |
+| `supabase/schema.sql` | Database tables and storage |
+| `data/library.json` | The starter catalogue (6 subjects) |
+| `data/samples/*.json` | Ready-made sample lessons (built by `scripts/build_samples.py`) |
 
-### Android app (`app/`, Flutter)
+Copyrighted book text (including the author's own PDF) is never committed; it lives only in Supabase.
 
-| Screen | What it does |
-|---|---|
-| Login | Mobile number + OTP |
-| Browse | Search, category chips, city filter, endless list |
-| Listing | Photos, price, details, approximate area; **Unlock** button (Razorpay); after paying: seller's phone, exact address, Call and Open in Maps |
-| Sell material | Photos checked on the phone (faces, QR codes, phone numbers) before upload and again on the server; live unlock-fee preview; private pickup address and GPS pin |
-| My listings | Status, how many buyers unlocked, edit, mark sold, hide; tap to see buyers' names and phone numbers |
-| Unlocked | Everything you paid for, with refund requests |
-| Account | Profile, fee table, listing rules, sign out |
+## Licence
 
-See `docs/RUNNING_COSTS.md` for what you pay and when.
+- **Code:** [GNU AGPL v3.0](LICENSE). You may use, study and change it. If you run a modified version for other people (for example as a website or app), you must share your source code under the same licence.
+- **Names and logos:** SHRAVAN, AAYAMIK, their logos and the tagline are not covered by the code licence. See [TRADEMARKS.md](TRADEMARKS.md).
+- **Book content:** see [data/CONTENT-LICENCE.md](data/CONTENT-LICENCE.md). The sample lessons of *The 100 Decisions Before the First Brick* are all rights reserved.
 
-## Getting the APK
-
-Every push builds an Android APK on GitHub:
-
-1. Open the repo on GitHub → **Actions** → latest **CI** run.
-2. Download **baaki-build-apk** at the bottom, unzip it, and install `app-release.apk` on an Android phone.
-
-For the APK to connect to your backend, first add two repository secrets under
-**Settings → Secrets and variables → Actions**:
-- `SUPABASE_URL`: e.g. `https://abcd1234.supabase.co`
-- `SUPABASE_PUBLISHABLE_KEY`: Supabase dashboard → Project Settings → API Keys
-
-## Web version (trial)
-
-The same app runs in the browser. Every push publishes it to Cloudflare Pages:
-
-- `https://baaki-build.pages.dev/`: the real app, using your Supabase backend
-- `https://baaki-build.pages.dev/demo/`: a demo with sample listings and no backend, for reviewing the design
-
-One-time setup, as two more repository secrets:
-- `CLOUDFLARE_ACCOUNT_ID`: Cloudflare dashboard → **Workers & Pages**, shown on the right
-- `CLOUDFLARE_API_TOKEN`: Cloudflare → **My Profile → API Tokens → Create Token → Custom token**, with permission **Account · Cloudflare Pages · Edit**
-
-Run the demo locally:
-
-```bash
-cd app && flutter run -d chrome --dart-define=DEMO=true
-```
-
-## Next steps
-
-1. Create the Supabase, Razorpay and Google Cloud accounts and set up the backend (below).
-2. Test the full flow on a phone with Razorpay **test mode** keys.
-3. Admin panel: review reports, rejected photos and refund requests.
-4. Launch: app icon, Play Store listing, privacy policy, terms.
-
-## Running the tests
-
-Database tests need Postgres 15+ server binaries installed locally:
-
-```bash
-./scripts/test-db.sh
-```
-
-App tests need [Flutter](https://flutter.dev):
-
-```bash
-cd app && flutter test
-```
-
-Server function tests need [Deno](https://deno.com):
-
-```bash
-cd supabase/functions && deno test --allow-env _shared/
-```
-
-## Setting up the live backend
-
-1. Create a project at [supabase.com](https://supabase.com) and install the Supabase CLI.
-2. Link and push the schema:
-   ```bash
-   supabase link --project-ref <your-project-ref>
-   ```
-   ```bash
-   supabase db push
-   ```
-3. In Supabase → Authentication → Providers, turn on **Phone** and connect an SMS
-   provider (MSG91 or Twilio).
-4. Set the function secrets:
-   ```bash
-   supabase secrets set RAZORPAY_KEY_ID=... RAZORPAY_KEY_SECRET=... RAZORPAY_WEBHOOK_SECRET=... GOOGLE_VISION_API_KEY=...
-   ```
-5. Deploy the functions:
-   ```bash
-   supabase functions deploy
-   ```
-6. In the Razorpay dashboard:
-   - Turn on **automatic payment capture**.
-   - Add a webhook pointing to `https://<project-ref>.supabase.co/functions/v1/razorpay-webhook`
-     for the events `payment.captured` and `refund.processed`.
-7. Process refunds from the Razorpay dashboard. The webhook marks them refunded in the app.
-8. Run the app against it:
-   ```bash
-   cd app && flutter run --dart-define=SUPABASE_URL=https://<project-ref>.supabase.co --dart-define=SUPABASE_PUBLISHABLE_KEY=<key>
-   ```
+Copyright (C) 2026 AAYAMIK.
